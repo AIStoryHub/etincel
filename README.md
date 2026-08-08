@@ -13,7 +13,7 @@ AI-drafted prose has a recognizable shape: uniform paragraphs, hedged authority,
 
 ## What's in here
 
-- **An MCP server** (`src/server.ts`) exposing seventeen tools:
+- **An MCP server** (`src/server.ts`) exposing twenty tools:
   - `list_styles`: premade tone presets plus any voices you've trained
   - `get_style_guide`: the drafting instructions for one style
   - `train_style`: learn a voice from your own writing samples (sentence rhythm, contraction rate, em-dash habits, paragraph variance, recurring phrasing: measured, not guessed)
@@ -29,6 +29,7 @@ AI-drafted prose has a recognizable shape: uniform paragraphs, hedged authority,
   - `add_custom_word` / `remove_custom_word`: maintain a "never flag this" list: an org's own acronyms or house terms, the corporate-dictionary case
   - `list_dictionary`: see a scope's banned/custom words, and (for a style) what actually applies once merged with the global list
   - `copy_dictionary`: copy one scope's word lists onto another style, or fan them out to every known style in one call
+  - `set_style_instructions` / `clear_style_instructions` / `get_style_instructions`: save, remove, or read free-text drafting rules for a scope (required elements, forbidden topics, format constraints), merged into `get_style_guide` the same way dictionaries merge into `audit_text`
 - **A Claude Code / Claude Desktop skill** (`skills/etincel-nonfiction/`) that uses those tools when you're drafting or revising non-fiction prose of any meaningful length.
 
 Trained voices, dictionaries, and your default style live locally in `~/.etincel/`: nothing is sent anywhere. `audit_text` is plain deterministic code (string analysis + a curated corpus of AI-writing tells), not a model call.
