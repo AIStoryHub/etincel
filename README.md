@@ -1,5 +1,7 @@
 # Étincel: Non-Fiction Writing Connector
 
+[![mcpscore audit](https://mcpscore.dev/api/v1/servers/badge.svg?url=https%3A%2F%2Fetincel.ai%2Fapi%2Fmcp)](https://mcpscore.dev/s?url=https%3A%2F%2Fetincel.ai%2Fapi%2Fmcp)
+
 A connector for Claude Code, Claude Desktop, and any MCP-enabled tool that adds a layer of human-like non-fiction authoring on top of whatever you already write in. It does not replace your email client, editor, or CMS. It shapes the prose before it gets there, in a voice you either train from your own writing or pick from a set of premade emotional-tone presets, and it flags AI writing tells transparently instead of silently rewriting your words.
 
 ## Why
