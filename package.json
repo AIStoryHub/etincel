@@ -1,0 +1,43 @@
+{
+  "name": "etincel-nonfiction",
+  "version": "0.1.0",
+  "description": "Étincel: a non-fiction writing connector for Claude Code, Claude Desktop, and MCP-enabled tools. Trainable voice, premade emotional tones, and a transparent anti-AI-tells audit. Not an email client or editor replacement, a layer that keeps the writer in trust mode.",
+  "type": "module",
+  "bin": {
+    "etincel-nonfiction": "./dist/server.js",
+    "etincel": "./dist/cli.js"
+  },
+  "main": "./dist/server.js",
+  "files": [
+    "dist",
+    "skills",
+    ".claude-plugin"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && mkdir -p dist/data && cp src/data/*.json dist/data/",
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "smoke": "node dist/smoke.js",
+    "smoke:mcp": "node scripts/mcp-smoke.mjs",
+    "test": "tsx --test src/*.test.ts src/**/*.test.ts",
+    "postinstall": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "author": "Jean-Philippe LeBlanc",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aistoryhub/etincel"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "ai.etincel/etincel-nonfiction",
+  "description": "Trainable non-fiction writing voice, presets, and an anti-AI-tells audit for Claude, via MCP.",
+  "version": "0.1.0",
+  "websiteUrl": "https://etincel.ai/connect",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://etincel.ai/api/mcp"
+    }
+  ]
+}

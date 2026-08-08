@@ -1,0 +1,1855 @@
+{
+  "$schema_note": "Hard-ban terms/phrases: rhetorical inflation over denotation. Flag every occurrence, propose the replacement_hint if present.",
+  "source": "Condensed from JP LeBlanc's etincel-prose skill (references/banned-terms.md) and avoid-ai-writing's words-and-phrases.md replacement table.",
+  "count": 344,
+  "entries": [
+    {
+      "term": "dive",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "look at, examine"
+    },
+    {
+      "term": "diving",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "looking at, examining"
+    },
+    {
+      "term": "delve",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "explore, dig into, look at"
+    },
+    {
+      "term": "harness",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "use, tap"
+    },
+    {
+      "term": "leverage",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "use"
+    },
+    {
+      "term": "utilize",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "use"
+    },
+    {
+      "term": "facilitate",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "help, enable, run"
+    },
+    {
+      "term": "unveil",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "reveal, announce"
+    },
+    {
+      "term": "elucidate",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "explain, clarify"
+    },
+    {
+      "term": "strategize",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "innovate",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "synthesize",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "combine, distill"
+    },
+    {
+      "term": "expedite",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "cultivate",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "build, grow"
+    },
+    {
+      "term": "delineate",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "navigate",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "handle, work through"
+    },
+    {
+      "term": "proliferate",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "augment",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "add to, expand"
+    },
+    {
+      "term": "conceptualize",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "manifest",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "appear, show up as"
+    },
+    {
+      "term": "harmonize",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "align, bring together"
+    },
+    {
+      "term": "accentuate",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "emphasize, bring out"
+    },
+    {
+      "term": "illuminate",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "clarify, show"
+    },
+    {
+      "term": "mitigate",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "reduce, lessen"
+    },
+    {
+      "term": "galvanize",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "spur, motivate"
+    },
+    {
+      "term": "transcend",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "go beyond"
+    },
+    {
+      "term": "exemplify",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "show, illustrate"
+    },
+    {
+      "term": "validate",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "consolidate",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "combine, merge"
+    },
+    {
+      "term": "synergize",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "extrapolate",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "substantiate",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "deconstruct",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "envision",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "expound",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "juxtapose",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "encompass",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "include, cover"
+    },
+    {
+      "term": "revitalize",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "assimilate",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "fortify",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "embark",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "start, begin"
+    },
+    {
+      "term": "envisage",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "resonate",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "connect with, matter to"
+    },
+    {
+      "term": "catalyze",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "trigger, spark"
+    },
+    {
+      "term": "revolutionize",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "change, transform (say what specifically changed)"
+    },
+    {
+      "term": "streamline",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "simplify, speed up"
+    },
+    {
+      "term": "foster",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "encourage, build"
+    },
+    {
+      "term": "reimagine",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "rethink, redesign"
+    },
+    {
+      "term": "reframe",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "rethink, recast"
+    },
+    {
+      "term": "infuse",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "add, mix in"
+    },
+    {
+      "term": "elevate",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "improve, raise"
+    },
+    {
+      "term": "enrich",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "improve, add depth to"
+    },
+    {
+      "term": "evoke",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "bring to mind, suggest"
+    },
+    {
+      "term": "reinforce",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "strengthen, back up"
+    },
+    {
+      "term": "underpin",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "support, form the basis of"
+    },
+    {
+      "term": "transform",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "change (say how)"
+    },
+    {
+      "term": "spearhead",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "lead, drive"
+    },
+    {
+      "term": "curate",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "select, choose"
+    },
+    {
+      "term": "propagate",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "spread"
+    },
+    {
+      "term": "ignite",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "spark, start"
+    },
+    {
+      "term": "immerse",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "surround, absorb in"
+    },
+    {
+      "term": "pivot",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "anchor",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "ground, base"
+    },
+    {
+      "term": "champion",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "back, push for"
+    },
+    {
+      "term": "enhance",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "improve"
+    },
+    {
+      "term": "underscore",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "highlight, show"
+    },
+    {
+      "term": "showcase",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "show, display"
+    },
+    {
+      "term": "garner",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "get, earn"
+    },
+    {
+      "term": "boasts",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "has"
+    },
+    {
+      "term": "highlight",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "pave the way",
+      "category": "verb",
+      "subcategory": "signature-verb",
+      "replacement_hint": "make possible, open the door for"
+    },
+    {
+      "term": "comprehensive",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "thorough, complete"
+    },
+    {
+      "term": "dazzling",
+      "category": "adjective",
+      "subcategory": "signature-adjective"
+    },
+    {
+      "term": "meticulous",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "careful, detailed"
+    },
+    {
+      "term": "cutting-edge",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "newest, latest"
+    },
+    {
+      "term": "groundbreaking",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "new, first-of-its-kind (name the precedent broken)"
+    },
+    {
+      "term": "transformative",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "(describe what changed and how)"
+    },
+    {
+      "term": "robust",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "strong, reliable"
+    },
+    {
+      "term": "seamless",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "smooth, easy"
+    },
+    {
+      "term": "holistic",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "complete, full"
+    },
+    {
+      "term": "immersive",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "engaging (describe how)"
+    },
+    {
+      "term": "innovative",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "new (describe what's new)"
+    },
+    {
+      "term": "revolutionary",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "new (name the precedent it breaks)"
+    },
+    {
+      "term": "iterative",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "repeated, step-by-step"
+    },
+    {
+      "term": "integral",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "essential, necessary"
+    },
+    {
+      "term": "intrinsic",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "inherent, built-in"
+    },
+    {
+      "term": "multifaceted",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "(name the actual facets, or cut)"
+    },
+    {
+      "term": "unprecedented",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "first of its kind (name the precedent it breaks)"
+    },
+    {
+      "term": "scalable",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "able to grow (describe how and to what)"
+    },
+    {
+      "term": "captivating",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "(say why it holds attention)"
+    },
+    {
+      "term": "vibrant",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "lively, active (or cite specifics)"
+    },
+    {
+      "term": "profound",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "deep, significant (say why)"
+    },
+    {
+      "term": "timeless",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "lasting (or cite how long)"
+    },
+    {
+      "term": "boundless",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "unlimited, endless (or cite scope)"
+    },
+    {
+      "term": "pivotal",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "important, key"
+    },
+    {
+      "term": "intricate",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "complex, detailed"
+    },
+    {
+      "term": "quintessential",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "typical, classic"
+    },
+    {
+      "term": "resilient",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "tough, durable (or cite what it withstood)"
+    },
+    {
+      "term": "visionary",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "forward-thinking (name the vision)"
+    },
+    {
+      "term": "expansive",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "large, wide-ranging"
+    },
+    {
+      "term": "futuristic",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "advanced (describe what specifically)"
+    },
+    {
+      "term": "monumental",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "huge, major (cite scale)"
+    },
+    {
+      "term": "daunting",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "hard, difficult"
+    },
+    {
+      "term": "bustling",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "busy, active (or cite what makes it busy)"
+    },
+    {
+      "term": "renowned",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "well-known (name who knows them)"
+    },
+    {
+      "term": "ever-evolving",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "changing, growing"
+    },
+    {
+      "term": "fast-paced",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "quick, busy"
+    },
+    {
+      "term": "game-changing",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "(say what specifically changed)"
+    },
+    {
+      "term": "next-level",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "better (say how)"
+    },
+    {
+      "term": "state-of-the-art",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "newest, most advanced"
+    },
+    {
+      "term": "unparalleled",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "unmatched (cite the comparison)"
+    },
+    {
+      "term": "world-class",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "top-tier (cite a benchmark)"
+    },
+    {
+      "term": "synergy",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "combined effect (describe it)"
+    },
+    {
+      "term": "paradigm",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "model, approach"
+    },
+    {
+      "term": "ecosystem",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "system, market, community"
+    },
+    {
+      "term": "nexus",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "hub, center, link"
+    },
+    {
+      "term": "tapestry",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "(describe the actual complexity, or cut the metaphor)"
+    },
+    {
+      "term": "mosaic",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "mix, blend (name the actual pieces)"
+    },
+    {
+      "term": "continuum",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "range, spectrum"
+    },
+    {
+      "term": "facet",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "part, aspect"
+    },
+    {
+      "term": "realm",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "area, field"
+    },
+    {
+      "term": "modality",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "method, mode, way"
+    },
+    {
+      "term": "touchpoint",
+      "category": "noun",
+      "subcategory": "signature-noun"
+    },
+    {
+      "term": "fabric",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "structure, makeup (name the actual thing)"
+    },
+    {
+      "term": "frontier",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "edge, new area"
+    },
+    {
+      "term": "crucible",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "testing ground (or name the actual pressure)"
+    },
+    {
+      "term": "confluence",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "combination, meeting point"
+    },
+    {
+      "term": "impetus",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "reason, driver"
+    },
+    {
+      "term": "kaleidoscope",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "mix, variety (name the actual elements)"
+    },
+    {
+      "term": "symphony",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "(describe the actual coordination)"
+    },
+    {
+      "term": "labyrinth",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "maze (or name the actual complexity)"
+    },
+    {
+      "term": "metamorphosis",
+      "category": "noun",
+      "subcategory": "signature-noun"
+    },
+    {
+      "term": "gossamer",
+      "category": "noun",
+      "subcategory": "signature-noun"
+    },
+    {
+      "term": "beacon",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "(rewrite; name what it actually signals)"
+    },
+    {
+      "term": "cornerstone",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "foundation, basis"
+    },
+    {
+      "term": "interplay",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "relationship, interaction"
+    },
+    {
+      "term": "treasure trove",
+      "category": "noun",
+      "subcategory": "signature-noun",
+      "replacement_hint": "(name specifically what's valuable)"
+    },
+    {
+      "term": "shall",
+      "category": "filler",
+      "subcategory": "filler-word"
+    },
+    {
+      "term": "alright",
+      "category": "filler",
+      "subcategory": "filler-word"
+    },
+    {
+      "term": "hey",
+      "category": "filler",
+      "subcategory": "filler-word"
+    },
+    {
+      "term": "folks",
+      "category": "filler",
+      "subcategory": "filler-word"
+    },
+    {
+      "term": "pesky",
+      "category": "filler",
+      "subcategory": "filler-word"
+    },
+    {
+      "term": "fancy",
+      "category": "filler",
+      "subcategory": "filler-word"
+    },
+    {
+      "term": "moist",
+      "category": "filler",
+      "subcategory": "filler-word"
+    },
+    {
+      "term": "nestled",
+      "category": "filler",
+      "subcategory": "filler-word"
+    },
+    {
+      "term": "neon",
+      "category": "imagery",
+      "subcategory": "imagery-cliche"
+    },
+    {
+      "term": "neon-lit",
+      "category": "imagery",
+      "subcategory": "imagery-cliche"
+    },
+    {
+      "term": "kaleidoscope",
+      "category": "imagery",
+      "subcategory": "imagery-cliche"
+    },
+    {
+      "term": "tapestry",
+      "category": "imagery",
+      "subcategory": "imagery-cliche"
+    },
+    {
+      "term": "phosphorescent",
+      "category": "imagery",
+      "subcategory": "imagery-cliche"
+    },
+    {
+      "term": "liminal",
+      "category": "imagery",
+      "subcategory": "imagery-cliche"
+    },
+    {
+      "term": "ethereal",
+      "category": "imagery",
+      "subcategory": "imagery-cliche"
+    },
+    {
+      "term": "dappled",
+      "category": "imagery",
+      "subcategory": "imagery-cliche"
+    },
+    {
+      "term": "thrum",
+      "category": "imagery",
+      "subcategory": "imagery-cliche"
+    },
+    {
+      "term": "whispering",
+      "category": "imagery",
+      "subcategory": "imagery-cliche"
+    },
+    {
+      "term": "glimmer",
+      "category": "imagery",
+      "subcategory": "imagery-cliche"
+    },
+    {
+      "term": "gossamer",
+      "category": "imagery",
+      "subcategory": "imagery-cliche"
+    },
+    {
+      "term": "firstly",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "moreover",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "furthermore",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "additionally",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "consequently",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "importantly",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "similarly",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "nonetheless",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "indeed",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "alternatively",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "notably",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "essentially",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "however",
+      "category": "transition",
+      "subcategory": "lazy-transition"
+    },
+    {
+      "term": "in conclusion",
+      "category": "phrase",
+      "subcategory": "wrap-up-setup"
+    },
+    {
+      "term": "to summarize",
+      "category": "phrase",
+      "subcategory": "wrap-up-setup"
+    },
+    {
+      "term": "that being said",
+      "category": "phrase",
+      "subcategory": "wrap-up-setup"
+    },
+    {
+      "term": "when it comes to",
+      "category": "phrase",
+      "subcategory": "wrap-up-setup"
+    },
+    {
+      "term": "in the realm of",
+      "category": "phrase",
+      "subcategory": "wrap-up-setup"
+    },
+    {
+      "term": "it is essential to note that",
+      "category": "phrase",
+      "subcategory": "wrap-up-setup"
+    },
+    {
+      "term": "at its core",
+      "category": "phrase",
+      "subcategory": "wrap-up-setup"
+    },
+    {
+      "term": "from a broader perspective",
+      "category": "phrase",
+      "subcategory": "wrap-up-setup"
+    },
+    {
+      "term": "take a dive into",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "unlock the secrets",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "unleash your potential",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "harness the power of",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "the intersection of",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "shaping the future",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "bridging the gap between",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "seamlessly integrated",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "pushing the boundaries of",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "a testament to",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "game changer",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "paradigm shift",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "inflection point",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "best-in-class",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "next-generation",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "serves as a",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "stands as a",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "marks a turning point",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "sets the stage for",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "cements its status",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "highlights the importance of",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "plays a crucial role",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "plays a pivotal role",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "represents a paradigm shift",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "solidifies its position as",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "underscores the need for",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "in today's world",
+      "category": "phrase",
+      "subcategory": "filler-hype-opener"
+    },
+    {
+      "term": "now more than ever",
+      "category": "phrase",
+      "subcategory": "filler-hype-opener"
+    },
+    {
+      "term": "in an age of",
+      "category": "phrase",
+      "subcategory": "filler-hype-opener"
+    },
+    {
+      "term": "in the modern era",
+      "category": "phrase",
+      "subcategory": "filler-hype-opener"
+    },
+    {
+      "term": "here's the thing",
+      "category": "phrase",
+      "subcategory": "banned-transition-phrase"
+    },
+    {
+      "term": "it's worth noting",
+      "category": "phrase",
+      "subcategory": "banned-transition-phrase"
+    },
+    {
+      "term": "widely regarded as",
+      "category": "phrase",
+      "subcategory": "copulative-avoidance"
+    },
+    {
+      "term": "experts argue",
+      "category": "phrase",
+      "subcategory": "vague-authority"
+    },
+    {
+      "term": "experts suggest",
+      "category": "phrase",
+      "subcategory": "vague-authority"
+    },
+    {
+      "term": "observers have noted",
+      "category": "phrase",
+      "subcategory": "vague-authority"
+    },
+    {
+      "term": "industry reports suggest",
+      "category": "phrase",
+      "subcategory": "vague-authority"
+    },
+    {
+      "term": "several sources indicate",
+      "category": "phrase",
+      "subcategory": "vague-authority"
+    },
+    {
+      "term": "highlighting its",
+      "category": "phrase",
+      "subcategory": "participial-padding"
+    },
+    {
+      "term": "emphasizing the importance",
+      "category": "phrase",
+      "subcategory": "participial-padding"
+    },
+    {
+      "term": "underscoring its",
+      "category": "phrase",
+      "subcategory": "participial-padding"
+    },
+    {
+      "term": "it is worth noting",
+      "category": "phrase",
+      "subcategory": "didactic-hedge"
+    },
+    {
+      "term": "it should be noted",
+      "category": "phrase",
+      "subcategory": "didactic-hedge"
+    },
+    {
+      "term": "it is important to note",
+      "category": "phrase",
+      "subcategory": "didactic-hedge"
+    },
+    {
+      "term": "despite these challenges",
+      "category": "phrase",
+      "subcategory": "challenges-formula"
+    },
+    {
+      "term": "despite this",
+      "category": "phrase",
+      "subcategory": "challenges-formula"
+    },
+    {
+      "term": "i want to be clear about",
+      "category": "phrase",
+      "subcategory": "throat-clearing-opener"
+    },
+    {
+      "term": "let me be direct",
+      "category": "phrase",
+      "subcategory": "throat-clearing-opener"
+    },
+    {
+      "term": "to be clear",
+      "category": "phrase",
+      "subcategory": "throat-clearing-opener"
+    },
+    {
+      "term": "to be honest",
+      "category": "phrase",
+      "subcategory": "throat-clearing-opener"
+    },
+    {
+      "term": "here's the key point",
+      "category": "phrase",
+      "subcategory": "throat-clearing-opener"
+    },
+    {
+      "term": "to put it plainly",
+      "category": "phrase",
+      "subcategory": "throat-clearing-opener"
+    },
+    {
+      "term": "the key takeaway is",
+      "category": "phrase",
+      "subcategory": "throat-clearing-opener"
+    },
+    {
+      "term": "rich cultural heritage",
+      "category": "phrase",
+      "subcategory": "tourism-brochure"
+    },
+    {
+      "term": "breathtaking",
+      "category": "phrase",
+      "subcategory": "tourism-brochure"
+    },
+    {
+      "term": "must-visit",
+      "category": "phrase",
+      "subcategory": "tourism-brochure"
+    },
+    {
+      "term": "stunning natural beauty",
+      "category": "phrase",
+      "subcategory": "tourism-brochure"
+    },
+    {
+      "term": "enduring legacy",
+      "category": "phrase",
+      "subcategory": "tourism-brochure"
+    },
+    {
+      "term": "continues to captivate",
+      "category": "phrase",
+      "subcategory": "tourism-brochure"
+    },
+    {
+      "term": "leaves a lasting impact",
+      "category": "phrase",
+      "subcategory": "tourism-brochure"
+    },
+    {
+      "term": "is a testament to",
+      "category": "phrase",
+      "subcategory": "tourism-brochure"
+    },
+    {
+      "term": "a feast for the senses",
+      "category": "phrase",
+      "subcategory": "tourism-brochure"
+    },
+    {
+      "term": "hidden gem",
+      "category": "phrase",
+      "subcategory": "tourism-brochure"
+    },
+    {
+      "term": "picturesque",
+      "category": "phrase",
+      "subcategory": "tourism-brochure"
+    },
+    {
+      "term": "in today's competitive landscape",
+      "category": "phrase",
+      "subcategory": "vague-landscape-opener"
+    },
+    {
+      "term": "in today's digital landscape",
+      "category": "phrase",
+      "subcategory": "vague-landscape-opener"
+    },
+    {
+      "term": "as businesses navigate the evolving",
+      "category": "phrase",
+      "subcategory": "vague-landscape-opener"
+    },
+    {
+      "term": "with the rise of",
+      "category": "phrase",
+      "subcategory": "vague-landscape-opener"
+    },
+    {
+      "term": "as the world becomes increasingly",
+      "category": "phrase",
+      "subcategory": "vague-landscape-opener"
+    },
+    {
+      "term": "in today's fast-paced world",
+      "category": "phrase",
+      "subcategory": "vague-landscape-opener"
+    },
+    {
+      "term": "more than ever before",
+      "category": "phrase",
+      "subcategory": "vague-landscape-opener"
+    },
+    {
+      "term": "it is worth noting",
+      "category": "phrase",
+      "subcategory": "editorializing-marker"
+    },
+    {
+      "term": "no discussion would be complete without",
+      "category": "phrase",
+      "subcategory": "editorializing-marker"
+    },
+    {
+      "term": "in this article",
+      "category": "phrase",
+      "subcategory": "editorializing-marker"
+    },
+    {
+      "term": "as we will see",
+      "category": "phrase",
+      "subcategory": "editorializing-marker"
+    },
+    {
+      "term": "a growing body of research",
+      "category": "phrase",
+      "subcategory": "academic-register-tell"
+    },
+    {
+      "term": "has garnered significant attention",
+      "category": "phrase",
+      "subcategory": "academic-register-tell"
+    },
+    {
+      "term": "paving the way for",
+      "category": "phrase",
+      "subcategory": "academic-register-tell"
+    },
+    {
+      "term": "sheds light on",
+      "category": "phrase",
+      "subcategory": "academic-register-tell"
+    },
+    {
+      "term": "needless to say",
+      "category": "phrase",
+      "subcategory": "academic-register-tell"
+    },
+    {
+      "term": "at the forefront of",
+      "category": "phrase",
+      "subcategory": "business-idiom"
+    },
+    {
+      "term": "bring to the table",
+      "category": "phrase",
+      "subcategory": "business-idiom"
+    },
+    {
+      "term": "in a nutshell",
+      "category": "phrase",
+      "subcategory": "business-idiom"
+    },
+    {
+      "term": "low-hanging fruit",
+      "category": "phrase",
+      "subcategory": "business-idiom"
+    },
+    {
+      "term": "move the needle",
+      "category": "phrase",
+      "subcategory": "business-idiom"
+    },
+    {
+      "term": "think outside the box",
+      "category": "phrase",
+      "subcategory": "business-idiom"
+    },
+    {
+      "term": "thought leader",
+      "category": "phrase",
+      "subcategory": "business-idiom"
+    },
+    {
+      "term": "when all is said and done",
+      "category": "phrase",
+      "subcategory": "business-idiom"
+    },
+    {
+      "term": "let's unpack",
+      "category": "phrase",
+      "subcategory": "connective-phrase"
+    },
+    {
+      "term": "speaks volumes",
+      "category": "phrase",
+      "subcategory": "connective-phrase"
+    },
+    {
+      "term": "this highlights the fact that",
+      "category": "phrase",
+      "subcategory": "connective-phrase"
+    },
+    {
+      "term": "a key takeaway is",
+      "category": "phrase",
+      "subcategory": "connective-phrase"
+    },
+    {
+      "term": "food for thought",
+      "category": "phrase",
+      "subcategory": "connective-phrase"
+    },
+    {
+      "term": "last but not least",
+      "category": "phrase",
+      "subcategory": "connective-phrase"
+    },
+    {
+      "term": "absolutely!",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "as we move forward",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "at the end of the day",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "certainly!",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "feel free to reach out",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "great question!",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "i hope this helps!",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "i'd be happy to help",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "imagine a world where",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "let me break this down for you",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "only time will tell",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "picture this:",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "that's a really interesting point.",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "the key takeaway here is",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "the possibilities are endless",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "to sum up",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "ultimately the choice is yours",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "you raise a valid concern.",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "you're absolutely right",
+      "category": "phrase",
+      "subcategory": "sycophantic-opener"
+    },
+    {
+      "term": "as of my last knowledge update",
+      "category": "phrase",
+      "subcategory": "assistant-chrome"
+    },
+    {
+      "term": "i cannot fulfill this request",
+      "category": "phrase",
+      "subcategory": "assistant-chrome"
+    },
+    {
+      "term": "i do not have access to real-time",
+      "category": "phrase",
+      "subcategory": "assistant-chrome"
+    },
+    {
+      "term": "i don't have personal opinions",
+      "category": "phrase",
+      "subcategory": "assistant-chrome"
+    },
+    {
+      "term": "i don't have the ability to",
+      "category": "phrase",
+      "subcategory": "assistant-chrome"
+    },
+    {
+      "term": "i'd be happy to assist you with that",
+      "category": "phrase",
+      "subcategory": "assistant-chrome"
+    },
+    {
+      "term": "i'm just an ai",
+      "category": "phrase",
+      "subcategory": "assistant-chrome"
+    },
+    {
+      "term": "i'm sorry, but i cannot",
+      "category": "phrase",
+      "subcategory": "assistant-chrome"
+    },
+    {
+      "term": "please note that i am an ai",
+      "category": "phrase",
+      "subcategory": "assistant-chrome"
+    },
+    {
+      "term": "regenerate response",
+      "category": "phrase",
+      "subcategory": "assistant-chrome"
+    },
+    {
+      "term": "commendable",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "good, well done (name what specifically)"
+    },
+    {
+      "term": "significant",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "large, real, big (or name the actual size/effect)"
+    },
+    {
+      "term": "invaluable",
+      "category": "adjective",
+      "subcategory": "signature-adjective",
+      "replacement_hint": "very useful, essential (or name what it enabled)"
+    },
+    {
+      "term": "it's important to note",
+      "category": "phrase",
+      "subcategory": "editorializing-marker"
+    },
+    {
+      "term": "embark on a journey",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "holistic approach",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "left an indelible mark",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "unwavering commitment",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "valuable insights",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "a gateway to",
+      "category": "phrase",
+      "subcategory": "business-idiom"
+    },
+    {
+      "term": "take it to the next level",
+      "category": "phrase",
+      "subcategory": "business-idiom"
+    },
+    {
+      "term": "this underscores the importance of",
+      "category": "phrase",
+      "subcategory": "connective-phrase"
+    },
+    {
+      "term": "to put it simply",
+      "category": "phrase",
+      "subcategory": "connective-phrase"
+    },
+    {
+      "term": "actionable insights",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "built for tomorrow",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "crafted with precision",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "designed to enhance",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "drive innovation",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "driven by innovation",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "empowering the next generation",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "plays a vital role",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "watershed moment",
+      "category": "phrase",
+      "subcategory": "significance-inflation"
+    },
+    {
+      "term": "in the ever-evolving world of",
+      "category": "phrase",
+      "subcategory": "vague-landscape-opener"
+    },
+    {
+      "term": "transformative journey",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "unlock the potential",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "unlock the power of",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "a myriad of",
+      "category": "phrase",
+      "subcategory": "filler-hype-opener"
+    },
+    {
+      "term": "plethora of",
+      "category": "phrase",
+      "subcategory": "filler-hype-opener"
+    },
+    {
+      "term": "bespoke solutions",
+      "category": "phrase",
+      "subcategory": "marketing-hype"
+    },
+    {
+      "term": "deep dive",
+      "category": "phrase",
+      "subcategory": "overused-noun-phrase"
+    },
+    {
+      "term": "necessitating",
+      "category": "verb",
+      "subcategory": "signature-verb"
+    },
+    {
+      "term": "rest assured",
+      "category": "phrase",
+      "subcategory": "corporate-reassurance",
+      "replacement_hint": "cut it, state the fact"
+    },
+    {
+      "term": "we appreciate your patience",
+      "category": "phrase",
+      "subcategory": "corporate-reassurance",
+      "replacement_hint": "skip it, get to the update"
+    },
+    {
+      "term": "your feedback is important to us",
+      "category": "phrase",
+      "subcategory": "corporate-reassurance",
+      "replacement_hint": "cut it entirely"
+    },
+    {
+      "term": "working tirelessly",
+      "category": "phrase",
+      "subcategory": "corporate-reassurance",
+      "replacement_hint": "say what's actually being done"
+    },
+    {
+      "term": "we sincerely apologize for the inconvenience",
+      "category": "phrase",
+      "subcategory": "corporate-reassurance",
+      "replacement_hint": "say sorry plainly, then say what happened"
+    },
+    {
+      "term": "we sincerely apologize for any inconvenience",
+      "category": "phrase",
+      "subcategory": "corporate-reassurance",
+      "replacement_hint": "say sorry plainly, then say what happened"
+    },
+    {
+      "term": "due to unforeseen circumstances",
+      "category": "phrase",
+      "subcategory": "corporate-reassurance",
+      "replacement_hint": "say what happened"
+    },
+    {
+      "term": "please know that",
+      "category": "phrase",
+      "subcategory": "corporate-reassurance",
+      "replacement_hint": "cut it, state the thing directly"
+    },
+    {
+      "term": "we understand your frustration",
+      "category": "phrase",
+      "subcategory": "corporate-reassurance",
+      "replacement_hint": "skip naming the feeling, address the actual issue"
+    },
+    {
+      "term": "we are committed to providing",
+      "category": "phrase",
+      "subcategory": "corporate-reassurance",
+      "replacement_hint": "say what you'll actually do"
+    },
+    {
+      "term": "thank you for your patience and understanding",
+      "category": "phrase",
+      "subcategory": "corporate-reassurance",
+      "replacement_hint": "cut it, or just say thanks"
+    },
+    {
+      "term": "we're writing to inform you",
+      "category": "phrase",
+      "subcategory": "corporate-reassurance",
+      "replacement_hint": "lead with the actual news"
+    }
+  ]
+}

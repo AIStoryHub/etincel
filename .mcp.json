@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "etincel-nonfiction": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/server.js"]
+    }
+  }
+}

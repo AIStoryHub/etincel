@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.next/
+*.log
+.DS_Store
+.vercel
+.env*
+!.env.example
+mcp-registry-auth.key.pem

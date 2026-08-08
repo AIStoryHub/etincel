@@ -1,0 +1,745 @@
+{
+  "$schema_note": "Soft-flag terms: legitimate technical/analytical uses exist. Surface as a challenge/question, never auto-rewrite.",
+  "source": "Condensed from JP LeBlanc's etincel-prose skill (references/banned-terms.md) and avoid-ai-writing's words-and-phrases.md orange/yellow tiers.",
+  "count": 123,
+  "entries": [
+    {
+      "term": "diversify",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "shapes",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Fine as a plural noun (odd shapes); the tell is the abstract verb use, 'shapes how we think about X.'"
+    },
+    {
+      "term": "shaping",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "The tell is the abstract verb use, 'shaping the future of X,' not literal shaping of an object."
+    },
+    {
+      "term": "shaped",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "The tell is the abstract verb use, 'shaped by these forces,' not a literally shaped object."
+    },
+    {
+      "term": "will shape",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Bare infinitive is rare enough as a real AI tell that only the forward-looking construction is worth flagging: 'will shape the future of X.'"
+    },
+    {
+      "term": "ponder",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "scrutinize",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "elicit",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "enumerate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "empower",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "disseminate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "culminate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "perceive",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "actualize",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "reiterate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "advocate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "mediate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "contextualize",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "amplify",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "elaborate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "correlate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "quantify",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "speculate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "interpret",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "collaborate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "deliberate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "aggregate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "differentiate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "reconcile",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "decipher",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "theorize",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "alleviate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "align",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "dissect",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "formulate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "evaluate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "converge",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "scaffold",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "emulate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "reconfigure",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "incubate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "permeate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "benchmark",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "calibrate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "orchestrate",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "evolve",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "discern",
+      "category": "verb",
+      "subcategory": "soft-flag-verb",
+      "note": "Has genuine technical/analytical use; keep if precise, replace if standing in for something plainer."
+    },
+    {
+      "term": "dynamic",
+      "category": "adjective",
+      "subcategory": "soft-flag-adjective",
+      "note": "Over-used but sometimes accurate; 'dynamic'/'adaptive' have real technical senses, 'nuanced' can describe genuine shading."
+    },
+    {
+      "term": "adaptive",
+      "category": "adjective",
+      "subcategory": "soft-flag-adjective",
+      "note": "Over-used but sometimes accurate; 'dynamic'/'adaptive' have real technical senses, 'nuanced' can describe genuine shading."
+    },
+    {
+      "term": "compelling",
+      "category": "adjective",
+      "subcategory": "soft-flag-adjective",
+      "note": "Over-used but sometimes accurate; 'dynamic'/'adaptive' have real technical senses, 'nuanced' can describe genuine shading."
+    },
+    {
+      "term": "nuanced",
+      "category": "adjective",
+      "subcategory": "soft-flag-adjective",
+      "note": "Over-used but sometimes accurate; 'dynamic'/'adaptive' have real technical senses, 'nuanced' can describe genuine shading."
+    },
+    {
+      "term": "crucial",
+      "category": "adjective",
+      "subcategory": "soft-flag-adjective",
+      "note": "Over-used but sometimes accurate; 'dynamic'/'adaptive' have real technical senses, 'nuanced' can describe genuine shading."
+    },
+    {
+      "term": "vital",
+      "category": "adjective",
+      "subcategory": "soft-flag-adjective",
+      "note": "Over-used but sometimes accurate; 'dynamic'/'adaptive' have real technical senses, 'nuanced' can describe genuine shading."
+    },
+    {
+      "term": "essential",
+      "category": "adjective",
+      "subcategory": "soft-flag-adjective",
+      "note": "Over-used but sometimes accurate; 'dynamic'/'adaptive' have real technical senses, 'nuanced' can describe genuine shading."
+    },
+    {
+      "term": "keen",
+      "category": "adjective",
+      "subcategory": "soft-flag-adjective",
+      "note": "Over-used but sometimes accurate; 'dynamic'/'adaptive' have real technical senses, 'nuanced' can describe genuine shading."
+    },
+    {
+      "term": "rapidly",
+      "category": "adjective",
+      "subcategory": "soft-flag-adjective",
+      "note": "Over-used but sometimes accurate; 'dynamic'/'adaptive' have real technical senses, 'nuanced' can describe genuine shading."
+    },
+    {
+      "term": "expanding",
+      "category": "adjective",
+      "subcategory": "soft-flag-adjective",
+      "note": "Over-used but sometimes accurate; 'dynamic'/'adaptive' have real technical senses, 'nuanced' can describe genuine shading."
+    },
+    {
+      "term": "enduring",
+      "category": "adjective",
+      "subcategory": "soft-flag-adjective",
+      "note": "Over-used but sometimes accurate; 'dynamic'/'adaptive' have real technical senses, 'nuanced' can describe genuine shading."
+    },
+    {
+      "term": "framework",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "landscape",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "narrative",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "domain",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "trajectory",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "spectrum",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "horizon",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "construct",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "schema",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "tension",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "mechanism",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "ethos",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "catalyst",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "discourse",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "arc",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "matrix",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "iteration",
+      "category": "noun",
+      "subcategory": "soft-flag-noun",
+      "note": "Real technical/analytical use (framework in software, trajectory in physics, mechanism in causal reasoning); the tell is reaching for it metaphorically when a concrete noun would land harder."
+    },
+    {
+      "term": "sure",
+      "category": "filler",
+      "subcategory": "soft-flag-filler",
+      "note": "Conversational use is real."
+    },
+    {
+      "term": "therefore",
+      "category": "transition",
+      "subcategory": "soft-flag-transition",
+      "note": "Mathematical/analytical writing uses this precisely."
+    },
+    {
+      "term": "thus",
+      "category": "transition",
+      "subcategory": "soft-flag-transition",
+      "note": "Same as therefore: precise in analytical prose."
+    },
+    {
+      "term": "specifically",
+      "category": "transition",
+      "subcategory": "soft-flag-transition",
+      "note": "Legitimate scope-narrowing use."
+    },
+    {
+      "term": "generally",
+      "category": "transition",
+      "subcategory": "soft-flag-transition",
+      "note": "Legitimate scope-widening use."
+    },
+    {
+      "term": "shadows",
+      "category": "imagery",
+      "subcategory": "soft-flag-imagery",
+      "note": "Literal use is fine (a literal flicker, an actual hum); the metaphorical use is the tell."
+    },
+    {
+      "term": "hum",
+      "category": "imagery",
+      "subcategory": "soft-flag-imagery",
+      "note": "Literal use is fine (a literal flicker, an actual hum); the metaphorical use is the tell."
+    },
+    {
+      "term": "hummed",
+      "category": "imagery",
+      "subcategory": "soft-flag-imagery",
+      "note": "Literal use is fine (a literal flicker, an actual hum); the metaphorical use is the tell."
+    },
+    {
+      "term": "glide",
+      "category": "imagery",
+      "subcategory": "soft-flag-imagery",
+      "note": "Literal use is fine (a literal flicker, an actual hum); the metaphorical use is the tell."
+    },
+    {
+      "term": "glided",
+      "category": "imagery",
+      "subcategory": "soft-flag-imagery",
+      "note": "Literal use is fine (a literal flicker, an actual hum); the metaphorical use is the tell."
+    },
+    {
+      "term": "shimmer",
+      "category": "imagery",
+      "subcategory": "soft-flag-imagery",
+      "note": "Literal use is fine (a literal flicker, an actual hum); the metaphorical use is the tell."
+    },
+    {
+      "term": "flicker",
+      "category": "imagery",
+      "subcategory": "soft-flag-imagery",
+      "note": "Literal use is fine (a literal flicker, an actual hum); the metaphorical use is the tell."
+    },
+    {
+      "term": "dripping",
+      "category": "imagery",
+      "subcategory": "soft-flag-imagery",
+      "note": "Literal use is fine (a literal flicker, an actual hum); the metaphorical use is the tell."
+    },
+    {
+      "term": "dance",
+      "category": "imagery",
+      "subcategory": "soft-flag-imagery",
+      "note": "Literal use is fine (a literal flicker, an actual hum); the metaphorical use is the tell."
+    },
+    {
+      "term": "dancing",
+      "category": "imagery",
+      "subcategory": "soft-flag-imagery",
+      "note": "Literal use is fine (a literal flicker, an actual hum); the metaphorical use is the tell."
+    },
+    {
+      "term": "fragmented",
+      "category": "imagery",
+      "subcategory": "soft-flag-imagery",
+      "note": "Literal use is fine (a literal flicker, an actual hum); the metaphorical use is the tell."
+    },
+    {
+      "term": "on the other hand",
+      "category": "phrase",
+      "subcategory": "contrastive",
+      "note": "genuine contrastive use when there really are two sides"
+    },
+    {
+      "term": "in order to",
+      "category": "phrase",
+      "subcategory": "contrastive",
+      "note": "sometimes the natural phrasing"
+    },
+    {
+      "term": "not only ... but also",
+      "category": "phrase",
+      "subcategory": "contrastive",
+      "note": "occasionally the right construction in formal prose"
+    },
+    {
+      "term": "could potentially",
+      "category": "phrase",
+      "subcategory": "hedge",
+      "note": "stacking two hedge words is the tell, not either alone"
+    },
+    {
+      "term": "might eventually",
+      "category": "phrase",
+      "subcategory": "hedge",
+      "note": "same: the stack is the problem"
+    },
+    {
+      "term": "arguably",
+      "category": "phrase",
+      "subcategory": "hedge",
+      "note": "fine standalone, watch for hedge-stacking"
+    },
+    {
+      "term": "in many cases",
+      "category": "phrase",
+      "subcategory": "hedge",
+      "note": "legitimate scope qualifier"
+    },
+    {
+      "term": "to some extent",
+      "category": "phrase",
+      "subcategory": "hedge",
+      "note": "legitimate scope qualifier"
+    },
+    {
+      "term": "a wide range of",
+      "category": "phrase",
+      "subcategory": "academic",
+      "note": "fine when the range is real and enumerable"
+    },
+    {
+      "term": "in recent years",
+      "category": "phrase",
+      "subcategory": "academic",
+      "note": "fine with a specific claim attached"
+    },
+    {
+      "term": "remains to be seen",
+      "category": "phrase",
+      "subcategory": "academic",
+      "note": "fine in genuine forecasting contexts"
+    },
+    {
+      "term": "further research is needed",
+      "category": "phrase",
+      "subcategory": "academic",
+      "note": "fine in actual research writing"
+    },
+    {
+      "term": "best practices",
+      "category": "phrase",
+      "subcategory": "business",
+      "note": "legitimate in technical/operational writing where specific standards exist"
+    },
+    {
+      "term": "playbook",
+      "category": "phrase",
+      "subcategory": "business",
+      "note": "fine as a concrete metaphor for a documented process"
+    },
+    {
+      "term": "win-win",
+      "category": "phrase",
+      "subcategory": "business",
+      "note": "fine when both sides' gain is actually named"
+    },
+    {
+      "term": "it depends on various factors",
+      "category": "phrase",
+      "subcategory": "hedge-everything",
+      "note": "legitimate when the factors are actually named right after"
+    },
+    {
+      "term": "there are several considerations",
+      "category": "phrase",
+      "subcategory": "hedge-everything",
+      "note": "legitimate when the considerations are actually named"
+    },
+    {
+      "term": "this is a complex topic with no single answer",
+      "category": "phrase",
+      "subcategory": "hedge-everything",
+      "note": "sometimes true, but often a dodge for not committing to a view anywhere in the piece"
+    },
+    {
+      "term": "always consult a professional",
+      "category": "phrase",
+      "subcategory": "assistant-chrome",
+      "note": "legitimate as an actual disclaimer in medical/legal/financial writing"
+    },
+    {
+      "term": "i cannot provide",
+      "category": "phrase",
+      "subcategory": "assistant-chrome",
+      "note": "legitimate mid-sentence (\"I cannot provide guarantees, only estimates\"); watch for it standing in for a real refusal"
+    },
+    {
+      "term": "it's important to remember that",
+      "category": "phrase",
+      "subcategory": "assistant-chrome",
+      "note": "sometimes a genuine reminder; watch for it prefacing an obvious point"
+    },
+    {
+      "term": "circle back",
+      "category": "phrase",
+      "subcategory": "business-jargon",
+      "note": "legitimate when a real follow-up is actually scheduled"
+    },
+    {
+      "term": "touch base",
+      "category": "phrase",
+      "subcategory": "business-jargon",
+      "note": "fine as an informal, genuine check-in"
+    },
+    {
+      "term": "bandwidth",
+      "category": "phrase",
+      "subcategory": "business-jargon",
+      "note": "legitimate as a real capacity constraint, not just a soft no"
+    },
+    {
+      "term": "table this",
+      "category": "phrase",
+      "subcategory": "business-jargon",
+      "note": "fine when there is a real reason and a real revisit date"
+    },
+    {
+      "term": "boil the ocean",
+      "category": "phrase",
+      "subcategory": "business-jargon",
+      "note": "a real idiom for real scope-creep, not automatically a tell"
+    },
+    {
+      "term": "continuous improvement",
+      "category": "phrase",
+      "subcategory": "business-jargon",
+      "note": "a real term of art in ops/quality contexts (e.g. Six Sigma)"
+    },
+    {
+      "term": "operational excellence",
+      "category": "phrase",
+      "subcategory": "business-jargon",
+      "note": "a real term of art; watch for it standing in for specifics"
+    },
+    {
+      "term": "strategic alignment",
+      "category": "phrase",
+      "subcategory": "business-jargon",
+      "note": "fine when the strategy and the alignment are both named"
+    },
+    {
+      "term": "organizational efficiency",
+      "category": "phrase",
+      "subcategory": "business-jargon",
+      "note": "fine when a specific efficiency gain is actually described"
+    },
+    {
+      "term": "solution development",
+      "category": "phrase",
+      "subcategory": "business-jargon",
+      "note": "vague unless the solution is named"
+    },
+    {
+      "term": "cadence",
+      "category": "phrase",
+      "subcategory": "business-jargon",
+      "note": "legitimate agile/ops usage (release cadence, sprint cadence)"
+    }
+  ]
+}

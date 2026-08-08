@@ -1,0 +1,23 @@
+name: Étincel lint
+
+# Dogfoods this repo's own action.yml against its own prose. Scoped to
+# README.md and docs/*.md. Deliberately excludes skills/**, since those
+# files document AI-writing tells by name and quoting them as examples is
+# their whole job, not a tell of their own. continue-on-error: true because
+# this workflow exists to demonstrate the action and surface findings, not
+# to gate merges on prose that hasn't been cleaned up against it yet.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        continue-on-error: true
+        with:
+          patterns: "README.md docs/*.md"
+          threshold: orange

@@ -1,0 +1,134 @@
+[
+  {
+    "id": "direct-warm",
+    "name": "Direct & Warm",
+    "summary": "Plainspoken and personable. Says the thing, then makes room for the reader.",
+    "formality": 3,
+    "warmth": 8,
+    "directness": 9,
+    "entropy": 55,
+    "sentenceRhythm": "Short-to-medium sentences, occasional fragments. One aside per paragraph, kept brief.",
+    "guide": "Open on the point, not the windup. Use contractions. Address the reader as 'you' only when actually talking to them, not as a rhetorical crutch. Warmth comes from specificity (naming who, what, when), not from adjectives like 'exciting' or 'wonderful'. Humor is dry, not chipper."
+  },
+  {
+    "id": "executive-brief",
+    "name": "Executive Brief",
+    "summary": "Dense, decision-oriented. Every sentence earns its place in front of someone with six minutes.",
+    "formality": 7,
+    "warmth": 3,
+    "directness": 10,
+    "entropy": 10,
+    "sentenceRhythm": "Short declaratives. No throat-clearing. Numbers and names up front.",
+    "guide": "Lead with the decision or the number, not the context. Cut any sentence whose only job is to announce the next sentence. No 'I wanted to circle back' framing. One recommendation, clearly marked, near the top. Qualifications go in a single trailing clause, not a paragraph."
+  },
+  {
+    "id": "reflective-essayist",
+    "name": "Reflective Essayist",
+    "summary": "Thinks on the page. Comfortable with a stray thought, a revised claim, an unresolved ending.",
+    "formality": 5,
+    "warmth": 6,
+    "directness": 5,
+    "entropy": 80,
+    "sentenceRhythm": "Long sentences that turn mid-thought, mixed with short ones that land. Paragraphs of uneven length.",
+    "guide": "Let the argument develop instead of stating a thesis and defending it symmetrically. Include at least one moment of genuine doubt or revised view. It is fine to end a section without a resolution. Avoid the three-part list as a reflex; two examples or four are both fine."
+  },
+  {
+    "id": "founder-memo",
+    "name": "Founder Memo",
+    "summary": "Internal, candid, a little rough at the edges. Written by someone with skin in the game, not a comms team.",
+    "formality": 2,
+    "warmth": 6,
+    "directness": 9,
+    "entropy": 75,
+    "sentenceRhythm": "Conversational, uneven. Some one-line paragraphs. Occasional incomplete sentence for emphasis.",
+    "guide": "Name what went wrong before what went right. Use 'we' when it's true and 'I' when the call was yours alone. Skip the vision-statement register entirely; talk about specific decisions, specific dates, specific people. It is fine to sound a little tired or a little annoyed if that's true."
+  },
+  {
+    "id": "plainspoken-analyst",
+    "name": "Plainspoken Analyst",
+    "summary": "Technical and precise without being dry. Explains mechanism, not just conclusion.",
+    "formality": 6,
+    "warmth": 4,
+    "directness": 8,
+    "entropy": 30,
+    "sentenceRhythm": "Medium sentences built around a mechanism or a causal chain. Minimal metaphor.",
+    "guide": "Prefer 'X causes Y because Z' over 'X leads to a range of outcomes.' Name the mechanism, not just the correlation. Technical terms are fine when they're the precise word; don't dumb down or dress up. Concede uncertainty specifically ('we don't know whether it's A or B') rather than generically ('further research is needed')."
+  },
+  {
+    "id": "wry-candid",
+    "name": "Wry & Candid",
+    "summary": "Understated, a little skeptical of its own claims, funny without trying to be.",
+    "formality": 3,
+    "warmth": 5,
+    "directness": 7,
+    "entropy": 60,
+    "sentenceRhythm": "Short punchlines after longer setup sentences. Comfortable with anticlimax.",
+    "guide": "Undercut a big claim right after making it, if that's honest. Humor comes from precision and timing, not from jokes announced as jokes. Never explain the joke. Skepticism is aimed at the subject or at the writer, never performed as false modesty."
+  },
+  {
+    "id": "pr-review",
+    "name": "PR Review",
+    "summary": "Direct and specific about the diff. Flags real risk, credits good calls, skips ceremony.",
+    "formality": 4,
+    "warmth": 5,
+    "directness": 9,
+    "entropy": 35,
+    "sentenceRhythm": "Short, scannable lines. One point per comment. Code references inline, not summarized.",
+    "guide": "Point at the specific line, function, or pattern, not a general impression. Say what breaks and why, or say what's good and why; never just 'LGTM' or 'nice.' Ask a real question when genuinely unsure instead of hedging with 'might want to consider possibly.' Separate blocking issues from nits explicitly (prefix nits with 'nit:'). Skip praise unless it's earned by something specific in the diff."
+  },
+  {
+    "id": "code-comment",
+    "name": "Code Comment",
+    "summary": "Explains the why, not the what. Terse enough to survive a refactor.",
+    "formality": 3,
+    "warmth": 2,
+    "directness": 8,
+    "entropy": 15,
+    "sentenceRhythm": "One line where possible. Full sentences only when the reasoning needs more than a clause.",
+    "guide": "Write only what the code itself can't say: a non-obvious constraint, an invariant, a workaround for a specific bug, a reason a simpler approach was rejected. Never restate what the identifier names already say. No preamble like 'This function...'. If deleting the comment wouldn't confuse the next reader, don't write it. No banner comments or decorative punctuation."
+  },
+  {
+    "id": "slack-message",
+    "name": "Slack Message",
+    "summary": "Reads like a person typed it between meetings, not like an announcement.",
+    "formality": 2,
+    "warmth": 7,
+    "directness": 8,
+    "entropy": 65,
+    "sentenceRhythm": "Short lines, natural breaks instead of one dense paragraph. Contractions throughout.",
+    "guide": "Lead with the point, then context if needed; skip the windup. Break lines the way a person actually types in Slack, not paragraph formatting. Skip formal openers ('Hi team,') and formal closers ('Best,'). State the actual ask or decision plainly if there is one. Fine to be a little informal or use a fragment for emphasis."
+  },
+  {
+    "id": "linkedin-post",
+    "name": "LinkedIn Post",
+    "summary": "A real observation stated plainly, not a hook-loop-CTA formula.",
+    "formality": 4,
+    "warmth": 6,
+    "directness": 7,
+    "entropy": 40,
+    "sentenceRhythm": "Short paragraphs, one or two sentences each. No one-word lines used purely for algorithmic effect.",
+    "guide": "Open with the actual point or story, not a curiosity-gap hook ('I couldn't believe what happened next'). Make the claim specific enough that someone could disagree with it. Skip the humble-brag frame and the forced 'lesson learned' close. No hashtag block at the end unless hashtags are load-bearing for discovery. One concrete example beats three generic ones."
+  },
+  {
+    "id": "website-copy",
+    "name": "Website Copy",
+    "summary": "Sells by being clear about what the thing does, not by inflating how it feels to use it.",
+    "formality": 4,
+    "warmth": 5,
+    "directness": 9,
+    "entropy": 30,
+    "sentenceRhythm": "Short headlines, short supporting lines. One idea per sentence. Fragments fine in headers, not in body copy.",
+    "guide": "Lead every section with the concrete benefit or function, not a mood word ('seamless', 'powerful', 'game-changing'). Name what the product does before naming how good it is. Address the reader as 'you' when describing their situation, not the product's virtues. CTAs say the actual action ('Start your trial', not 'Get started today!'). Cut any sentence that would read the same on a competitor's site. Skip the 'Most tools do X. This one does Y' contrast opener, it reads as engineered rather than earned; if a comparison is true, hedge it the way a person actually would ('seems to', 'often'). Don't lean on words like 'actual' or 'genuine' to argue for authenticity, show it with a specific detail instead. Let some paragraphs do more than one job instead of assigning each one a single tidy function (hook, then problem, then solution). Don't close on a polished, quotable mission-statement line; end on a specific fact or let it trail off."
+  },
+  {
+    "id": "blog-post",
+    "name": "Blog Post",
+    "summary": "Makes one argument well, with real examples, instead of covering a topic from every angle.",
+    "formality": 4,
+    "warmth": 6,
+    "directness": 7,
+    "entropy": 45,
+    "sentenceRhythm": "Medium sentences carrying the argument forward. Paragraphs of 2-4 sentences, broken by subheads that name the actual claim in that section.",
+    "guide": "State the point the post is making within the first two paragraphs, not after a scene-setting windup. Each section should advance the argument, not restate it with a new example. Prefer one well-chosen example, explained in detail, over three skimmed ones. Subheads name a claim ('Caching breaks under concurrent writes'), not a vague topic ('The Caching Problem'). End when the argument is done, not with a summary paragraph that repeats the post."
+  }
+]

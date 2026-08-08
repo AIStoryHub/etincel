@@ -1,0 +1,48 @@
+name: "Étincel Lint"
+description: "Deterministic AI-writing-tells audit for prose (README, docs, blog posts). No network call, no model call, same 494-check corpus as the audit_text MCP tool."
+author: "Jean-Philippe LeBlanc"
+branding:
+  icon: "edit-3"
+  color: "orange"
+
+inputs:
+  patterns:
+    description: "Space-separated glob pattern(s) to lint, relative to the checked-out repo (e.g. 'docs/**/*.md README.md')."
+    required: false
+    default: "**/*.md"
+  threshold:
+    description: "Minimum tier that fails the check: green, yellow, orange, or red."
+    required: false
+    default: "orange"
+  register:
+    description: "Register to calibrate strictness against: email, blog, memo, essay, social, docs, general. Leave unset to let .md/.mdx files default to 'docs' automatically."
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Build Étincel
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: npm ci
+
+    - name: Run lint
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      run: |
+        set -e
+        args=(lint)
+        for pattern in ${{ inputs.patterns }}; do
+          args+=("$pattern")
+        done
+        args+=(--threshold "${{ inputs.threshold }}")
+        if [ -n "${{ inputs.register }}" ]; then
+          args+=(--register "${{ inputs.register }}")
+        fi
+        node "${{ github.action_path }}/dist/cli.js" "${args[@]}"

@@ -1,0 +1,264 @@
+{
+  "$schema_note": "Structural/rhetorical AI tells, whole-piece and sentence-level. 'critical' severity items are near-definitive fingerprints \u2014 a single hit is enough to flag regardless of the rest of the piece.",
+  "source": "Condensed from JP LeBlanc's etincel-prose skill (references/ai-tells.md, items 1-26) and avoid-ai-writing's channel-and-chatbot-tells.md.",
+  "count": 41,
+  "entries": [
+    {
+      "id": "uniform-paragraph-length",
+      "name": "Uniform paragraph length",
+      "description": "AI prose tends toward paragraphs of similar size, often four to six sentences each. Vary widely \u2014 one-word paragraphs and ten-sentence paragraphs are both fine.",
+      "severity": "medium"
+    },
+    {
+      "id": "symmetric-elaboration",
+      "name": "Symmetric elaboration",
+      "description": "Every point developed to roughly the same depth, as if each idea had equal claim on the reader's attention. Develop asymmetrically by rhetorical need \u2014 one point can deserve three times the space of its neighbours.",
+      "severity": "medium"
+    },
+    {
+      "id": "clean-paragraph-resolution",
+      "name": "Clean paragraph resolution",
+      "description": "Every paragraph closing with a neat synthesis or summary of itself. Some paragraphs should end mid-thought, on an unanswered question, or on a quiet observation.",
+      "severity": "medium"
+    },
+    {
+      "id": "topic-sentence-every-time",
+      "name": "Topic sentence every time",
+      "description": "Each paragraph announces its argument in its first sentence. Vary entry points: a number, a name, a date, a fragment, a contradiction.",
+      "severity": "low"
+    },
+    {
+      "id": "stacked-transitions",
+      "name": "Stacked transitions",
+      "description": "Every link between sentences and paragraphs spelled out (\"However.\" \"Therefore.\" \"Moreover.\"). Trust the reader; not every connection needs to be named.",
+      "severity": "medium"
+    },
+    {
+      "id": "parallel-clause-pileup",
+      "name": "Parallel clause pileup",
+      "description": "Three clauses in a row with the same grammatical shape: \"It is X. It is Y. It is Z.\" Break grammatical parallelism deliberately.",
+      "severity": "medium",
+      "example_bad": "It is fast. It is reliable. It is scalable."
+    },
+    {
+      "id": "copulative-avoidance",
+      "name": "Copulative avoidance",
+      "description": "Refusing to say is/has when that's the actual relation (\"serves as,\" \"stands as,\" \"represents,\" \"constitutes\"). Use the simple verb when it's the right verb.",
+      "severity": "high",
+      "example_bad": "The report serves as a reminder of the risk.",
+      "example_good": "The report shows the risk."
+    },
+    {
+      "id": "significance-inflation",
+      "name": "Significance inflation",
+      "description": "Sentences whose only function is to assert that something matters (\"This is a pivotal moment.\" \"This represents a fundamental shift.\"). Cut these; show the outcome, don't label its importance.",
+      "severity": "high"
+    },
+    {
+      "id": "vague-authority-attribution",
+      "name": "Vague authority attribution",
+      "description": "\"Experts argue.\" \"Observers note.\" \"Industry reports suggest.\" Name the source or own the claim.",
+      "severity": "high"
+    },
+    {
+      "id": "participial-padding",
+      "name": "Participial padding",
+      "description": "Sentences trailing into -ing clauses that restate what the sentence already said (\"...highlighting its importance,\" \"...underscoring the shift\"). Cut the tail, or lead with it if it carries real content.",
+      "severity": "medium",
+      "example_bad": "Revenue doubled, underscoring the company's momentum.",
+      "example_good": "Revenue doubled."
+    },
+    {
+      "id": "rule-of-three-compulsion",
+      "name": "Rule-of-three compulsion",
+      "description": "Three examples, three principles, three reasons \u2014 including hidden triads (three clauses in a sentence, three sentences mapping to three points). Sometimes the answer has two parts, or five, or one.",
+      "severity": "medium",
+      "example_bad": "fast, reliable, and scalable"
+    },
+    {
+      "id": "elegant-variation",
+      "name": "Elegant variation",
+      "description": "Renaming the same referent every time it recurs (\"the company,\" then \"the firm,\" then \"the organization\"). If it's the same thing, use the same noun.",
+      "severity": "low"
+    },
+    {
+      "id": "challenges-and-prospects-scaffolding",
+      "name": "Challenges-and-prospects scaffolding",
+      "description": "The template: concede a difficulty, then pivot to generic optimism (\"Despite these challenges, opportunities abound\"). Avoid the entire shape.",
+      "severity": "high"
+    },
+    {
+      "id": "throat-clearing-openers",
+      "name": "Throat-clearing openers",
+      "description": "Opening a piece or section with sentences that announce what it's about to do rather than doing it. Start with substance: a person, a year, a number, a quoted line.",
+      "severity": "high",
+      "example_bad": "I want to be clear about something important."
+    },
+    {
+      "id": "resolved-metaphors",
+      "name": "Resolved metaphors",
+      "description": "Analogies that fit too perfectly. Real analogies break somewhere \u2014 let them snag, or cut the metaphor.",
+      "severity": "medium"
+    },
+    {
+      "id": "parallel-clean-arc-case-studies",
+      "name": "Parallel clean-arc case studies",
+      "description": "Illustrative people whose stories arc neatly to the writer's point. Real people have flaws, asides, dumb mistakes \u2014 include some of that.",
+      "severity": "high"
+    },
+    {
+      "id": "no-intellectual-wrong-turns",
+      "name": "No intellectual wrong turns",
+      "description": "A thesis without friction: no doubt, no revised view, no moment of changing one's mind. Substantive sections need at least one such turn.",
+      "severity": "high"
+    },
+    {
+      "id": "relentless-second-person",
+      "name": "Relentless second person",
+      "description": "Pages and pages of \"you.\" Vary register: third-person analysis, autobiographical first person, neutral essay voice.",
+      "severity": "medium"
+    },
+    {
+      "id": "generic-evidence",
+      "name": "Generic evidence",
+      "description": "\"A leading financial services firm.\" \"A Fortune 500 company.\" Name it, or cut the sentence.",
+      "severity": "high",
+      "example_bad": "A leading financial services firm reported gains.",
+      "example_good": "Fidelity reported gains."
+    },
+    {
+      "id": "tourism-brochure-tone",
+      "name": "Tourism-brochure tone",
+      "description": "Warm, admiring, slightly breathless register that treats the subject as already significant before the writing has earned the claim. A register-level tell, distinct from sentence-level significance inflation.",
+      "severity": "medium"
+    },
+    {
+      "id": "false-ranges",
+      "name": "False ranges",
+      "description": "\"From intimate gatherings to global movements.\" Implies a real spectrum between two loosely related things dressed up as comprehensive. Make the range real or pick one side.",
+      "severity": "medium"
+    },
+    {
+      "id": "two-sentence-negation",
+      "name": "Two-sentence negation",
+      "description": "Negative parallelism split across two sentences: state X, then pivot with \"however\"/\"but\"/\"yet\" to contrasting Y. State directly instead.",
+      "severity": "medium"
+    },
+    {
+      "id": "bullet-with-bolded-title",
+      "name": "Bullet with bolded title",
+      "description": "The \"**Term:** definition\" pattern, where the bold phrase is just reworded in the sentence that follows. Never appears in real prose drafts; write the sentence instead.",
+      "severity": "medium"
+    },
+    {
+      "id": "bold-as-textbook",
+      "name": "Bold as textbook",
+      "description": "Bolding key terms inside running prose the way a textbook bolds vocabulary on first appearance. Default to no bold in body prose; italics for genuine emphasis.",
+      "severity": "low"
+    },
+    {
+      "id": "vague-landscape-openers",
+      "name": "Vague-landscape openers",
+      "description": "\"In today's evolving landscape of...\" / \"As businesses navigate the evolving...\" \u2014 dressed-up throat-clearing. Start with the specific thing the piece is actually about.",
+      "severity": "high"
+    },
+    {
+      "id": "editorializing-markers",
+      "name": "Editorializing markers",
+      "description": "Phrases signaling the writer is about to insert opinion instead of just doing the interpreting (\"it is worth noting,\" \"no discussion would be complete without\"). If the point matters, make it; if not, cut it.",
+      "severity": "medium"
+    },
+    {
+      "id": "ai-sentence-dna-arc",
+      "name": "AI sentence-DNA arc",
+      "description": "A four-beat arc (opening claim, expansion, contrast pivot, rhetorical-question/\"the takeaway?\" resolution) repeating at the paragraph level across the whole piece. One instance is a choice; the same arc every paragraph is the tell.",
+      "severity": "high"
+    },
+    {
+      "id": "paragraph-reshuffle-test",
+      "name": "Paragraph-reshuffle test (fails)",
+      "description": "If two body paragraphs can swap without the piece breaking, it's a list of points dressed as an argument. Make each paragraph depend on the one before it, or format it as an actual list.",
+      "severity": "medium"
+    },
+    {
+      "id": "treadmill-test",
+      "name": "Treadmill test (fails)",
+      "description": "A paragraph that restates the premise in fresh words without advancing the piece \u2014 motion without distance covered. Cut it or make it add a fact, claim, or turn.",
+      "severity": "medium"
+    },
+    {
+      "id": "narrow-vocabulary-range",
+      "name": "Narrow vocabulary range",
+      "description": "On pieces over ~200 words, the same 15-20 words doing all the work reads flat. Not proof alone (narrow technical topics compress vocabulary too) but worth a second look.",
+      "severity": "low"
+    },
+    {
+      "id": "chatbot-self-disclosure",
+      "name": "Chatbot self-disclosure",
+      "description": "\"As an AI language model,\" \"I don't have access to real-time data,\" \"as of my last update,\" \"I'm just an AI.\" A single occurrence is proof the draft was pasted without a cleanup pass.",
+      "severity": "critical"
+    },
+    {
+      "id": "citation-markup-leak",
+      "name": "Citation/markup leak",
+      "description": "citeturn0search0-style tokens, contentReference[oaicite:...], oai_citation, grok_card, [attached_file:1]. Chat-UI artifacts leaking into published text.",
+      "severity": "critical"
+    },
+    {
+      "id": "utm-tracking-leak",
+      "name": "AI-tool UTM tracking leak",
+      "description": "utm_source=chatgpt.com / claude.ai / similar tracking params surviving into a cited URL.",
+      "severity": "critical"
+    },
+    {
+      "id": "unfilled-placeholder",
+      "name": "Unfilled template placeholder",
+      "description": "[Your Name], [INSERT SOURCE URL], 2025-XX-XX, <!-- add citation -->. Mechanical: fill it in or cut it.",
+      "severity": "critical"
+    },
+    {
+      "id": "assistant-chrome",
+      "name": "Assistant chrome",
+      "description": "\"Would you like me to...?\", \"I hope this helps!\", \"Here is a comprehensive overview of...\", \"Regenerate response\". Signals the draft was never reviewed before being handed over \u2014 re-read the whole piece, not just the one line.",
+      "severity": "critical"
+    },
+    {
+      "id": "diagnostic-pivot-transition",
+      "name": "Diagnostic-pivot transition",
+      "description": "A sentence that announces a turn toward specificity (\"Let me be specific,\" \"So let me try to be concrete instead\") immediately followed by the concrete answer. Common and often genuinely good \u2014 it's how clear thinking reads on the page \u2014 so this is not mechanically detected and never auto-flagged. It becomes a tell only when it's a reflexive tic rather than a real correction, or when it repeats more than once in a piece; judge it in context rather than by presence alone.",
+      "severity": "low"
+    },
+    {
+      "id": "engineered-contrast-positioning",
+      "name": "Engineered category contrast",
+      "description": "A two-sentence positioning move that sets up a generic category claim, then pivots to a sharper claim about the specific subject (\"Most AI writing tools optimize for X. This one optimizes for Y.\"). Reads like ad copy because the contrast is airtight and confident where a real comparison would hedge (\"seem to,\" \"often\") and land on something narrower than a clean opposite. Mechanically flagged by the category-contrast-positioning structural pattern.",
+      "severity": "high",
+      "example_bad": "Most AI writing tools optimize for making the output sound polished. This one optimizes for writing that sounds like one particular person actually wrote it.",
+      "example_good": "Most AI writing tools seem focused on making the output sound polished. I wanted something narrower: writing that could plausibly have come from one particular person."
+    },
+    {
+      "id": "keyword-crutch-repetition",
+      "name": "Keyword crutch repetition",
+      "description": "Reaching for the same abstract keyword in nearly every sentence (a brand's own buzzword, or a general-purpose word like \"voice\" or \"write/writing\") instead of varying with concrete specifics or just leaving it out. Not proof alone on branded copy where the word is the product's whole point, but worth a second look when it's standing in for a more specific noun or verb rather than naming the actual thing.",
+      "severity": "medium"
+    },
+    {
+      "id": "one-job-per-paragraph",
+      "name": "One job per paragraph",
+      "description": "Every paragraph legibly performs a single, cleanly-labeled rhetorical function \u2014 hook, then problem, then solution, then proof, then CTA \u2014 like a sales-page template rather than a developing argument. Real prose lets paragraphs do more than one job, blur into the next, or exist for reasons other than moving a pitch forward.",
+      "severity": "high"
+    },
+    {
+      "id": "authenticity-flag-adjective",
+      "name": "Authenticity-flag adjective",
+      "description": "Words like \"actual,\" \"genuine,\" or \"real\" used as an intensifier to pre-empt doubt about authenticity (\"actual voice,\" \"genuine connection\") rather than to add a fact. Often paired with a named opposite (\"flattened,\" \"generic\") to manufacture a contrast that reads as ad copy rather than a plain claim.",
+      "severity": "medium"
+    },
+    {
+      "id": "manifesto-close",
+      "name": "Manifesto close",
+      "description": "Ending on a tidy, quotable one-line restatement of the whole piece's purpose, as if the last sentence were written to be pulled out and quoted. Real endings are more likely to trail off, hedge, or land on one specific fact than close with a polished mission statement.",
+      "severity": "high"
+    }
+  ]
+}
