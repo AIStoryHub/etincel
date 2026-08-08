@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { ensureDirs, INSTRUCTIONS_PATH } from "./paths.js";
 import { emptyInstructions, type StyleInstructions, type InstructionsStore } from "./instructionsStore.js";
+import { sanitizeFreeformText } from "./sanitizeText.js";
 
 interface StoredInstructions {
   instructions: string;
@@ -31,7 +32,10 @@ async function getInstructions(scope: string): Promise<StyleInstructions> {
 
 async function setInstructions(scope: string, instructions: string): Promise<StyleInstructions> {
   const all = readAll();
-  const record: StoredInstructions = { instructions: instructions.trim(), updatedAt: new Date().toISOString() };
+  const record: StoredInstructions = {
+    instructions: sanitizeFreeformText(instructions.trim()),
+    updatedAt: new Date().toISOString(),
+  };
   all[scope] = record;
   writeAll(all);
   return { scope, ...record };

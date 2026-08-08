@@ -3,10 +3,11 @@ import {
   mergeInstructions,
   type InstructionsStore,
 } from "../engine/instructionsStore.js";
+import { sanitizeFreeformText } from "../engine/sanitizeText.js";
 
 function resolveScope(styleId?: string): string {
-  const trimmed = styleId?.trim();
-  return trimmed && trimmed.length > 0 ? trimmed : GLOBAL_INSTRUCTIONS_SCOPE;
+  const trimmed = sanitizeFreeformText(styleId?.trim() ?? "");
+  return trimmed.length > 0 ? trimmed : GLOBAL_INSTRUCTIONS_SCOPE;
 }
 
 export function createInstructionsTools(store: InstructionsStore) {

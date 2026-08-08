@@ -13,6 +13,7 @@ import {
 } from "./dials.js";
 import { presetGuideText, type Preset } from "./presets.js";
 import { extractOpener } from "./selfRepetition.js";
+import { sanitizeFreeformText } from "./sanitizeText.js";
 import type { VoiceStore, VoiceProfile, SampleFingerprint } from "./voiceStore.js";
 
 interface Config {
@@ -53,8 +54,9 @@ async function findVoiceByName(name: string): Promise<VoiceProfile | undefined> 
   return all.find((v) => normalizeName(v.name) === target);
 }
 
-async function trainVoice(name: string, samples: string[], targetId?: string): Promise<VoiceProfile> {
+async function trainVoice(rawName: string, samples: string[], targetId?: string): Promise<VoiceProfile> {
   ensureDirs();
+  const name = sanitizeFreeformText(rawName);
   if (samples.length === 0) throw new Error("At least one writing sample is required to train a voice.");
   const trimmedSamples = samples.filter((s) => s.trim().length > 0);
   if (trimmedSamples.length === 0) throw new Error("Samples were empty after trimming.");
@@ -106,8 +108,9 @@ async function trainVoice(name: string, samples: string[], targetId?: string): P
   return profile;
 }
 
-async function createFromDials(name: string, dials: StyleDials): Promise<VoiceProfile> {
+async function createFromDials(rawName: string, dials: StyleDials): Promise<VoiceProfile> {
   ensureDirs();
+  const name = sanitizeFreeformText(rawName);
   const stats = dialsToStats(dials);
   const existing = await findVoiceByName(name);
   const id = existing?.id ?? randomUUID();
@@ -128,8 +131,9 @@ async function createFromDials(name: string, dials: StyleDials): Promise<VoicePr
   return profile;
 }
 
-async function forkFromPreset(preset: Preset, name: string): Promise<VoiceProfile> {
+async function forkFromPreset(preset: Preset, rawName: string): Promise<VoiceProfile> {
   ensureDirs();
+  const name = sanitizeFreeformText(rawName);
   const stats = dialsToStats({ ...DEFAULT_MECHANICAL_DIALS, entropy: preset.entropy });
   const existing = await findVoiceByName(name);
   const id = existing?.id ?? randomUUID();
@@ -150,8 +154,9 @@ async function forkFromPreset(preset: Preset, name: string): Promise<VoiceProfil
   return profile;
 }
 
-async function updateVoice(id: string, name: string, dials: StyleDials): Promise<VoiceProfile> {
+async function updateVoice(id: string, rawName: string, dials: StyleDials): Promise<VoiceProfile> {
   ensureDirs();
+  const name = sanitizeFreeformText(rawName);
   const existing = await loadVoice(id);
   if (!existing) throw new Error(`No trained voice named "${id}".`);
   // Persona dials always apply; the mechanical stats only change for a

@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { ensureDirs, DICTIONARIES_PATH } from "./paths.js";
 import { dedupeWords, removeWord, emptyDictionary, type Dictionary, type DictionaryStore } from "./dictionaryStore.js";
+import { sanitizeFreeformText } from "./sanitizeText.js";
 
 interface StoredDictionary {
   bannedWords: string[];
@@ -36,8 +37,8 @@ async function setDictionary(
 ): Promise<Dictionary> {
   const all = readAll();
   const record: StoredDictionary = {
-    bannedWords: dedupeWords(dict.bannedWords),
-    allowedWords: dedupeWords(dict.allowedWords),
+    bannedWords: dedupeWords(dict.bannedWords.map(sanitizeFreeformText)),
+    allowedWords: dedupeWords(dict.allowedWords.map(sanitizeFreeformText)),
     updatedAt: new Date().toISOString(),
   };
   all[scope] = record;

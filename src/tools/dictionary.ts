@@ -1,5 +1,6 @@
 import { GLOBAL_DICTIONARY_SCOPE, dedupeWords, type Dictionary, type DictionaryStore } from "../engine/dictionaryStore.js";
 import { staticPresetSource, type PresetSource } from "../engine/presets.js";
+import { sanitizeFreeformText } from "../engine/sanitizeText.js";
 import type { VoiceStore } from "../engine/voiceStore.js";
 
 /** "all" is the only reserved copy target; any other string is a literal
@@ -7,8 +8,8 @@ import type { VoiceStore } from "../engine/voiceStore.js";
 export const COPY_ALL_TARGET = "all";
 
 function resolveScope(styleId?: string): string {
-  const trimmed = styleId?.trim();
-  return trimmed && trimmed.length > 0 ? trimmed : GLOBAL_DICTIONARY_SCOPE;
+  const trimmed = sanitizeFreeformText(styleId?.trim() ?? "");
+  return trimmed.length > 0 ? trimmed : GLOBAL_DICTIONARY_SCOPE;
 }
 
 function requireWord(word: string): string {
