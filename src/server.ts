@@ -68,10 +68,20 @@ const dialsSchema = {
     ),
 };
 
-const server = new McpServer({
-  name: "etincel-nonfiction",
-  version: "0.1.0",
-});
+const server = new McpServer(
+  {
+    name: "etincel-nonfiction",
+    version: "0.1.1",
+  },
+  {
+    instructions:
+      "Start with list_styles to see available presets and trained voices, then get_style_guide to pull the full drafting guide for the one you want before writing. After drafting, run audit_text to catch AI writing tells; use train_style or create_style_from_dials to build a new voice from the user's own writing or explicit dial values.",
+    // Declared explicitly (with no resources registered) so resources/list
+    // and resources/read are routed through the SDK's own capability
+    // handling instead of falling through to a generic method-not-found.
+    capabilities: { resources: {} },
+  }
+);
 
 function json(data: unknown) {
   return { content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] };
@@ -86,6 +96,7 @@ server.registerTool(
   "list_styles",
   {
     title: "List writing styles",
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "List every available style: premade emotional-tone presets plus any voices the user has trained from their own samples. Call this before drafting or revising non-fiction prose if the caller hasn't been told which style to use, or if the user asks what styles exist.",
     inputSchema: {},
@@ -103,6 +114,7 @@ server.registerTool(
   "get_style_guide",
   {
     title: "Get a style guide",
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Fetch the full drafting guide for one style (a preset id like 'direct-warm', or the id of a trained voice). Returns prose instructions to follow while drafting or revising: sentence rhythm, tone dials, and (for trained voices) the writer's own measured habits. Read this before drafting; it is context for you, the drafting model, not a tool that writes prose itself.",
     inputSchema: { styleId: z.string().describe("Preset id or trained voice id, from list_styles.") },
@@ -120,6 +132,7 @@ server.registerTool(
   "train_style",
   {
     title: "Train a voice from writing samples",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
     description:
       "Analyze one or more of the user's own writing samples (emails, posts, essays, memos: real finished text they wrote or approved) and persist a trained voice profile under that name. Measures sentence length and variance, paragraph rhythm, contraction rate, em-dash and semicolon habits, fragment use, structural entropy (sentence-opener variety and punctuation-mark variety), and recurring phrasing. Call again with the same name and new samples to add more training data to that voice; the new samples blend into its existing measurements rather than replacing them. If the voice may have been renamed since it was created, pass its id (from list_styles) instead so the right voice is targeted regardless of its current name. This never fabricates a voice from a description; it only learns from real text the user supplies.",
     inputSchema: {
@@ -149,11 +162,14 @@ server.registerTool(
   "create_style_from_dials",
   {
     title: "Create a style from dials",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Build a style profile from explicit dial values instead of writing samples: for when the user wants to hand-tune a voice (or doesn't have samples handy). 3 persona dials (formality, warmth, directness, 0-10) plus 8 mechanical dials (0-100, including entropy: how much AI-typical structural regularity to break) that map onto the same measurements train_style extracts from real text, so a dial-built style and a trained voice are the same shape. Call again with the same name to overwrite.",
     inputSchema: {
       name: z.string().describe("Name for this voice."),
-      dials: z.object(dialsSchema),
+      dials: z
+        .object(dialsSchema)
+        .describe("The 11 dial values (3 persona + 8 mechanical) that define this style's voice."),
     },
   },
   async ({ name, dials }) => {
@@ -169,12 +185,15 @@ server.registerTool(
   "update_style",
   {
     title: "Edit an existing custom style",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Rename a trained voice or adjust its dials in place, keeping its id (and default-style pointer) stable. Persona dials (formality, warmth, directness) always apply; the mechanical dials only take effect if the voice has no writing samples (was built from dials, not trained). A sample-trained voice keeps its measured mechanical stats regardless of what's passed here.",
     inputSchema: {
       id: z.string().describe("Id of the trained voice to edit, from list_styles."),
       name: z.string().describe("New (or unchanged) name for this voice."),
-      dials: z.object(dialsSchema),
+      dials: z
+        .object(dialsSchema)
+        .describe("The 11 dial values (3 persona + 8 mechanical) that define this style's voice."),
     },
   },
   async ({ id, name, dials }) => {
@@ -190,6 +209,7 @@ server.registerTool(
   "fork_style",
   {
     title: "Fork a preset into a trained voice",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
     description:
       "Copy a premade preset (e.g. 'pr-review', 'linkedin-post') into a new trained voice under the given name, seeded with the preset's persona dials and drafting guide. The fork is then a normal trained voice: retrain it with train_style from real samples, or hand-tune it with update_style, without touching the original preset.",
     inputSchema: {
@@ -210,8 +230,9 @@ server.registerTool(
   "delete_style",
   {
     title: "Delete a trained voice",
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
     description: "Permanently delete a trained voice profile by id. Does not affect premade presets.",
-    inputSchema: { id: z.string() },
+    inputSchema: { id: z.string().describe("Id of the trained voice to delete, from list_styles.") },
   },
   async ({ id }) => {
     try {
@@ -226,9 +247,12 @@ server.registerTool(
   "set_default_style",
   {
     title: "Set the default style",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Set which style (preset or trained voice) should be used by default for this user going forward, so it doesn't need to be re-specified every time.",
-    inputSchema: { id: z.string() },
+    inputSchema: {
+      id: z.string().describe("Id of the style (preset or trained voice) to set as default, from list_styles."),
+    },
   },
   async ({ id }) => {
     try {
@@ -243,6 +267,7 @@ server.registerTool(
   "check_voice_match",
   {
     title: "Check a draft against a trained voice",
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Compare a piece of drafted text's measured sentence/paragraph rhythm against a trained or custom voice's baseline (sentence length, rhythm variance, paragraph variance, contraction rate, em-dash use, fragment use, question use, structural entropy). Use this after drafting in a voice to check whether the draft actually landed close to it, instead of just eyeballing it. Returns a verdict, a match score, and specific dials that drifted with a plain-language note for each. Only works against trained or custom voices (from train_style, create_style_from_dials, or fork_style), not bare presets, which have no measured baseline; fork_style a preset first if you want to check a draft against one.",
     inputSchema: {
@@ -263,6 +288,7 @@ server.registerTool(
   "check_self_repetition",
   {
     title: "Check a draft for habits repeated across a voice's past pieces",
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Compare a piece of drafted text against a trained voice's own recent training samples for two kinds of self-repetition: opening the same way (\"you've opened this way in 4 of your last 6 pieces\"), and reusing a characteristic phrase across several of them. This is about the writer's own recurring habits, not AI-writing tells; use audit_text for those. Only meaningful for a voice trained from real samples (train_style) with at least 3 recorded samples; dial-tuned or preset-forked voices, or ones with too little history yet, come back with an empty findings list rather than an error. Only the local install tracks sample history today, so a hosted/remote connection may always report zero history. A signal to weigh, same trust-mode spirit as audit_text: never rewrite the draft on the strength of this alone.",
     inputSchema: {
@@ -283,6 +309,7 @@ server.registerTool(
   "audit_text",
   {
     title: "Audit text for AI writing tells",
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Deterministically scan a piece of non-fiction text for common AI-writing tells: banned hype vocabulary, chatbot fingerprints, and structural patterns (uniform paragraph length, stacked transitions, em-dash overuse, rule-of-three compulsion, and more), plus this installer's own banned/custom word lists from add_banned_word/add_custom_word (the 'global' list, merged with a style's own list if styleId is given), plus a repo-local .etincelrc/.etincelrc.json/etincel.config.json if one exists at or above the current directory (dictionary as code, reviewable and versioned). Returns a tier (green/yellow/orange/red), a numeric score, specific findings with severity and location, and a strengths signal (specificity density, concrete-vs-abstract ratio, sentence-rhythm variation). Read strengths too, not just findings: it's the counter-signal against fixing every flagged word into flat, sterile prose. Never a silent rewrite. Use this to show the user what's flagged and why, so they stay in control of any change; only rewrite what they ask you to rewrite.",
     inputSchema: {
@@ -315,6 +342,7 @@ server.registerTool(
   "add_banned_word",
   {
     title: "Add a word to a banned-words list",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Add a term to this installer's own banned-words list, checked by audit_text alongside the built-in AI-tell corpus. Without styleId, this adds to the global list, which applies to every style. With styleId, it only applies when auditing against that specific style, merged on top of the global list. Use this when the user says something like 'add [word] to my banned words list' or 'never let me use [word] again'.",
     inputSchema: {
@@ -338,6 +366,7 @@ server.registerTool(
   "remove_banned_word",
   {
     title: "Remove a word from a banned-words list",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description: "Remove a term from this installer's banned-words list (global, or a specific style's list).",
     inputSchema: {
       word: z.string().describe("The term to unban."),
@@ -360,6 +389,7 @@ server.registerTool(
   "add_custom_word",
   {
     title: "Add a word to a custom (allowed) words list",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Add a term to this installer's own allowed-words list, so audit_text never flags it even if it matches the built-in corpus or a banned word: the 'corporate dictionary' case, e.g. an org's own acronyms or house terms. Without styleId, this adds to the global list. With styleId, it only applies to that specific style, merged on top of the global list. Use this when the user says something like 'add [word] to my custom words list' or 'stop flagging [word], it's one of ours'.",
     inputSchema: {
@@ -383,6 +413,7 @@ server.registerTool(
   "remove_custom_word",
   {
     title: "Remove a word from a custom (allowed) words list",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description: "Remove a term from this installer's allowed-words list (global, or a specific style's list).",
     inputSchema: {
       word: z.string().describe("The term to remove from the allowed list."),
@@ -405,6 +436,7 @@ server.registerTool(
   "list_dictionary",
   {
     title: "List a dictionary's banned and custom words",
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Show the banned-words and custom (allowed) words lists for a scope: the global list (default), or a specific style's list. For a style, also returns the effective merged list (that style's words plus the global ones): what audit_text actually applies when that style is selected.",
     inputSchema: {
@@ -427,6 +459,7 @@ server.registerTool(
   "copy_dictionary",
   {
     title: "Copy a dictionary to another style (or every style)",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Copy one scope's banned/custom word lists onto another scope, overwriting the destination's lists outright. Pass toScope: 'all' to fan a dictionary out to every known style (every trained voice plus every preset id) in one call: the easy way to make one org dictionary apply everywhere. Omit fromStyleId to copy from the global list.",
     inputSchema: {
@@ -452,6 +485,7 @@ server.registerTool(
   "set_style_instructions",
   {
     title: "Set custom instructions for a style",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Save free-text drafting rules layered on top of a style's voice: required elements ('always include a CTA'), audience notes, forbidden topics, format constraints, anything that isn't about sentence rhythm or tone. Overwrites whatever was saved for this scope. Without styleId, this sets the global instructions, which apply to every style. With styleId, it only applies to that specific style, merged after the global instructions (get_style_guide returns the merged result automatically). Use this when the user says something like 'for this style, always end with a CTA' or 'remember: never mention pricing in emails'.",
     inputSchema: {
@@ -475,6 +509,7 @@ server.registerTool(
   "clear_style_instructions",
   {
     title: "Clear custom instructions for a style",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description: "Remove the saved instructions for a scope (global, or a specific style), leaving it empty.",
     inputSchema: {
       styleId: z
@@ -496,6 +531,7 @@ server.registerTool(
   "get_style_instructions",
   {
     title: "Get custom instructions for a style",
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
       "Show the saved instructions for a scope: the global instructions (default), or a specific style's own. For a style, also returns the effective merged text (global plus that style's own) that get_style_guide already folds in automatically.",
     inputSchema: {
