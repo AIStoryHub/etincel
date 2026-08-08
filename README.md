@@ -37,9 +37,11 @@ Beyond the built-in AI-tell corpus, you can maintain your own banned and "always
 ### Claude Code
 
 ```
-/plugin marketplace add /path/to/etincel   # or a git URL once published
+/plugin marketplace add AIStoryHub/etincel
 /plugin install etincel-nonfiction
 ```
+
+Or from a local clone: `/plugin marketplace add /path/to/etincel`.
 
 ### Claude Desktop / other MCP hosts
 
@@ -105,7 +107,7 @@ Exits non-zero if any matched file's tier is at or above `--threshold` (default 
 A GitHub Action wraps the same CLI (see `action.yml`, and `.github/workflows/lint.yml` in this repo for a working example):
 
 ```yaml
-- uses: aistoryhub/etincel@main
+- uses: AIStoryHub/etincel@main
   with:
     patterns: "docs/**/*.md README.md"
     threshold: orange
