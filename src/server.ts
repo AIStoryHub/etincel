@@ -68,18 +68,30 @@ const dialsSchema = {
     ),
 };
 
+const ICONS = [
+  { src: "https://etincel.ai/brand/mark-on-light.svg", mimeType: "image/svg+xml", theme: "light" as const },
+  { src: "https://etincel.ai/brand/mark-on-dark.svg", mimeType: "image/svg+xml", theme: "dark" as const },
+];
+
 const server = new McpServer(
   {
     name: "etincel-nonfiction",
+    title: "Étincel",
     version: "0.1.1",
+    description: "Gives Claude a trained writing voice, and audits drafts for AI writing tells.",
+    websiteUrl: "https://etincel.ai",
+    icons: ICONS,
   },
   {
     instructions:
       "Start with list_styles to see available presets and trained voices, then get_style_guide to pull the full drafting guide for the one you want before writing. After drafting, run audit_text to catch AI writing tells; use train_style or create_style_from_dials to build a new voice from the user's own writing or explicit dial values.",
-    // Declared explicitly (with no resources registered) so resources/list
-    // and resources/read are routed through the SDK's own capability
-    // handling instead of falling through to a generic method-not-found.
-    capabilities: { resources: {} },
+    // NOT declaring a `resources` capability here: unlike the newer SDK used
+    // in web/ (@modelcontextprotocol/server), this SDK's McpServer only
+    // wires up the resources/list and resources/read request handlers
+    // lazily, the first time registerResource() is called. Declaring the
+    // capability without ever calling registerResource() would advertise
+    // support and then fail every resources/list call with "Method not
+    // found", worse than not declaring it at all.
   }
 );
 
