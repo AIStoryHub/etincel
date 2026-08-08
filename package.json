@@ -14,7 +14,7 @@
     ".claude-plugin"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json && mkdir -p dist/data && cp src/data/*.json dist/data/",
+    "build": "tsc -p tsconfig.json && mkdir -p dist/data && cp src/data/*.json dist/data/ && chmod +x dist/cli.js dist/server.js",
     "dev": "tsx src/server.ts",
     "start": "node dist/server.js",
     "smoke": "node dist/smoke.js",
