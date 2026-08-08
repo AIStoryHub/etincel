@@ -35,14 +35,18 @@ runs:
     - name: Run lint
       shell: bash
       working-directory: ${{ github.workspace }}
+      env:
+        ETINCEL_PATTERNS: ${{ inputs.patterns }}
+        ETINCEL_THRESHOLD: ${{ inputs.threshold }}
+        ETINCEL_REGISTER: ${{ inputs.register }}
       run: |
         set -e
         args=(lint)
-        for pattern in ${{ inputs.patterns }}; do
+        for pattern in $ETINCEL_PATTERNS; do
           args+=("$pattern")
         done
-        args+=(--threshold "${{ inputs.threshold }}")
-        if [ -n "${{ inputs.register }}" ]; then
-          args+=(--register "${{ inputs.register }}")
+        args+=(--threshold "$ETINCEL_THRESHOLD")
+        if [ -n "$ETINCEL_REGISTER" ]; then
+          args+=(--register "$ETINCEL_REGISTER")
         fi
         node "${{ github.action_path }}/dist/cli.js" "${args[@]}"
