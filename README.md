@@ -98,11 +98,11 @@ Twelve premade presets ship out of the box: six emotional tones (Direct & Warm, 
 `audit_text` is a pure function under the hood, so it also ships as a CLI, for linting prose outside a chat client (READMEs, docs, PR descriptions in CI):
 
 ```
-npx etincel-nonfiction lint 'docs/**/*.md'
-npx etincel-nonfiction lint README.md --register docs --threshold yellow
+npx etincel lint 'docs/**/*.md'
+npx etincel lint README.md --register docs --threshold yellow
 ```
 
-Exits non-zero if any matched file's tier is at or above `--threshold` (default `orange`). `.md`/`.mdx` files default to the `docs` register automatically (suppresses the Markdown-structure false positives, since a real heading isn't a chatbot tell); pass `--register` to override. Add `--json` for a machine-readable report. Run `npx etincel-nonfiction lint --help` for the full option list.
+Exits non-zero if any matched file's tier is at or above `--threshold` (default `orange`). `.md`/`.mdx` files default to the `docs` register automatically (suppresses the Markdown-structure false positives, since a real heading isn't a chatbot tell); pass `--register` to override. Add `--json` for a machine-readable report. Run `npx etincel lint --help` for the full option list.
 
 A GitHub Action wraps the same CLI (see `action.yml`, and `.github/workflows/lint.yml` in this repo for a working example):
 

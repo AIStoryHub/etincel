@@ -24,8 +24,8 @@ async function main() {
   ]);
   console.log(JSON.stringify(trained, null, 2));
 
-  section("set_default_style('smoke-test-voice')");
-  console.log(JSON.stringify(await setDefaultStyleTool("smoke-test-voice"), null, 2));
+  section(`set_default_style('${trained.id}')`);
+  console.log(JSON.stringify(await setDefaultStyleTool(trained.id), null, 2));
 
   section("audit_text on AI-slop-shaped text");
   const slop = `In today's rapidly evolving landscape of technology, it is worth noting that many experts agree that leveraging cutting-edge solutions can unlock a myriad of opportunities. Furthermore, organizations that embrace this transformative journey will find themselves well-positioned for success. Moreover, the benefits are seamless, robust, and holistic. As an AI language model, I don't have access to real-time data, but I hope this helps!`;

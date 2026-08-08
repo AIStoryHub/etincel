@@ -265,7 +265,7 @@ export function mergeStats(perSample: TextStats[]): TextStats {
   function mergeByPresence(key: "topBigrams" | "topWords"): string[] {
     const presenceCounts = new Map<string, number>();
     for (const s of perSample) {
-      for (const token of s[key]) presenceCounts.set(token, (presenceCounts.get(token) ?? 0) + 1);
+      for (const token of s[key] ?? []) presenceCounts.set(token, (presenceCounts.get(token) ?? 0) + 1);
     }
     return [...presenceCounts.entries()]
       .sort((a, b) => b[1] - a[1])
