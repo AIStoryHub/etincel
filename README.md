@@ -1,5 +1,19 @@
 # Étincel: Non-Fiction Writing Connector
 
+```
+      ___           ___                       ___           ___           ___           ___
+     /\  \         /\  \          ___        /\__\         /\  \         /\  \         /\__\
+    /::\  \        \:\  \        /\  \      /::|  |       /::\  \       /::\  \       /:/  /
+   /:/\:\  \        \:\  \       \:\  \    /:|:|  |      /:/\:\  \     /:/\:\  \     /:/  /
+  /::\~\:\  \       /::\  \      /::\__\  /:/|:|  |__   /:/  \:\  \   /::\~\:\  \   /:/  /
+ /:/\:\ \:\__\     /:/\:\__\  __/:/\/__/ /:/ |:| /\__\ /:/__/ \:\__\ /:/\:\ \:\__\ /:/__/
+ \:\~\:\ \/__/    /:/  \/__/ /\/:/  /    \/__|:|/:/  / \:\  \  \/__/ \:\~\:\ \/__/ \:\  \
+  \:\ \:\__\     /:/  /      \::/__/         |:/:/  /   \:\  \        \:\ \:\__\    \:\  \
+   \:\ \/__/     \/__/        \:\__\         |::/  /     \:\  \        \:\ \/__/     \:\  \
+    \:\__\                     \/__/         /:/  /       \:\__\        \:\__\        \:\__\
+     \/__/                                   \/__/         \/__/         \/__/         \/__/
+```
+
 [![mcpscore audit](https://mcpscore.dev/api/v1/servers/badge.svg?url=https%3A%2F%2Fetincel.ai%2Fapi%2Fmcp)](https://mcpscore.dev/s?url=https%3A%2F%2Fetincel.ai%2Fapi%2Fmcp)
 
 <sub><em>This audits the hosted remote server (`etincel.ai/api/mcp`), not the local/stdio engine in this repo; the two expose the same tools but run as separate deployments.</em></sub>
