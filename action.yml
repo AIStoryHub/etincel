@@ -1,5 +1,5 @@
 name: "Étincel Lint"
-description: "Deterministic AI-writing-tells audit for prose (README, docs, blog posts). No network call, no model call, same 494-check corpus as the audit_text MCP tool."
+description: "Deterministic AI-writing-tells audit for prose. No network or model calls; same 494-check corpus as the audit_text MCP tool."
 author: "Jean-Philippe LeBlanc"
 branding:
   icon: "edit-3"
