@@ -33,7 +33,7 @@ AI-drafted prose has a recognizable shape: uniform paragraphs, hedged authority,
   - `train_style`: learn a voice from your own writing samples (sentence rhythm, contraction rate, em-dash habits, paragraph variance, recurring phrasing: measured, not guessed)
   - `create_style_from_dials`: build a style from explicit formality/warmth/directness and mechanical dials instead of samples
   - `update_style`: rename a trained voice or adjust its dials in place
-  - `fork_style`: copy a preset's dials and guide into a new trained voice you can retrain or hand-tune
+  - `fork_style`: copy a preset's dials and guide into a new trained voice you can retrain or hand-tune, or fork another installer's style once they've published it publicly on the hosted gallery (addressed as `handle/slug`, e.g. `jpleblanc/blunt-memo`, the same address shown on its public page at `etincel.ai/v/handle/slug`); a public-style fork makes one network call to `etincel.ai` to fetch it, a preset fork never leaves this install
   - `delete_style`: permanently remove a trained voice
   - `set_default_style`: remember which style to use without repeating yourself
   - `check_voice_match`: compare a draft's measured rhythm against a trained voice's baseline
@@ -46,7 +46,7 @@ AI-drafted prose has a recognizable shape: uniform paragraphs, hedged authority,
   - `set_style_instructions` / `clear_style_instructions` / `get_style_instructions`: save, remove, or read free-text drafting rules for a scope (required elements, forbidden topics, format constraints), merged into `get_style_guide` the same way dictionaries merge into `audit_text`
 - **A Claude Code / Claude Desktop skill** (`skills/etincel-nonfiction/`) that uses those tools when you're drafting or revising non-fiction prose of any meaningful length.
 
-Trained voices, dictionaries, and your default style live locally in `~/.etincel/`: nothing is sent anywhere. `audit_text` is plain deterministic code (string analysis + a curated corpus of AI-writing tells), not a model call.
+Trained voices, dictionaries, and your default style live locally in `~/.etincel/`: nothing is sent anywhere. `audit_text` is plain deterministic code (string analysis + a curated corpus of AI-writing tells), not a model call. The one exception is forking a *public* style via `fork_style`, which fetches (never sends) that style's guide from `etincel.ai`'s public gallery; forking a preset, or anything else in this list, still touches the network not at all.
 
 ### Custom dictionaries
 

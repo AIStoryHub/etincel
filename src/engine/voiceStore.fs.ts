@@ -15,7 +15,7 @@ import { presetGuideText, type Preset } from "./presets.js";
 import { extractOpener } from "./selfRepetition.js";
 import { sanitizeFreeformText } from "./sanitizeText.js";
 import { generateShortId } from "./shortId.js";
-import type { VoiceStore, VoiceProfile, SampleFingerprint } from "./voiceStore.js";
+import type { VoiceStore, VoiceProfile, SampleFingerprint, StyleSeed } from "./voiceStore.js";
 
 interface Config {
   defaultStyleId?: string;
@@ -171,6 +171,31 @@ async function forkFromPreset(preset: Preset, rawName: string): Promise<VoicePro
   return profile;
 }
 
+async function forkFromGuide(seed: StyleSeed, rawName: string): Promise<VoiceProfile> {
+  ensureDirs();
+  const name = sanitizeFreeformText(rawName);
+  const stats = dialsToStats(DEFAULT_MECHANICAL_DIALS);
+  const existing = await findVoiceByName(name);
+  const id = existing?.id ?? randomUUID();
+  const shortId = existing?.shortId ?? (await uniqueShortId());
+  const now = new Date().toISOString();
+  const profile: VoiceProfile = {
+    id,
+    shortId,
+    name,
+    createdAt: existing?.createdAt ?? now,
+    updatedAt: now,
+    sampleCount: 0,
+    stats,
+    guide: seed.guide,
+    formality: seed.formality,
+    warmth: seed.warmth,
+    directness: seed.directness,
+  };
+  writeFileSync(join(VOICES_DIR, `${id}.json`), JSON.stringify(profile, null, 2), "utf8");
+  return profile;
+}
+
 async function updateVoice(id: string, rawName: string, dials: StyleDials): Promise<VoiceProfile> {
   ensureDirs();
   const name = sanitizeFreeformText(rawName);
@@ -268,6 +293,7 @@ export const fsVoiceStore: VoiceStore = {
   createFromDials,
   updateVoice,
   forkFromPreset,
+  forkFromGuide,
   loadVoice,
   listVoices,
   deleteVoice,

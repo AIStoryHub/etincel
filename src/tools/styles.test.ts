@@ -167,8 +167,55 @@ test("forkStyleTool seeds a trained voice from a preset's persona dials and guid
   assert.equal(retrained.sampleCount, 1);
 });
 
-test("forkStyleTool rejects an unknown preset id", async () => {
-  await assert.rejects(() => forkStyleTool("not-a-real-preset", "Whatever"), /no preset found/i);
+test("forkStyleTool rejects an unknown preset id with no publicStyleSource configured", async () => {
+  await assert.rejects(() => forkStyleTool("not-a-real-preset", "Whatever"), /no preset or published style found/i);
+});
+
+test("forkStyleTool forks a published community style via its handle/slug address", async () => {
+  const seed = { guide: "Write like this. Short sentences.", formality: 3, warmth: 7, directness: 8 };
+  const { forkStyleTool: forkWithPublicSource } = createStylesTools(fsVoiceStore, undefined, undefined, {
+    async getPublicStyle(handle, slug) {
+      return handle === "jpleblanc" && slug === "blunt-memo" ? seed : undefined;
+    },
+  });
+
+  const forked = await forkWithPublicSource("jpleblanc/blunt-memo", "My Blunt Memo");
+  assert.match(forked.id, UUID_RE);
+  assert.equal(forked.forkedFrom, "jpleblanc/blunt-memo");
+  assert.equal(forked.guide, seed.guide);
+
+  const guide = await getStyleGuideTool(forked.id);
+  assert.equal(guide.kind, "trained");
+  if (guide.kind === "trained") {
+    assert.equal(guide.dials.formality, seed.formality);
+    assert.equal(guide.dials.warmth, seed.warmth);
+    assert.equal(guide.dials.directness, seed.directness);
+    assert.equal(guide.sampleCount, 0);
+  }
+});
+
+test("forkStyleTool rejects a well-formed handle/slug ref that doesn't resolve to a published style", async () => {
+  const { forkStyleTool: forkWithPublicSource } = createStylesTools(fsVoiceStore, undefined, undefined, {
+    async getPublicStyle() {
+      return undefined;
+    },
+  });
+  await assert.rejects(
+    () => forkWithPublicSource("nobody/nothing-here", "Whatever"),
+    /no preset or published style found/i
+  );
+});
+
+test("forkStyleTool never treats a bare preset id as a public-style ref", async () => {
+  // No "/" in the id, so a configured publicStyleSource that would answer
+  // anything is never even consulted; presetSource still resolves it.
+  const { forkStyleTool: forkWithPublicSource } = createStylesTools(fsVoiceStore, undefined, undefined, {
+    async getPublicStyle() {
+      throw new Error("should not be called for a bare preset id");
+    },
+  });
+  const forked = await forkWithPublicSource("linkedin-post", "My LinkedIn Voice");
+  assert.equal(forked.forkedFrom, "linkedin-post");
 });
 
 let matchVoiceId: string;

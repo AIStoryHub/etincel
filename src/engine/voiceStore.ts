@@ -49,6 +49,20 @@ export interface VoiceProfile {
   history?: SampleFingerprint[];
 }
 
+/** The minimum needed to seed a new trained voice from an existing style's
+ * guide and persona: forkFromPreset and forkFromGuide both reset mechanics
+ * to defaults (keeping only entropy for a preset) rather than trying to
+ * preserve the source's exact measured rhythm, since a published public
+ * style never exposes its exact mechanical dials in the first place, only
+ * formality/warmth/directness (see the hosted web app's PublicStyle type
+ * in web/lib/publishStore.neon.ts). */
+export interface StyleSeed {
+  guide: string;
+  formality: number;
+  warmth: number;
+  directness: number;
+}
+
 /**
  * Storage for trained voices and per-installer config. The local (stdio)
  * server backs this with a file under ~/.etincel; the hosted (Vercel) server
@@ -81,6 +95,12 @@ export interface VoiceStore {
    * description), so the fork keeps the preset's drafting instructions
    * until the user retrains it from real samples or edits the dials. */
   forkFromPreset(preset: Preset, name: string): Promise<VoiceProfile>;
+  /** Seeds a new trained voice from a published public style (see
+   * publicStyleSource.ts): another installer's voice, or a preset,
+   * addressed by its public "handle/slug" rather than a local id. Same
+   * shape as forkFromPreset, guide folded in verbatim, mechanics reset to
+   * defaults, since that's all a public style ever exposes. */
+  forkFromGuide(seed: StyleSeed, name: string): Promise<VoiceProfile>;
   loadVoice(id: string): Promise<VoiceProfile | undefined>;
   listVoices(): Promise<VoiceProfile[]>;
   deleteVoice(id: string): Promise<boolean>;

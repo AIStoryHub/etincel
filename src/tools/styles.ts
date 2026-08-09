@@ -3,12 +3,14 @@ import { statsToDials, DEFAULT_PERSONA_DIALS, type StyleDials } from "../engine/
 import { compareToVoice } from "../engine/matchVoice.js";
 import { detectSelfRepetition } from "../engine/selfRepetition.js";
 import { GLOBAL_INSTRUCTIONS_SCOPE, mergeInstructions, type InstructionsStore } from "../engine/instructionsStore.js";
+import { parsePublicStyleRef, type PublicStyleSource } from "../engine/publicStyleSource.js";
 import type { VoiceStore } from "../engine/voiceStore.js";
 
 export function createStylesTools(
   store: VoiceStore,
   presetSource: PresetSource = staticPresetSource,
-  instructionsStore?: InstructionsStore
+  instructionsStore?: InstructionsStore,
+  publicStyleSource?: PublicStyleSource
 ) {
   /** Custom instructions layered on top of a style's voice: global notes
    * plus this style's own, same merge order as get_style_instructions. */
@@ -136,17 +138,38 @@ export function createStylesTools(
 
   async function forkStyleTool(presetId: string, name: string) {
     const preset = await presetSource.getPreset(presetId);
-    if (!preset) {
-      throw new Error(`No preset found for "${presetId}". Call list_styles to see available presets.`);
+    if (preset) {
+      const profile = await store.forkFromPreset(preset, name);
+      return {
+        id: profile.id,
+        shortId: profile.shortId,
+        name: profile.name,
+        guide: profile.guide,
+        forkedFrom: preset.id,
+      };
     }
-    const profile = await store.forkFromPreset(preset, name);
-    return {
-      id: profile.id,
-      shortId: profile.shortId,
-      name: profile.name,
-      guide: profile.guide,
-      forkedFrom: preset.id,
-    };
+
+    // Not a preset id: try it as a published community style's public
+    // address ("handle/slug", e.g. "jpleblanc/blunt-memo"), if this store
+    // has a way to look those up at all.
+    if (publicStyleSource) {
+      const ref = parsePublicStyleRef(presetId);
+      const seed = ref && (await publicStyleSource.getPublicStyle(ref.handle, ref.slug));
+      if (seed) {
+        const profile = await store.forkFromGuide(seed, name);
+        return {
+          id: profile.id,
+          shortId: profile.shortId,
+          name: profile.name,
+          guide: profile.guide,
+          forkedFrom: presetId,
+        };
+      }
+    }
+
+    throw new Error(
+      `No preset or published style found for "${presetId}". Call list_styles to see available presets, or use a published style's "handle/slug" address from its public page.`
+    );
   }
 
   async function checkVoiceMatchTool(id: string, text: string) {

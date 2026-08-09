@@ -4,6 +4,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { createStylesTools } from "./tools/styles.js";
 import { fsVoiceStore } from "./engine/voiceStore.fs.js";
+import { createHttpPublicStyleSource } from "./engine/httpPublicStyleSource.js";
 import { auditTextTool } from "./tools/audit.js";
 import { findRepoConfig } from "./engine/repoConfig.js";
 import { fsDictionaryStore } from "./engine/dictionaryStore.fs.js";
@@ -22,7 +23,7 @@ const {
   setDefaultStyleTool,
   checkVoiceMatchTool,
   checkSelfRepetitionTool,
-} = createStylesTools(fsVoiceStore, undefined, fsInstructionsStore);
+} = createStylesTools(fsVoiceStore, undefined, fsInstructionsStore, createHttpPublicStyleSource());
 
 const {
   addBannedWordTool,
@@ -220,12 +221,14 @@ server.registerTool(
 server.registerTool(
   "fork_style",
   {
-    title: "Fork a preset into a trained voice",
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+    title: "Fork a preset or published community style into a trained voice",
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
     description:
-      "Copy a premade preset (e.g. 'pr-review', 'linkedin-post') into a new trained voice under the given name, seeded with the preset's persona dials and drafting guide. The fork is then a normal trained voice: retrain it with train_style from real samples, or hand-tune it with update_style, without touching the original preset.",
+      "Copy a style into a new trained voice under the given name, seeded with its persona dials and drafting guide. Two kinds of source: a premade preset (e.g. 'pr-review', 'linkedin-post'), or another installer's style published publicly on the hosted gallery, addressed as \"handle/slug\" (e.g. \"jpleblanc/blunt-memo\", the same address shown on its public page at etincel.ai/v/handle/slug). A public-style fork makes one network call to etincel.ai to fetch it; a preset fork never leaves this install. The fork is then a normal trained voice: retrain it with train_style from real samples, or hand-tune it with update_style, without touching the original.",
     inputSchema: {
-      presetId: z.string().describe("Id of the preset to fork, from list_styles."),
+      presetId: z
+        .string()
+        .describe('Id of the preset to fork (from list_styles), or a published style\'s "handle/slug" address.'),
       name: z.string().describe("Name for the new trained voice."),
     },
   },
