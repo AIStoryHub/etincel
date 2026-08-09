@@ -1,0 +1,115 @@
+version: 2.1
+
+description: >
+  Deterministic AI-writing-tells audit for prose. No network or model calls;
+  same 494-check corpus as the audit_text MCP tool and the etincel CLI.
+
+display:
+  home_url: https://github.com/AIStoryHub/etincel
+  source_url: https://github.com/AIStoryHub/etincel
+
+executors:
+  default:
+    docker:
+      - image: cimg/node:20.20
+
+commands:
+  lint:
+    description: >
+      Build Étincel from source and run `etincel lint` against the checked-out
+      project. There's no published npm package yet, so this clones
+      AIStoryHub/etincel at a pinned ref and runs its CLI in place, the same
+      way action.yml checks out and builds its own copy for the GitHub Action.
+    parameters:
+      patterns:
+        type: string
+        default: "**/*.md"
+        description: >
+          Space-separated glob pattern(s) to lint, relative to the checked-out
+          project (e.g. "docs/**/*.md README.md").
+      threshold:
+        type: enum
+        enum: ["green", "yellow", "orange", "red"]
+        default: "orange"
+        description: "Minimum tier that fails the check."
+      register:
+        type: string
+        default: ""
+        description: >
+          Register to calibrate strictness against: email, blog, memo, essay,
+          social, docs, general. Leave unset to let .md/.mdx files default to
+          "docs" automatically.
+      ref:
+        type: string
+        default: "main"
+        description: "Git ref (branch or tag) of AIStoryHub/etincel to build and run."
+    steps:
+      - run:
+          name: "Étincel: build <<parameters.ref>>"
+          environment:
+            ETINCEL_REF: <<parameters.ref>>
+          command: |
+            set -e
+            git clone --depth 1 --branch "$ETINCEL_REF" \
+              https://github.com/AIStoryHub/etincel.git /tmp/etincel-orb \
+              || git clone https://github.com/AIStoryHub/etincel.git /tmp/etincel-orb
+            cd /tmp/etincel-orb
+            git rev-parse --abbrev-ref HEAD | grep -qx "$ETINCEL_REF" || git checkout "$ETINCEL_REF"
+            npm ci
+      - run:
+          name: "Étincel: lint"
+          environment:
+            ETINCEL_PATTERNS: <<parameters.patterns>>
+            ETINCEL_THRESHOLD: <<parameters.threshold>>
+            ETINCEL_REGISTER: <<parameters.register>>
+          command: |
+            set -e
+            args=(lint)
+            for pattern in $ETINCEL_PATTERNS; do
+              args+=("$pattern")
+            done
+            args+=(--threshold "$ETINCEL_THRESHOLD")
+            if [ -n "$ETINCEL_REGISTER" ]; then
+              args+=(--register "$ETINCEL_REGISTER")
+            fi
+            node /tmp/etincel-orb/dist/cli.js "${args[@]}"
+
+jobs:
+  lint:
+    description: "Check out the project and run `etincel lint` against it."
+    executor: default
+    parameters:
+      patterns:
+        type: string
+        default: "**/*.md"
+      threshold:
+        type: enum
+        enum: ["green", "yellow", "orange", "red"]
+        default: "orange"
+      register:
+        type: string
+        default: ""
+      ref:
+        type: string
+        default: "main"
+    steps:
+      - checkout
+      - lint:
+          patterns: <<parameters.patterns>>
+          threshold: <<parameters.threshold>>
+          register: <<parameters.register>>
+          ref: <<parameters.ref>>
+
+examples:
+  basic_lint:
+    description: "Lint README and docs on every pipeline run."
+    usage:
+      version: 2.1
+      orbs:
+        etincel: aistoryhub/etincel@1.0.0
+      workflows:
+        lint:
+          jobs:
+            - etincel/lint:
+                patterns: "docs/**/*.md README.md"
+                threshold: orange
