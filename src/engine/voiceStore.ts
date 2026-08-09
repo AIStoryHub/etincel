@@ -23,6 +23,11 @@ export interface VoiceProfile {
    * renames. Never derived from `name`, so it never collides with, or
    * drifts from, whatever the voice is currently called. */
   id: string;
+  /** Short, memorable, human-typeable stand-in for `id` (e.g. "K7M2X"),
+   * shown in the UI in place of the raw UUID. Assigned once at creation
+   * alongside `id` and stable across renames for the same reason. See
+   * shortId.ts. */
+  shortId: string;
   name: string;
   createdAt: string;
   updatedAt: string;
