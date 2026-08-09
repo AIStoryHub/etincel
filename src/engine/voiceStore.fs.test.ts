@@ -174,6 +174,19 @@ test("trainVoice's id is stable across a rename, decoupled from the current name
   assert.notEqual(underOldName.id, created.id);
 });
 
+test("trainVoice assigns a 5-character shortId, stable across a rename and distinct per voice", async () => {
+  const SHORT_ID_RE = /^[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{5}$/;
+  const a = await trainVoice("Short Id Voice A", ["A first sample for voice A."]);
+  const b = await trainVoice("Short Id Voice B", ["A first sample for voice B."]);
+  assert.match(a.shortId, SHORT_ID_RE);
+  assert.match(b.shortId, SHORT_ID_RE);
+  assert.notEqual(a.shortId, b.shortId);
+
+  await updateVoice(a.id, "Renamed Short Id Voice", SAMPLE_DIALS);
+  const retrained = await trainVoice("Renamed Short Id Voice", ["A second sample after the rename."], a.id);
+  assert.equal(retrained.shortId, a.shortId);
+});
+
 test("trainVoice rejects a targetId with no existing voice", async () => {
   await assert.rejects(
     () => trainVoice("Some Name", ["A sample."], "no-such-voice-id"),

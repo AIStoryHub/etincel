@@ -67,6 +67,7 @@ export function createStylesTools(
     if (voice) {
       return {
         id: voice.id,
+        shortId: voice.shortId,
         kind: "trained" as const,
         name: voice.name,
         guide: voice.guide,
@@ -90,6 +91,7 @@ export function createStylesTools(
     const profile = await store.trainVoice(name, samples, id);
     return {
       id: profile.id,
+      shortId: profile.shortId,
       name: profile.name,
       sampleCount: profile.sampleCount,
       guide: profile.guide,
@@ -100,6 +102,7 @@ export function createStylesTools(
     const profile = await store.createFromDials(name, dials);
     return {
       id: profile.id,
+      shortId: profile.shortId,
       name: profile.name,
       guide: profile.guide,
     };
@@ -109,6 +112,7 @@ export function createStylesTools(
     const profile = await store.updateVoice(id, name, dials);
     return {
       id: profile.id,
+      shortId: profile.shortId,
       name: profile.name,
       guide: profile.guide,
     };
@@ -138,6 +142,7 @@ export function createStylesTools(
     const profile = await store.forkFromPreset(preset, name);
     return {
       id: profile.id,
+      shortId: profile.shortId,
       name: profile.name,
       guide: profile.guide,
       forkedFrom: preset.id,
