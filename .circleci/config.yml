@@ -1,0 +1,74 @@
+version: 2.1
+
+# Mirrors .github/workflows/ci.yml and lint.yml, plus a validation pass on
+# orb.yml (the CircleCI equivalent of action.yml: a packaged, distributable
+# way for other projects to add Étincel's lint to their own pipeline).
+
+executors:
+  node:
+    docker:
+      - image: cimg/node:20.20
+
+commands:
+  install:
+    description: "Install npm dependencies, with caching."
+    steps:
+      - restore_cache:
+          keys:
+            - npm-deps-v1-{{ checksum "package-lock.json" }}
+      - run: npm ci
+      - save_cache:
+          key: npm-deps-v1-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+
+jobs:
+  test:
+    executor: node
+    steps:
+      - checkout
+      - install
+      - run: npx tsc -p tsconfig.json --noEmit
+      - run: npm test
+      - run: npm run build
+
+  lint-prose:
+    executor: node
+    steps:
+      - checkout
+      - install
+      - run: npm run build
+      # Dogfoods this repo's own CLI against its own prose (README.md and
+      # docs/*.md), the same scope as .github/workflows/lint.yml. Non-blocking
+      # for the same reason that workflow uses continue-on-error: true, this
+      # exists to surface findings, not to gate merges on prose that hasn't
+      # been cleaned up against it yet.
+      - run:
+          name: "Étincel self-lint (README + docs)"
+          command: node dist/cli.js lint README.md docs/*.md --threshold orange || true
+
+  validate-orb:
+    executor: node
+    steps:
+      - checkout
+      - run:
+          name: Install CircleCI CLI
+          command: curl -fLSs https://raw.githubusercontent.com/CircleCI-Public/circleci-cli/main/install.sh | bash
+      - run:
+          name: Validate orb.yml
+          command: |
+            if [ -z "$CIRCLE_TOKEN" ]; then
+              echo "No CIRCLE_TOKEN project environment variable is set, so this check is skipped."
+              echo "'circleci orb validate' calls the CircleCI API and needs a token: create one at"
+              echo "https://app.circleci.com/settings/user/tokens and add it as CIRCLE_TOKEN under"
+              echo "Project Settings > Environment Variables to turn this into a real check."
+              exit 0
+            fi
+            circleci orb validate orb.yml
+
+workflows:
+  ci:
+    jobs:
+      - test
+      - lint-prose
+      - validate-orb

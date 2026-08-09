@@ -133,6 +133,22 @@ A GitHub Action wraps the same CLI (see `action.yml`, and `.github/workflows/lin
     threshold: orange
 ```
 
+A CircleCI orb wraps the same CLI (see `orb.yml`, and `.circleci/config.yml` in this repo for a working example). Once it's published to the CircleCI Orb Registry, usage will look like:
+
+```yaml
+version: 2.1
+orbs:
+  etincel: aistoryhub/etincel@1.0.0
+workflows:
+  lint:
+    jobs:
+      - etincel/lint:
+          patterns: "docs/**/*.md README.md"
+          threshold: orange
+```
+
+It isn't published yet. Until then, copy the `commands.lint` and `jobs.lint` blocks from `orb.yml` into your own `.circleci/config.yml`.
+
 ### Repo-local config
 
 A team's banned/allowed words don't have to live only in an account setting. Drop a `.etincelrc` (or `.etincelrc.json` / `etincel.config.json`) at the repo root:
