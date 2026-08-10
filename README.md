@@ -87,9 +87,9 @@ Build first: `npm install && npm run build`.
 
 ### Remote (hosted, multi-tenant)
 
-A hosted version is also available at `https://etincel.ai/api/mcp`, exposing
-the same tools over Streamable HTTP with per-account auth instead of stdio.
-Point any MCP client at it directly:
+A hosted version is also available at [etincel.ai](https://etincel.ai), exposing
+the same tools over Streamable HTTP (`https://etincel.ai/api/mcp`) with
+per-account auth instead of stdio. Point any MCP client at it directly:
 
 ```json
 {
