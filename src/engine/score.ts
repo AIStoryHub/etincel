@@ -94,6 +94,34 @@ export type Register = "email" | "blog" | "memo" | "essay" | "social" | "docs" |
  * detector id (STRUCTURAL_PATTERNS entries) when that register is passed. */
 const REGISTER_DETECTOR_SUPPRESSIONS: Partial<Record<Register, string[]>> = {
   docs: ["markdown-heading-leak", "markdown-bold-in-prose", "bulleted-bold-term", "title-case-header"],
+  // Measured independently against a labeled blog corpus (30 pre-2021
+  // Rust/Electron blog posts vs. two AI-effort tiers, see the "blog" entry
+  // in REGISTER_TERM_SUPPRESSIONS below): markdown-heading-leak fired on
+  // 100% of the positive class and 86% of the negative class (lift 1.16,
+  // essentially non-discriminating noise), because blog posts use ##
+  // subheadings as legitimate structure the same way docs do. The other
+  // three docs suppressions are NOT carried over here: markdown-bold-in-prose
+  // showed real separation on this corpus (lift 1.66) and bulleted-bold-term/
+  // title-case-header never cleared the 4-hit minimum either way, so there's
+  // no data to suppress them on.
+  blog: ["markdown-heading-leak"],
+  // Measured independently against a labeled memo corpus (30 pre-2021
+  // Rust compiler-team meeting minutes and Go proposal docs vs. two AI-effort
+  // tiers): markdown-heading-leak fired on 100% of BOTH classes (lift
+  // exactly 1.0, the most non-discriminating result yet across three
+  // registers), because meeting-minutes and proposal docs use ## headers
+  // as structure the same way docs and blog prose do. No other detector
+  // suppression was justified: markdown-bold-in-prose showed real
+  // separation here too (lift 2.74), and the other two docs suppressions
+  // never cleared the 4-hit minimum either way.
+  memo: ["markdown-heading-leak"],
+  // Measured independently against a labeled essay corpus (24 pre-2021 Rust
+  // RFCs and Python PEPs vs. two AI-effort tiers): markdown-heading-leak
+  // still non-discriminating here (posRate 1.0, negRate 0.71, lift 1.4),
+  // though weaker than docs/blog/memo's near-1.0 lift, RFC/PEP section
+  // headers are legitimate structure the same way. markdown-bold-in-prose
+  // again showed real separation (lift 3.9) and was not suppressed.
+  essay: ["markdown-heading-leak"],
 }
 
 /** Dictionary terms that measurably fire *more* on real human writing than
@@ -109,6 +137,79 @@ const REGISTER_DETECTOR_SUPPRESSIONS: Partial<Record<Register, string[]>> = {
  * safer than trusting its magnitude. Revisit as the eval corpus grows. */
 const REGISTER_TERM_SUPPRESSIONS: Partial<Record<Register, string[]>> = {
   docs: ["in order to", "when it comes to", "significant", "propagate", "domain", "expedite", "framework", "validate"],
+  // Measured independently against a labeled blog corpus (30 pre-2021
+  // Rust/Electron blog posts vs. two AI-effort tiers: 15 careful, 15
+  // low-effort). All four showed negativeRate > positiveRate at register
+  // "blog", each with the minimum 4+ hits this project trusts direction on.
+  // Notably NOT the same list as docs: "significant" is inverted for docs
+  // but fires MORE on the AI class here (lift 2.2, kept, not suppressed),
+  // confirming genre-specific measurement isn't optional. The same word can
+  // point opposite directions in two registers.
+  blog: ["ecosystem", "highlight", "manifest", "additionally"],
+  // Measured independently against a labeled memo corpus (30 pre-2021 Rust
+  // compiler-team meeting minutes and Go proposal docs vs. two AI-effort
+  // tiers). All three showed negativeRate > positiveRate at register
+  // "memo", each with the minimum 4+ hits this project trusts direction on.
+  // "when it comes to" is ALSO suppressed for docs, an independent
+  // confirmation on a different corpus rather than an assumption carried
+  // over; "mechanism" and "similarly" are new to this register.
+  memo: ["mechanism", "similarly", "when it comes to"],
+  // Measured independently against a labeled essay corpus (24 pre-2021 Rust
+  // RFCs and Python PEPs vs. two AI-effort tiers). All five showed
+  // negativeRate > positiveRate at register "essay", each 4+ hits.
+  // "propagate" is ALSO suppressed for docs and "similarly"/"additionally"
+  // for memo/blog respectively, independent confirmations on unrelated
+  // corpora, not assumptions carried over. "significant", by contrast, is
+  // inverted for docs but fires MORE on the AI class here too (lift 4.63,
+  // kept, same direction blog independently found), the same word pointing
+  // opposite ways depending on register, again.
+  essay: ["propagate", "evaluate", "moreover", "similarly", "additionally"],
+}
+
+/** Per-register weight for each whole-piece rhythm finding (see
+ * detectWholePieceRhythm), applied on top of the density-based score.
+ * Registers without their own entry fall back to DEFAULT_RHYTHM_WEIGHT, the
+ * value the "docs" register itself uses, chosen there because higher values
+ * raised false-positive rate rather than improving separation (see
+ * src/data/SOURCES.md's 2026-08-10 entry). Each register that gets its own
+ * entry here earned it via its own weight sweep against its own labeled
+ * corpus, same stopping rule: more separation, not just a higher number. */
+const DEFAULT_RHYTHM_WEIGHT = 14
+const REGISTER_RHYTHM_WEIGHT: Partial<Record<Register, number>> = {
+  // Swept 8/10/14/16/18/22 against the labeled blog corpus. FPR and recall
+  // held completely flat (0.276 / 0.7) across 14-18, with AUC creeping up
+  // only 0.006 across that whole range (0.820 to 0.826), well inside the
+  // ~0.2-wide bootstrap CI, so no register-specific value is justified.
+  // AUC then dropped and FPR rose together at 22, the same overfitting
+  // signature that capped docs' own sweep. Set explicitly, not left to fall
+  // through to DEFAULT_RHYTHM_WEIGHT, so it's clear this was measured and
+  // confirmed for blog, not silently inherited from docs.
+  blog: 14,
+  // Swept 6/8/9/10/11/12/13/14/18/22 against the labeled memo corpus, a
+  // different shape than blog's sweep: FPR and AUC climbed together the
+  // whole way, with no flat plateau, so the docs/blog default of 14 was NOT
+  // right here. FPR held flat at 0.4 across 11-13 while recall reached 1.0
+  // exactly at 13 (up from 0.967 at 11-12) and AUC kept improving (0.898 to
+  // 0.909), the best point on the curve. At 14, FPR jumped straight to 0.5
+  // for only +0.008 AUC, with recall already saturated at 1.0 since 13, so
+  // every gain past that point is pure false-positive inflation with
+  // nothing left to buy on the recall side. 13, not 14: a concrete case for
+  // why each register needs its own sweep rather than reusing the docs
+  // default's specific number, even after two registers separately
+  // confirmed the SAME default worked for them.
+  memo: 13,
+  // Swept 8/10/14/18/22/24/26/30 against the labeled essay corpus. A third
+  // distinct shape: FPR climbed steadily with weight (0.375 at 8 up to
+  // 0.500 at the docs/blog/default-adjacent 14), then flattened at 0.542
+  // across 18-22 while AUC kept improving in that flat window (0.893 to
+  // 0.900) and recall saturated at 1.0 starting at 18. 22 is the last
+  // weight before FPR starts climbing again (0.625 at 24), and 30
+  // eventually shows the same overfitting signature as the other two
+  // registers: AUC actually drops (0.914 at 26 to 0.890 at 30) while FPR
+  // keeps rising. 22, not 13 or 14: essay's own sweep landed somewhere
+  // between blog's "confirmed the default" and memo's "found a lower
+  // number", its own third distinct answer.
+  essay: 22,
 }
 
 function escapeRegExp(value: string): string {
@@ -511,18 +612,8 @@ export function auditText(text: string, options: AuditOptions = {}): AuditResult
   const score = weightedSum > 0 ? Math.round((100 * density) / (density + DENSITY_MIDPOINT)) : 0
 
   const rhythmFindings = detectWholePieceRhythm(cleanedText, options.register)
-  // Whole-piece rhythm findings get real weight, not a token nudge: once
-  // register-calibrated (see REGISTER_MECHANICAL_BASELINES in
-  // structural-detectors.ts), they turned out to be the best-populated,
-  // best-separating signal this engine has for long-form registers: an
-  // assay efficacy run against a labeled docs corpus moved pooled AUC from
-  // 0.489 (chance) to 0.725 going from a per-finding weight of 6 to 14.
-  // Picked 14 over higher values that scored marginally better (up to 0.79
-  // at weight 18) because that gain came from a rising false-positive rate,
-  // not broader separation, a sign of tuning to this one small corpus
-  // rather than the underlying signal. Re-tune against a larger corpus
-  // before pushing this further.
-  const rhythmBonus = rhythmFindings.length * 14
+  const rhythmWeight = (options.register && REGISTER_RHYTHM_WEIGHT[options.register]) ?? DEFAULT_RHYTHM_WEIGHT
+  const rhythmBonus = rhythmFindings.length * rhythmWeight
   const finalScore = Math.min(100, score + rhythmBonus)
 
   for (const rf of rhythmFindings) {

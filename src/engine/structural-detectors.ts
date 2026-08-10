@@ -413,6 +413,80 @@ const REGISTER_MECHANICAL_BASELINES: Record<string, {
     fragmentRate: { mean: 0.069, stdev: 0.068 },
     structuralEntropy: { mean: 0.583, stdev: 0.076 },
   },
+  // "blog" is calibrated from 166 pre-2021 posts on the official Go blog
+  // (golang/website, permissive BSD-style license), an independent source
+  // from the two repos (rust-lang/blog.rust-lang.org, electron/electronjs.org)
+  // that make up the labeled test corpus this register's suppressions and
+  // weight were measured against, same reasoning as docs: calibrating and
+  // testing on the same documents would be measuring the fix against the
+  // data it was tuned on. fragmentRate runs meaningfully higher than docs
+  // (0.115 vs 0.069) and paragraphLengthCV meaningfully lower (0.609 vs
+  // 0.719): blog writing tolerates more sentence fragments and holds
+  // slightly tighter paragraph rhythm than reference documentation does,
+  // confirming this register needed its own numbers, not docs's borrowed.
+  blog: {
+    sentenceLengthCV: { mean: 0.647, stdev: 0.176 },
+    paragraphLengthCV: { mean: 0.609, stdev: 0.162 },
+    fragmentRate: { mean: 0.115, stdev: 0.102 },
+    structuralEntropy: { mean: 0.591, stdev: 0.088 },
+  },
+  // "memo" is calibrated from 170 pre-2021 Node.js TSC meeting-minutes
+  // documents (nodejs/TSC), independent from the two repos
+  // (rust-lang/compiler-team, golang/proposal) that make up the labeled
+  // test corpus this register's suppressions and weight were measured
+  // against. Calibration-only use, never committed as corpus text: nodejs/TSC
+  // carries no explicit LICENSE file, a bar too low for redistributing raw
+  // text but fine for computing aggregate statistics that never leave this
+  // comment as anything but four numbers. paragraphLengthCV runs sharply
+  // higher than both docs (0.719) and blog (0.609) at 0.894: meeting-minutes
+  // agenda items vary wildly in length (one line for a settled item, many
+  // paragraphs for live debate) in a way neither reference docs nor blog
+  // posts do. fragmentRate runs lower than blog (0.115) at 0.057, closer to
+  // docs (0.069): despite the bulleted structure, memo sentences tend to be
+  // complete rather than fragmentary. Confirms memo needed its own numbers,
+  // not blog's or docs's borrowed.
+  memo: {
+    sentenceLengthCV: { mean: 0.781, stdev: 0.197 },
+    paragraphLengthCV: { mean: 0.894, stdev: 0.502 },
+    fragmentRate: { mean: 0.057, stdev: 0.061 },
+    structuralEntropy: { mean: 0.549, stdev: 0.079 },
+  },
+  // "essay" is calibrated from 47 pre-2021 RFC-style proposal documents
+  // (reactjs/rfcs, ember-cli/rfcs, npm/rfcs, combined for volume since no
+  // single one had enough pre-cutoff documents alone), independent from the
+  // two sources (rust-lang/rfcs, python/peps) that make up the labeled test
+  // corpus this register's suppressions and weight were measured against.
+  // Calibration-only use for ember-cli/rfcs and npm/rfcs specifically (no
+  // explicit LICENSE file in either, same reasoning as memo's nodejs/TSC
+  // source: too low a bar to redistribute text, fine for four aggregate
+  // numbers); reactjs/rfcs carries a clear LICENSE.md. Smaller sample than
+  // docs/blog/memo's ~170-190 documents, reported honestly rather than
+  // padded with a weaker source. structuralEntropy runs higher than docs
+  // (0.583) and blog (0.591) at 0.627: essays argue against alternatives
+  // and defend trade-offs, which reads as more varied sentence-opener and
+  // punctuation structure than announcement or reference prose.
+  essay: {
+    sentenceLengthCV: { mean: 0.668, stdev: 0.167 },
+    paragraphLengthCV: { mean: 0.684, stdev: 0.224 },
+    fragmentRate: { mean: 0.109, stdev: 0.079 },
+    structuralEntropy: { mean: 0.627, stdev: 0.076 },
+  },
+  // "email" deliberately has NO entry here, unlike the other four
+  // registers — tried and reverted. A baseline was calibrated from 80
+  // independent pre-2021 Enron sent-mail messages (mean/stdev:
+  // sentenceLengthCV 0.661/0.235, paragraphLengthCV 0.528/0.297,
+  // fragmentRate 0.153/0.142, structuralEntropy 0.532/0.124 — see git
+  // history for the full entry and ../assay/corpora/email/SOURCES.md for
+  // the corpus), but it measurably made pooled AUC worse (0.540 -> 0.497)
+  // against the labeled email test corpus, not better. Short documents
+  // produce inherently noisy per-document CV estimates for both classes,
+  // so a calibrated threshold ends up more lenient without discriminating
+  // any better, the opposite of the other four registers' outcome. See
+  // src/data/SOURCES.md's 2026-08-10 email entry for the full diagnosis:
+  // this register's real problem is structural (most documents never clear
+  // this engine's 8-sentence/4-paragraph whole-piece floors or its 2+
+  // occurrence soft-flag floor to begin with), not a calibration-direction
+  // problem the two-part fix pattern is built to solve.
 }
 
 /** How many standard deviations off a register's baseline counts as drift.

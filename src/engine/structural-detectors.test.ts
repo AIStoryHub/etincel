@@ -257,6 +257,55 @@ test("mechanical-register-drift fires on fragment-rate/entropy drift for docs re
   assert.ok(detectWholePieceRhythm(text, "docs").some((f) => f.id === "mechanical-register-drift"));
 });
 
+test("the 'blog' register's own calibrated threshold (baseline mean 0.647, stdev 0.176, so ~0.54) also catches moderate uniformity the generic 0.35 cutoff misses, independently of docs's threshold", () => {
+  const lens = [8, 8, 8, 8, 14, 14, 4, 4];
+  const text = lens
+    .map((n) => ["Term", ...Array.from({ length: n - 1 }, (_, i) => `term${i + 1}`)].join(" ") + ".")
+    .join(" ");
+  assert.equal(detectWholePieceRhythm(text).length, 0, "no register: reads as varied enough");
+  const blogFindings = detectWholePieceRhythm(text, "blog");
+  assert.ok(blogFindings.some((f) => f.id === "low-burstiness"), "blog register: below this register's own real baseline, should flag");
+  assert.ok(blogFindings.some((f) => f.id === "mechanical-register-drift"), "blog register: fragment-rate/entropy drift also fires using blog's own baseline");
+});
+
+test("the 'memo' register's own calibrated threshold (baseline mean 0.781, stdev 0.197, so ~0.66) also catches moderate uniformity the generic 0.35 cutoff misses, independently of docs's and blog's thresholds", () => {
+  const lens = [8, 8, 8, 8, 14, 14, 4, 4];
+  const text = lens
+    .map((n) => ["Term", ...Array.from({ length: n - 1 }, (_, i) => `term${i + 1}`)].join(" ") + ".")
+    .join(" ");
+  assert.equal(detectWholePieceRhythm(text).length, 0, "no register: reads as varied enough");
+  const memoFindings = detectWholePieceRhythm(text, "memo");
+  assert.ok(memoFindings.some((f) => f.id === "low-burstiness"), "memo register: below this register's own real baseline, should flag");
+  assert.ok(memoFindings.some((f) => f.id === "mechanical-register-drift"), "memo register: fragment-rate/entropy drift also fires using memo's own baseline");
+});
+
+test("the 'essay' register's own calibrated threshold (baseline mean 0.668, stdev 0.167, so ~0.57) also catches moderate uniformity the generic 0.35 cutoff misses, independently of the other three registers' thresholds", () => {
+  const lens = [8, 8, 8, 8, 14, 14, 4, 4];
+  const text = lens
+    .map((n) => ["Term", ...Array.from({ length: n - 1 }, (_, i) => `term${i + 1}`)].join(" ") + ".")
+    .join(" ");
+  assert.equal(detectWholePieceRhythm(text).length, 0, "no register: reads as varied enough");
+  const essayFindings = detectWholePieceRhythm(text, "essay");
+  assert.ok(essayFindings.some((f) => f.id === "low-burstiness"), "essay register: below this register's own real baseline, should flag");
+  assert.ok(essayFindings.some((f) => f.id === "mechanical-register-drift"), "essay register: fragment-rate/entropy drift also fires using essay's own baseline");
+});
+
+test("'email' deliberately has no REGISTER_MECHANICAL_BASELINES entry: a calibrated baseline was tried and measurably made pooled AUC worse (0.540 -> 0.497) against a labeled email corpus, not better, so register: 'email' falls through to the generic threshold same as no register at all (regression: a future edit that adds one back should re-verify against that finding first, see src/data/SOURCES.md's 2026-08-10 email entry)", () => {
+  const lens = [8, 8, 8, 8, 14, 14, 4, 4];
+  const text = lens
+    .map((n) => ["Term", ...Array.from({ length: n - 1 }, (_, i) => `term${i + 1}`)].join(" ") + ".")
+    .join(" ");
+  assert.deepEqual(detectWholePieceRhythm(text, "email"), detectWholePieceRhythm(text), "email register should behave identically to no register: no calibrated baseline exists for it");
+});
+
+test("'general' deliberately has no REGISTER_MECHANICAL_BASELINES entry: docs/blog/memo/essay's own calibrated baselines are measurably different from each other (sentenceLengthCV 0.666/0.647/0.781/0.668), so any single 'general' baseline would be an arbitrary blend of four different real populations rather than a real fifth one, see src/data/SOURCES.md's 2026-08-10 general entry", () => {
+  const lens = [8, 8, 8, 8, 14, 14, 4, 4];
+  const text = lens
+    .map((n) => ["Term", ...Array.from({ length: n - 1 }, (_, i) => `term${i + 1}`)].join(" ") + ".")
+    .join(" ");
+  assert.deepEqual(detectWholePieceRhythm(text, "general"), detectWholePieceRhythm(text), "general register should behave identically to no register: no calibrated baseline exists for it");
+});
+
 test("computeStrengthSignals rates named, numbered detail as more specific and more grounded than generic abstraction", () => {
   const specific =
     "Priya shipped the fix on March 19, 2026. Q3 renewal came in at 94%, three points ahead of plan. The team closed 12 tickets in Boston before Friday.";

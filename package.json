@@ -1,6 +1,6 @@
 {
   "name": "etincel-nonfiction",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Étincel: a non-fiction writing connector for Claude Code, Claude Desktop, and MCP-enabled tools. Trainable voice, premade emotional tones, and a transparent anti-AI-tells audit. Not an email client or editor replacement, a layer that keeps the writer in trust mode.",
   "type": "module",
   "bin": {
