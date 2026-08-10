@@ -7,3 +7,4 @@ dist/
 .env*
 !.env.example
 mcp-registry-auth.key.pem
+.circleci/info.yml
