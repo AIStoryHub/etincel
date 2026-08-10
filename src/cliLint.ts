@@ -19,7 +19,7 @@ export function tierRank(tier: Tier): number {
 export const USAGE = [
   "Usage: etincel-nonfiction lint <pattern...> [options]",
   "",
-  "Audits each matched file for AI writing tells (497 checks, no network or",
+  "Audits each matched file for AI writing tells (504 checks, no network or",
   "model call). Exits non-zero if any file's tier is at or above --threshold.",
   "",
   "Options:",

@@ -2,7 +2,7 @@ version: 2.1
 
 description: >
   Deterministic AI-writing-tells audit for prose. No network or model calls;
-  same 494-check corpus as the audit_text MCP tool and the etincel CLI.
+  same 504-check corpus as the audit_text MCP tool and the etincel CLI.
 
 display:
   home_url: https://github.com/AIStoryHub/etincel
