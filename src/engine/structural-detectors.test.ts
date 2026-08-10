@@ -231,6 +231,32 @@ test("detectWholePieceRhythm requires at least 4 paragraphs before flagging unif
   assert.ok(!findings.some((f) => f.id === "uniform-paragraph-length"));
 });
 
+test("register-calibrated threshold catches moderate uniformity the generic 0.35 cutoff misses", () => {
+  // Sentence-length CV ~0.42: above the generic 0.35 cutoff (so it reads as
+  // "varied enough" for any unspecified register) but below the "docs"
+  // register's calibrated threshold (baseline mean 0.666, stdev 0.189, so
+  // ~0.55), because real docs prose runs far more varied than 0.35 implies.
+  const lens = [8, 8, 8, 8, 14, 14, 4, 4];
+  const text = lens
+    .map((n) => ["Term", ...Array.from({ length: n - 1 }, (_, i) => `term${i + 1}`)].join(" ") + ".")
+    .join(" ");
+  const metrics = computeWholePieceMetrics(text);
+  assert.ok(metrics.sentenceBurstiness > 0.35 && metrics.sentenceBurstiness < 0.5, "fixture should sit between the generic and docs thresholds");
+
+  assert.equal(detectWholePieceRhythm(text).length, 0, "no register: reads as varied enough");
+  const docsFindings = detectWholePieceRhythm(text, "docs");
+  assert.ok(docsFindings.some((f) => f.id === "low-burstiness"), "docs register: below this register's real baseline, should flag");
+});
+
+test("mechanical-register-drift fires on fragment-rate/entropy drift for docs register only, above the sentence-count floor", () => {
+  const lens = [8, 8, 8, 8, 14, 14, 4, 4];
+  const text = lens
+    .map((n) => ["Term", ...Array.from({ length: n - 1 }, (_, i) => `term${i + 1}`)].join(" ") + ".")
+    .join(" ");
+  assert.ok(!detectWholePieceRhythm(text).some((f) => f.id === "mechanical-register-drift"));
+  assert.ok(detectWholePieceRhythm(text, "docs").some((f) => f.id === "mechanical-register-drift"));
+});
+
 test("computeStrengthSignals rates named, numbered detail as more specific and more grounded than generic abstraction", () => {
   const specific =
     "Priya shipped the fix on March 19, 2026. Q3 renewal came in at 94%, three points ahead of plan. The team closed 12 tickets in Boston before Friday.";

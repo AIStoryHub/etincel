@@ -189,6 +189,45 @@ JP owns both the source skills and the source SaaS product.
   "legitimate scope-widening use") before this pass, so softening the tier
   further was already tried and wasn't enough. Corpus now 340 + 123 = 463
   entries (was 341 + 126 = 467).
+- **2026-08-10: register-calibrated the mechanical/rhythm layer; pooled AUC
+  0.489 (chance) → 0.725 on a labeled docs corpus.** An `assay` efficacy run
+  (a sibling falsifiable-eval-harness repo, see `../assay`) against 29
+  pre-2021 human docs and 50 AI docs (two effort tiers)
+  found the detector indistinguishable from chance at `register: "docs"`
+  (AUC 0.489, 95% CI [0.35, 0.63]) and 7 of 12 fired dictionary terms
+  ("in order to", "when it comes to", "significant", "propagate", "domain",
+  "expedite", "framework", "validate") firing *more* on the human class than
+  the AI class, ordinary formal-register vocabulary in long-form reference
+  prose, not an AI tell in that genre. Two fixes: (1) those 8 terms are now
+  suppressed for `register: "docs"` via a new `REGISTER_TERM_SUPPRESSIONS`
+  map in `score.ts` (structurally suppressed, not sign-flipped: the
+  inversion is measured on a small corpus, so trusting its direction was
+  safer than trusting its magnitude); (2) `detectWholePieceRhythm`'s
+  paragraph-uniformity and sentence-burstiness checks, previously a fixed
+  0.35 coefficient-of-variation cutoff for every register, are now compared
+  against a per-register baseline (`REGISTER_MECHANICAL_BASELINES` in
+  `structural-detectors.ts`) computed from 191 independent pre-2021 docs
+  pages (kubernetes/website, rust-lang/rust, postgres, curl, vuejs/docs,
+  npm/cli, deliberately different repos than assay's own held-out human
+  corpus, to avoid calibrating on the same documents the AUC is measured
+  against). Real docs prose, human or AI, runs CV 0.5-0.8; a 0.35 cutoff
+  built for punchier short-form copy sat under where either class lives and
+  almost never fired, which is why 29 of 30 structural-pattern detectors
+  and both whole-piece rhythm checks were effectively dormant on this genre.
+  Two new checks (fragment-rate and structural-entropy drift from the same
+  baseline) were added alongside for `register: "docs"` only. Whole-piece
+  rhythm findings' score weight went from 6 to 14 points each, tuned against
+  the same labeled corpus (stopped short of the further-improving value of
+  18-per-finding because that extra gain came from a rising false-positive
+  rate, not broader separation, a sign of fitting the one small corpus
+  rather than the underlying signal). None of this touches non-"docs"
+  registers or the tier-55 threshold: per the same eval philosophy, a
+  threshold is cheap to recalibrate once the signal is real, and pointless
+  to touch while it wasn't. Caveat carried forward from the eval harness
+  itself: 79 total labeled documents is small; treat 0.725 as "the two
+  systemic bugs are fixed and the rhythm signal is real," not as a
+  field-validated number, and re-run before trusting a further push past
+  this weight.
 - **`score.ts` assigns flat strength values** (hard-ban = 80, soft-flag = 45)
   rather than porting each corpus entry's individual `strength_score`,
   since the curated JSON files don't carry that field. Structural patterns
