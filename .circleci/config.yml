@@ -66,9 +66,28 @@ jobs:
             fi
             circleci orb validate orb.yml
 
+  efficacy-regression:
+    description: >
+      Runs assay's efficacy check (github.com/AIStoryHub/assay) across every
+      register tracked in efficacy-baselines.json, at this commit's own SHA,
+      and reports whether any register's pooled AUC dropped below its last
+      known-good value. See scripts/check-efficacy-regression.mjs's own
+      header for the full design (deterministic comparison, no tolerance
+      margin needed for that reason, non-blocking until this check has an
+      established track record, the same reasoning lint-prose already
+      documents for itself).
+    executor: node
+    steps:
+      - checkout
+      - run:
+          name: "Efficacy regression check (non-blocking)"
+          command: node scripts/check-efficacy-regression.mjs --ref "$CIRCLE_SHA1"
+          no_output_timeout: 15m
+
 workflows:
   ci:
     jobs:
       - test
       - lint-prose
       - validate-orb
+      - efficacy-regression
