@@ -138,22 +138,6 @@ A GitHub Action wraps the same CLI (see `action.yml`, and `.github/workflows/lin
     threshold: orange
 ```
 
-A CircleCI orb wraps the same CLI (see `orb.yml`, and `.circleci/config.yml` in this repo for a working example). Once it's published to the CircleCI Orb Registry, usage will look like:
-
-```yaml
-version: 2.1
-orbs:
-  etincel: aistoryhub/etincel@1.0.0
-workflows:
-  lint:
-    jobs:
-      - etincel/lint:
-          patterns: "docs/**/*.md README.md"
-          threshold: orange
-```
-
-It isn't published yet. Until then, copy the `commands.lint` and `jobs.lint` blocks from `orb.yml` into your own `.circleci/config.yml`.
-
 ### Repo-local config: dictionary, instructions, and a shared team style
 
 A team's rules don't have to live only in each person's local `~/.etincel/`. Drop a `.etincelrc` (or `.etincelrc.json` / `etincel.config.json`) at the repo root and it's picked up automatically by the CLI and by the local (stdio) server, reviewable in code review and versioned instead of invisible and gone when someone leaves:
