@@ -1,10 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { compareToVoice } from "./matchVoice.js";
+import { compareToVoice, MIN_WORDS_FOR_CONFIDENT_READ } from "./matchVoice.js";
 import { computeTextStats } from "./textStats.js";
 import type { TextStats } from "./textStats.js";
 
-test("text that mirrors the target voice's rhythm is a close match with no findings", () => {
+test("text that mirrors the target voice's rhythm comes back on rhythm with no findings", () => {
   const voiceSample =
     "not the update i wanted to send but here we are. export flow's still flaky under load, found it wednesday. pushing the demo to friday instead of thursday.\n\nif you already blocked off thursday for the client, no need to unblock it, we'll use it to keep hammering on this. friday's the real one.";
   const targetStats = computeTextStats(voiceSample);
@@ -13,7 +13,7 @@ test("text that mirrors the target voice's rhythm is a close match with no findi
     "not thrilled about this but here it is. the export step is still breaking under real load, caught it tuesday night. moving the review to monday instead of friday.\n\nif you already cleared friday for the walkthrough, leave it blocked, we'll keep digging into this instead. monday's the real one.";
 
   const result = compareToVoice(similarDraft, targetStats);
-  assert.equal(result.verdict, "close match");
+  assert.equal(result.verdict, "on rhythm");
   assert.ok(result.matchScore >= 70, `expected a high match score, got ${result.matchScore}`);
 });
 
@@ -26,14 +26,14 @@ test("formal, hedged text drifts from a short-contraction-heavy voice", () => {
     "It is hereby communicated that the demonstration has been rescheduled to Thursday, thereby affording the team an additional period of two days in advance of the client presentation, which the team is strongly encouraged to utilize in full, notwithstanding any prior commitments that may have been previously scheduled during the intervening period.";
 
   const result = compareToVoice(stiffDraft, targetStats);
-  assert.notEqual(result.verdict, "close match");
+  assert.notEqual(result.verdict, "on rhythm");
   assert.ok(result.findings.length > 0, "expected at least one drifted dial");
   const contractionFinding = result.findings.find((f) => f.dial === "contractionUse");
   assert.ok(contractionFinding, "expected contraction use to be flagged as drifted");
   assert.equal(contractionFinding!.note, "Uses fewer contractions than usual; reads more formal than this voice normally does.");
 });
 
-test("one dial drifting moderately is not diluted into a close match by the other seven sitting near zero (regression: dogfood memo 2026-08-07)", () => {
+test("one dial drifting moderately is not diluted into on rhythm by the other seven sitting near zero (regression: dogfood memo 2026-08-07)", () => {
   const draft = "We shipped the update on time. The client was happy with results. Nothing broke in production this week.";
   const draftStats = computeTextStats(draft);
   // Same voice in every other respect, but a real, single-dial drift on
@@ -50,8 +50,43 @@ test("one dial drifting moderately is not diluted into a close match by the othe
   assert.equal(
     result.verdict,
     "some drift",
-    "a single moderate outlier dial should force at least 'some drift', not be averaged away into 'close match'"
+    "a single moderate outlier dial should force at least 'some drift', not be averaged away into 'on rhythm'"
   );
+});
+
+test("short input comes back with low confidence and a caveat instead of a bare confident verdict", () => {
+  const voiceSample =
+    "not the update i wanted to send but here we are. export flow's still flaky under load, found it wednesday. pushing the demo to friday instead of thursday.\n\nif you already blocked off thursday for the client, no need to unblock it, we'll use it to keep hammering on this. friday's the real one.";
+  const targetStats = computeTextStats(voiceSample);
+
+  const shortDraft = "Quick note. Sent it off. Keep it tight. Done for now.";
+  assert.ok(shortDraft.split(/\s+/).length < MIN_WORDS_FOR_CONFIDENT_READ);
+
+  const result = compareToVoice(shortDraft, targetStats);
+  assert.equal(result.confidence, "low");
+  assert.match(result.caveat, /too little text/i);
+});
+
+test("longer input that clears the minimum word count comes back with normal confidence", () => {
+  const voiceSample =
+    "not the update i wanted to send but here we are. export flow's still flaky under load, found it wednesday. pushing the demo to friday instead of thursday.\n\nif you already blocked off thursday for the client, no need to unblock it, we'll use it to keep hammering on this. friday's the real one.";
+  const targetStats = computeTextStats(voiceSample);
+
+  const similarDraft =
+    "not thrilled about this but here it is. the export step is still breaking under real load, caught it tuesday night. moving the review to monday instead of friday.\n\nif you already cleared friday for the walkthrough, leave it blocked, we'll keep digging into this instead. monday's the real one.";
+  assert.ok(similarDraft.split(/\s+/).length >= MIN_WORDS_FOR_CONFIDENT_READ);
+
+  const result = compareToVoice(similarDraft, targetStats);
+  assert.equal(result.confidence, "normal");
+});
+
+test("caveat always warns this measures rhythm, not authorship, regardless of confidence", () => {
+  const targetStats = computeTextStats("Short line. Another short line. Keep it brief. Real short.");
+  const result = compareToVoice(
+    "This is a considerably longer and more elaborately constructed sentence than the ones this voice usually produces, deliberately extended well past its normal length, and it continues for quite some additional distance before finally arriving at its conclusion.",
+    targetStats
+  );
+  assert.match(result.caveat, /not.*authorship|authorship.*not/i);
 });
 
 test("findings are sorted by delta, largest drift first", () => {

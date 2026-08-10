@@ -1,7 +1,7 @@
 {
   "$schema_note": "Hard-ban terms/phrases: rhetorical inflation over denotation. Flag every occurrence, propose the replacement_hint if present.",
   "source": "Condensed from JP LeBlanc's etincel-prose skill (references/banned-terms.md) and avoid-ai-writing's words-and-phrases.md replacement table.",
-  "count": 341,
+  "count": 340,
   "entries": [
     {
       "term": "dive",
@@ -896,11 +896,6 @@
     },
     {
       "term": "moreover",
-      "category": "transition",
-      "subcategory": "lazy-transition"
-    },
-    {
-      "term": "furthermore",
       "category": "transition",
       "subcategory": "lazy-transition"
     },

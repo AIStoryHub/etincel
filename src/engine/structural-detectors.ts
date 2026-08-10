@@ -411,7 +411,7 @@ export function detectWholePieceRhythm(text: string): WholePieceFinding[] {
       id: "uniform-paragraph-length",
       name: "Uniform paragraph length",
       severity: "medium",
-      detail: `${metrics.paragraphCount} paragraphs, sentence-count variation is low (cv=${metrics.paragraphLengthUniformity.toFixed(2)}). Vary paragraph length more.`,
+      detail: `${metrics.paragraphCount} paragraphs, most running about the same length with little variation between them. Vary paragraph length more.`,
     })
   }
 
@@ -420,7 +420,7 @@ export function detectWholePieceRhythm(text: string): WholePieceFinding[] {
       id: "low-burstiness",
       name: "Low sentence-length burstiness",
       severity: "medium",
-      detail: `${metrics.sentenceCount} sentences averaging ${metrics.avgSentenceLength.toFixed(0)} words with little variation (cv=${metrics.sentenceBurstiness.toFixed(2)}). Mix short sentences with long; allow fragments.`,
+      detail: `${metrics.sentenceCount} sentences averaging ${metrics.avgSentenceLength.toFixed(0)} words, with little variation in length from one sentence to the next. Mix short sentences with long; allow fragments.`,
     })
   }
 

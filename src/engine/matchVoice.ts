@@ -9,13 +9,36 @@ export interface VoiceMatchFinding {
   note: string;
 }
 
-export type VoiceMatchVerdict = "close match" | "some drift" | "off voice";
+/** Named for what's actually measured (rhythm/mechanics), not for who wrote
+ * the text: see VOICE_MATCH_CAVEAT. Was "close match" / "off voice" before
+ * a review found the old names read as an authorship claim the underlying
+ * measurement can't support. */
+export type VoiceMatchVerdict = "on rhythm" | "some drift" | "off rhythm";
 
 export interface VoiceMatchResult {
   verdict: VoiceMatchVerdict;
   matchScore: number;
   findings: VoiceMatchFinding[];
+  /** "low" below MIN_WORDS_FOR_CONFIDENT_READ: too little text for the
+   * rhythm dials to mean much, so the verdict is a guess dressed up as a
+   * measurement. */
+  confidence: "low" | "normal";
+  /** Always present. This score tracks sentence/paragraph rhythm and
+   * mechanics only, the same shape genre or register produces regardless of
+   * who wrote a piece, so it cannot by itself tell the target writer's own
+   * text apart from someone else's text written to match the same voice.
+   * Weigh it as one signal on drift, not as proof of (or against)
+   * authorship. */
+  caveat: string;
 }
+
+const VOICE_MATCH_CAVEAT =
+  "This measures sentence/paragraph rhythm and mechanics against the trained baseline, not who wrote the text. Text written or edited to match this voice's register can come back \"on rhythm\" even if the target writer never touched it; a real off-voice draft by the target writer can still come back drifted. Use it to catch rhythm drift after drafting, not to verify authorship.";
+
+/** Below this word count, rhythm/paragraph-variance dials are computed from
+ * too few sentences to be more than noise; see checkVoiceMatchTool's
+ * short-input guard. */
+export const MIN_WORDS_FOR_CONFIDENT_READ = 50;
 
 const DIAL_NOTES: Record<keyof MechanicalDials, { tooHigh: string; tooLow: string }> = {
   sentenceLength: {
@@ -57,8 +80,8 @@ const DIAL_NOTES: Record<keyof MechanicalDials, { tooHigh: string; tooLow: strin
 const DRIFT_THRESHOLD = 25;
 
 /** A single dial past this point is drift severe enough to call the draft
- * off voice on its own, no matter how close the other dials are. */
-const OFF_VOICE_SINGLE_DIAL_THRESHOLD = 50;
+ * off rhythm on its own, no matter how close the other dials are. */
+const OFF_RHYTHM_SINGLE_DIAL_THRESHOLD = 50;
 
 /**
  * Compare a piece of drafted text's measured rhythm against a trained or
@@ -66,7 +89,8 @@ const OFF_VOICE_SINGLE_DIAL_THRESHOLD = 50;
  * train_style/create_style_from_dials use. Pure function, no LLM call.
  */
 export function compareToVoice(text: string, targetStats: TextStats): VoiceMatchResult {
-  const actualDials = statsToDials(computeTextStats(text));
+  const actualStats = computeTextStats(text);
+  const actualDials = statsToDials(actualStats);
   const targetDials = statsToDials(targetStats);
 
   const findings: VoiceMatchFinding[] = [];
@@ -98,13 +122,20 @@ export function compareToVoice(text: string, targetStats: TextStats): VoiceMatch
 
   // The verdict is driven by whichever is worse, the average or the single
   // biggest outlier, so one dial blowing way past the others can't get
-  // diluted into "close match" by seven dials sitting near zero.
+  // diluted into "on rhythm" by seven dials sitting near zero.
   const verdict: VoiceMatchVerdict =
-    avgDelta >= 35 || maxDelta >= OFF_VOICE_SINGLE_DIAL_THRESHOLD
-      ? "off voice"
+    avgDelta >= 35 || maxDelta >= OFF_RHYTHM_SINGLE_DIAL_THRESHOLD
+      ? "off rhythm"
       : avgDelta >= 15 || maxDelta >= DRIFT_THRESHOLD
         ? "some drift"
-        : "close match";
+        : "on rhythm";
 
-  return { verdict, matchScore, findings };
+  const confidence: VoiceMatchResult["confidence"] =
+    actualStats.wordCount < MIN_WORDS_FOR_CONFIDENT_READ ? "low" : "normal";
+  const caveat =
+    confidence === "low"
+      ? `Only ${actualStats.wordCount} words: too little text for a reliable rhythm read (aim for at least ${MIN_WORDS_FOR_CONFIDENT_READ}). Treat this verdict as a rough guess, not a measurement. ${VOICE_MATCH_CAVEAT}`
+      : VOICE_MATCH_CAVEAT;
+
+  return { verdict, matchScore, findings, confidence, caveat };
 }

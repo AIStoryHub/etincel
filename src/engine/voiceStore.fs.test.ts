@@ -187,6 +187,27 @@ test("trainVoice assigns a 5-character shortId, stable across a rename and disti
   assert.equal(retrained.shortId, a.shortId);
 });
 
+test("loadVoice, updateVoice, trainVoice(targetId), and deleteVoice all resolve a shortId, not just the raw UUID", async () => {
+  const created = await trainVoice("Short Id Lookup Voice", ["A sample used to train this voice."]);
+
+  const byShortId = await loadVoice(created.shortId);
+  assert.equal(byShortId?.id, created.id);
+
+  const byLowercaseShortId = await loadVoice(created.shortId.toLowerCase());
+  assert.equal(byLowercaseShortId?.id, created.id);
+
+  const renamed = await updateVoice(created.shortId, "Renamed via shortId", SAMPLE_DIALS);
+  assert.equal(renamed.id, created.id);
+  assert.equal(renamed.shortId, created.shortId);
+
+  const retrained = await trainVoice("Renamed via shortId", ["A second sample, added by shortId."], created.shortId);
+  assert.equal(retrained.id, created.id);
+  assert.equal(retrained.sampleCount, 2);
+
+  assert.equal(await deleteVoice(created.shortId), true);
+  assert.equal(await loadVoice(created.id), undefined);
+});
+
 test("trainVoice rejects a targetId with no existing voice", async () => {
   await assert.rejects(
     () => trainVoice("Some Name", ["A sample."], "no-such-voice-id"),

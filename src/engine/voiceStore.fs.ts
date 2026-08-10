@@ -58,6 +58,16 @@ async function findVoiceByName(name: string): Promise<VoiceProfile | undefined> 
   return all.find((v) => normalizeName(v.name) === target);
 }
 
+/** Voices are filed on disk under their UUID, never their shortId, so a
+ * shortId (the identifier tools actually show a user) can't be resolved by
+ * path alone. Falls back to scanning listVoices() for a match, case-
+ * insensitive since a person retyping a shortId may not preserve case. */
+async function findVoiceByShortId(shortId: string): Promise<VoiceProfile | undefined> {
+  const target = shortId.trim().toUpperCase();
+  const all = await listVoices();
+  return all.find((v) => v.shortId === target);
+}
+
 /** Mints a shortId with no collision among this store's existing voices.
  * The alphabet is wide enough (31^5) that a retry is only ever a
  * theoretical safeguard, not something expected to fire in practice. */
@@ -228,16 +238,22 @@ async function updateVoice(id: string, rawName: string, dials: StyleDials): Prom
 async function loadVoice(id: string): Promise<VoiceProfile | undefined> {
   ensureDirs();
   const path = voicePath(id);
-  if (!path || !existsSync(path)) return undefined;
-  const profile = JSON.parse(readFileSync(path, "utf8")) as VoiceProfile;
-  // Backfills a shortId for a voice written before shortId existed, once,
-  // the first time it's loaded, so old libraries self-heal without a
-  // separate migration step.
-  if (!profile.shortId) {
-    profile.shortId = await uniqueShortId();
-    writeFileSync(path, JSON.stringify(profile, null, 2), "utf8");
+  if (path && existsSync(path)) {
+    const profile = JSON.parse(readFileSync(path, "utf8")) as VoiceProfile;
+    // Backfills a shortId for a voice written before shortId existed, once,
+    // the first time it's loaded, so old libraries self-heal without a
+    // separate migration step.
+    if (!profile.shortId) {
+      profile.shortId = await uniqueShortId();
+      writeFileSync(path, JSON.stringify(profile, null, 2), "utf8");
+    }
+    return profile;
   }
-  return profile;
+  // Not a UUID this store recognizes as a filename: try it as a shortId,
+  // the identifier every tool result actually shows a user in place of the
+  // raw UUID, so it needs to work as a real lookup key, not just a display
+  // string.
+  return findVoiceByShortId(id);
 }
 
 async function listVoices(): Promise<VoiceProfile[]> {
@@ -263,7 +279,9 @@ async function listVoices(): Promise<VoiceProfile[]> {
 
 async function deleteVoice(id: string): Promise<boolean> {
   ensureDirs();
-  const path = voicePath(id);
+  const voice = await loadVoice(id);
+  if (!voice) return false;
+  const path = voicePath(voice.id);
   if (!path || !existsSync(path)) return false;
   unlinkSync(path);
   return true;

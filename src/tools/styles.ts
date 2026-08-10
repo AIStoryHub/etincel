@@ -38,6 +38,7 @@ export function createStylesTools(
     }));
     const voices = voiceList.map((v) => ({
       id: v.id,
+      shortId: v.shortId,
       kind: "trained" as const,
       name: v.name,
       summary:
@@ -132,8 +133,12 @@ export function createStylesTools(
     if (!preset && !voice) {
       throw new Error(`"${id}" is not a known preset or trained voice. Call list_styles first.`);
     }
-    await store.setDefaultStyleId(id);
-    return { defaultStyleId: id };
+    // Store the canonical id even if the caller passed a voice's shortId,
+    // so every future lookup of the default style hits the same identity
+    // regardless of which form was used to set it.
+    const canonicalId = preset ? preset.id : voice!.id;
+    await store.setDefaultStyleId(canonicalId);
+    return { defaultStyleId: canonicalId };
   }
 
   async function forkStyleTool(presetId: string, name: string) {
@@ -187,7 +192,7 @@ export function createStylesTools(
       throw new Error(`No trained or custom voice found for "${id}". Call list_styles to see available options.`);
     }
     const result = compareToVoice(text, voice.stats);
-    return { id: voice.id, name: voice.name, ...result };
+    return { id: voice.id, shortId: voice.shortId, name: voice.name, ...result };
   }
 
   async function checkSelfRepetitionTool(id: string, text: string) {
@@ -207,6 +212,7 @@ export function createStylesTools(
     const history = voice.history ?? [];
     return {
       id: voice.id,
+      shortId: voice.shortId,
       name: voice.name,
       historyCount: history.length,
       findings: detectSelfRepetition(text, history),

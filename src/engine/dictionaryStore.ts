@@ -55,7 +55,6 @@ export interface DictionaryStore {
   removeBannedWord(scope: string, word: string): Promise<Dictionary>;
   addAllowedWord(scope: string, word: string): Promise<Dictionary>;
   removeAllowedWord(scope: string, word: string): Promise<Dictionary>;
-  /** Overwrites a scope's word lists outright: the primitive copy_dictionary
-   * builds on. */
+  /** Overwrites a scope's word lists outright. */
   setDictionary(scope: string, dict: { bannedWords: string[]; allowedWords: string[] }): Promise<Dictionary>;
 }

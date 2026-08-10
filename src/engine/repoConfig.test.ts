@@ -104,3 +104,67 @@ test("findRepoConfig defaults bannedWords/allowedWords to empty arrays when omit
   assert.deepEqual(config!.bannedWords, []);
   assert.deepEqual(config!.allowedWords, []);
 });
+
+test("findRepoConfig parses team-wide instructions when present", () => {
+  const dir = join(root, "instructions");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, ".etincelrc"), JSON.stringify({ instructions: "Always include a CTA." }));
+  const config = findRepoConfig(dir);
+  assert.equal(config!.instructions, "Always include a CTA.");
+});
+
+test("findRepoConfig throws on a non-string instructions value", () => {
+  const dir = join(root, "bad-instructions");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, ".etincelrc"), JSON.stringify({ instructions: 42 }));
+  assert.throws(() => findRepoConfig(dir), /invalid "instructions"/i);
+});
+
+const VALID_DIALS = {
+  formality: 6,
+  warmth: 4,
+  directness: 7,
+  sentenceLength: 40,
+  sentenceRhythmVariance: 50,
+  paragraphVariance: 30,
+  contractionUse: 20,
+  emDashUse: 0,
+  fragmentTolerance: 10,
+  questionUse: 5,
+  entropy: 60,
+};
+
+test("findRepoConfig parses a team style definition when present", () => {
+  const dir = join(root, "team-style");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, ".etincelrc"), JSON.stringify({ style: { name: "House voice", dials: VALID_DIALS } }));
+  const config = findRepoConfig(dir);
+  assert.ok(config!.style);
+  assert.equal(config!.style!.name, "House voice");
+  assert.deepEqual(config!.style!.dials, VALID_DIALS);
+});
+
+test("findRepoConfig throws when style.name is missing", () => {
+  const dir = join(root, "bad-style-name");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, ".etincelrc"), JSON.stringify({ style: { dials: VALID_DIALS } }));
+  assert.throws(() => findRepoConfig(dir), /invalid "style\.name"/i);
+});
+
+test("findRepoConfig throws when a dial is missing or out of range", () => {
+  const dir = join(root, "bad-style-dial");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    join(dir, ".etincelrc"),
+    JSON.stringify({ style: { name: "House voice", dials: { ...VALID_DIALS, formality: 15 } } })
+  );
+  assert.throws(() => findRepoConfig(dir), /invalid "style\.dials\.formality"/i);
+});
+
+test("findRepoConfig throws when style.dials is missing a key entirely", () => {
+  const dir = join(root, "missing-style-dial");
+  mkdirSync(dir, { recursive: true });
+  const { entropy, ...incomplete } = VALID_DIALS;
+  writeFileSync(join(dir, ".etincelrc"), JSON.stringify({ style: { name: "House voice", dials: incomplete } }));
+  assert.throws(() => findRepoConfig(dir), /invalid "style\.dials\.entropy"/i);
+});

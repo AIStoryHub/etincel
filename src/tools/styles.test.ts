@@ -230,13 +230,13 @@ test("checkVoiceMatchTool compares drafted text against a trained voice's rhythm
     "Quick note. Sent it off. Keep it tight. Done for now."
   );
   assert.equal(onVoice.id, matchVoiceId);
-  assert.equal(onVoice.verdict, "close match");
+  assert.equal(onVoice.verdict, "on rhythm");
 
   const offVoice = await checkVoiceMatchTool(
     matchVoiceId,
     "This is a considerably longer and more elaborately constructed sentence than the ones this voice usually produces, deliberately extended well past its normal length, and it continues for quite some additional distance before finally arriving at its conclusion."
   );
-  assert.notEqual(offVoice.verdict, "close match");
+  assert.notEqual(offVoice.verdict, "on rhythm");
   assert.ok(offVoice.findings.length > 0);
 });
 

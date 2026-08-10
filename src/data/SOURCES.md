@@ -38,7 +38,7 @@ JP owns both the source skills and the source SaaS product.
 ## Scope decisions
 
 - **Curated subset, not the full corpus.** `banned-terms.json` and
-  `soft-flag-terms.json` (341 + 126 = 467 entries as of 2026-08-09, plus
+  `soft-flag-terms.json` (340 + 123 = 463 entries as of 2026-08-10, plus
   automatic inflection matching on top, see below) are curated for
   category breadth (verbs, adjectives, nouns, filler, imagery, transitions,
   phrase subcategories) rather than mechanically dumping all 758 corpus
@@ -176,6 +176,19 @@ JP owns both the source skills and the source SaaS product.
   for an actual editorial selection process ("a curated corpus," "a curated
   subset," both true of this repo's own corpus); moved to soft-flag
   alongside `however`/`robust` above.
+- **2026-08-10: retired four transition/filler entries that fired more on
+  human prose than AI prose.** A benchmark comparing real flag rates across
+  human and AI-drafted samples found `however` and `generally`
+  (`soft-flag-terms.json`, `transition` category) and `sure`
+  (`soft-flag-terms.json`, `filler` category) triggering more often on the
+  human side, worse than a no-op signal, not just weak. Same finding for
+  `furthermore` (`banned-terms.json`, hard-ban `red` confidence, so it was
+  scoring on a single ordinary use, no occurrence threshold to soften it).
+  All four removed outright rather than downgraded again: each entry's own
+  note already conceded the ambiguity ("conversational use is real,"
+  "legitimate scope-widening use") before this pass, so softening the tier
+  further was already tried and wasn't enough. Corpus now 340 + 123 = 463
+  entries (was 341 + 126 = 467).
 - **`score.ts` assigns flat strength values** (hard-ban = 80, soft-flag = 45)
   rather than porting each corpus entry's individual `strength_score`,
   since the curated JSON files don't carry that field. Structural patterns

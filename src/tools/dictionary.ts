@@ -1,11 +1,5 @@
 import { GLOBAL_DICTIONARY_SCOPE, dedupeWords, type Dictionary, type DictionaryStore } from "../engine/dictionaryStore.js";
-import { staticPresetSource, type PresetSource } from "../engine/presets.js";
 import { sanitizeFreeformText } from "../engine/sanitizeText.js";
-import type { VoiceStore } from "../engine/voiceStore.js";
-
-/** "all" is the only reserved copy target; any other string is a literal
- * scope (a style id, or "global"). */
-export const COPY_ALL_TARGET = "all";
 
 function resolveScope(styleId?: string): string {
   const trimmed = sanitizeFreeformText(styleId?.trim() ?? "");
@@ -18,11 +12,7 @@ function requireWord(word: string): string {
   return trimmed;
 }
 
-export function createDictionaryTools(
-  store: DictionaryStore,
-  voiceStore?: VoiceStore,
-  presetSource: PresetSource = staticPresetSource
-) {
+export function createDictionaryTools(store: DictionaryStore) {
   async function addBannedWordTool(word: string, styleId?: string): Promise<Dictionary> {
     return store.addBannedWord(resolveScope(styleId), requireWord(word));
   }
@@ -59,50 +49,11 @@ export function createDictionaryTools(
     };
   }
 
-  /** Resolves every known scope this installer could copy a dictionary
-   * into: "global" plus every trained/custom voice id and every preset id.
-   * Presets are shared, not per-installer, but a preset id is still a valid
-   * dictionary scope: an installer's own word list for "when I use
-   * pr-review," so it's a legitimate copy target. */
-  async function allKnownScopes(): Promise<string[]> {
-    const voiceIds = voiceStore ? (await voiceStore.listVoices()).map((v) => v.id) : [];
-    const presetIds = (await presetSource.listPresets()).map((p) => p.id);
-    return Array.from(new Set([GLOBAL_DICTIONARY_SCOPE, ...voiceIds, ...presetIds]));
-  }
-
-  async function copyDictionaryTool(toScope: string, fromStyleId?: string) {
-    const from = resolveScope(fromStyleId);
-    const source = await store.getDictionary(from);
-
-    let targets: string[];
-    if (toScope === COPY_ALL_TARGET) {
-      targets = (await allKnownScopes()).filter((s) => s !== from);
-    } else {
-      const target = resolveScope(toScope);
-      if (target === from) {
-        throw new Error(`Source and destination are the same scope ("${from}").`);
-      }
-      targets = [target];
-    }
-
-    if (targets.length === 0) {
-      return { from, copiedTo: [] as string[] };
-    }
-
-    const results = await Promise.all(
-      targets.map((scope) =>
-        store.setDictionary(scope, { bannedWords: source.bannedWords, allowedWords: source.allowedWords })
-      )
-    );
-    return { from, copiedTo: results.map((r) => r.scope) };
-  }
-
   return {
     addBannedWordTool,
     removeBannedWordTool,
     addCustomWordTool,
     removeCustomWordTool,
     listDictionaryTool,
-    copyDictionaryTool,
   };
 }

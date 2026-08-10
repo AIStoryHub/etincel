@@ -389,8 +389,8 @@ test("an inflected form already listed as its own corpus entry is not double-cou
 test("strong specificity/groundedness caps the tier: soft tells alone can't push dense, named, concrete writing past yellow (regression: strengths were pure information, never fed back into the score)", () => {
   const groundedButFlagged = [
     "Q3 revenue grew 4.2% to $1.8 billion, driven by a 340-basis-point margin improvement at the Northeast hub.",
-    "Priya Malhotra's team cut fulfillment time from 6.3 days to 2.1 days between January and March 2026 by rerouting 60% of orders through the Newark facility, and however imperfect the model, it caught the March slowdown two weeks before Q2 closed.",
-    "However, the elasticity framework held up: fixed costs stayed at $412,000 monthly across all twelve regions, and the 8% churn drop in April tracked with the loyalty-program rollout on the 14th, itself built on the same framework Priya shipped last June.",
+    "Priya Malhotra's team cut fulfillment time from 6.3 days to 2.1 days between January and March 2026 by rerouting 60% of orders through the Newark facility, and the model therefore caught the March slowdown two weeks before Q2 closed.",
+    "Therefore, the elasticity framework held up: fixed costs stayed at $412,000 monthly across all twelve regions, and the 8% churn drop in April tracked with the loyalty-program rollout on the 14th, itself built on the same framework Priya shipped last June.",
   ].join("\n\n");
   const result = auditText(groundedButFlagged);
   assert.ok(result.findings.some((f) => f.scored), "expected this piece to still pick up scored findings");

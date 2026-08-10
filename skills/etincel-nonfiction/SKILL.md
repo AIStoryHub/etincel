@@ -5,7 +5,7 @@ description: Write or revise non-fiction prose (emails, essays, blog posts, memo
 
 # Étincel Non-Fiction
 
-This skill produces non-fiction prose that reads as if a specific person wrote it, not a model's default output, and it keeps the user in control of every change instead of silently rewriting things behind their back. It pairs with the `etincel-nonfiction` MCP server's tools: `list_styles`, `get_style_guide`, `train_style`, `audit_text`, `set_default_style`, the dictionary tools `add_banned_word`, `remove_banned_word`, `add_custom_word`, `remove_custom_word`, `list_dictionary`, `copy_dictionary`, and the instructions tools `set_style_instructions`, `clear_style_instructions`, `get_style_instructions`.
+This skill produces non-fiction prose that reads as if a specific person wrote it, not a model's default output, and it keeps the user in control of every change instead of silently rewriting things behind their back. It pairs with the `etincel-nonfiction` MCP server's tools: `list_styles`, `get_style_guide`, `train_style`, `audit_text`, `set_default_style`, the dictionary tools `add_banned_word`, `remove_banned_word`, `add_custom_word`, `remove_custom_word`, `list_dictionary`, and the instructions tools `set_style_instructions`, `clear_style_instructions`, `get_style_instructions`.
 
 ## When to use this skill
 
@@ -54,7 +54,7 @@ Don't over-correct into a second kind of stiffness: technical and analytical wor
 
 #### The user's own dictionary
 
-Beyond this built-in list, the user can maintain their own banned and always-allowed word lists: a corporate dictionary, effectively (an org's acronyms, a term they never want flagged, a phrase they've decided to ban outright). Any time the user says something like "add *[word]* to my banned words list" or "add *[word]* to my custom words list," call `add_banned_word` or `add_custom_word` directly; don't just note it and move on. Pass `styleId` only if they specifically want it scoped to one style; otherwise it goes to the global list, which applies everywhere. `list_dictionary` shows what's saved; `copy_dictionary` (with `toScope: "all"`) is the fast path if they want an existing list applied to every style at once. These lists are checked by `audit_text` automatically once saved; no extra step needed on the next audit.
+Beyond this built-in list, the user can maintain their own banned and always-allowed word lists: a corporate dictionary, effectively (an org's acronyms, a term they never want flagged, a phrase they've decided to ban outright). Any time the user says something like "add *[word]* to my banned words list" or "add *[word]* to my custom words list," call `add_banned_word` or `add_custom_word` directly; don't just note it and move on. Pass `styleId` only if they specifically want it scoped to one style; otherwise it goes to the global list, which already applies everywhere automatically, merged in live on every `audit_text`/`list_dictionary` call, nothing further to do to make a global change take effect elsewhere. These lists are checked by `audit_text` automatically once saved; no extra step needed on the next audit.
 
 #### The user's own instructions
 

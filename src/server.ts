@@ -6,11 +6,14 @@ import { createStylesTools } from "./tools/styles.js";
 import { fsVoiceStore } from "./engine/voiceStore.fs.js";
 import { createHttpPublicStyleSource } from "./engine/httpPublicStyleSource.js";
 import { auditTextTool } from "./tools/audit.js";
-import { findRepoConfig } from "./engine/repoConfig.js";
+import { findRepoConfig, REPO_STYLE_ID } from "./engine/repoConfig.js";
 import { fsDictionaryStore } from "./engine/dictionaryStore.fs.js";
 import { createDictionaryTools } from "./tools/dictionary.js";
 import { fsInstructionsStore } from "./engine/instructionsStore.fs.js";
 import { createInstructionsTools } from "./tools/instructions.js";
+import { mergeInstructions } from "./engine/instructionsStore.js";
+import { dialsToStats, personaGuideText } from "./engine/dials.js";
+import { describeStats } from "./engine/textStats.js";
 
 const {
   listStylesTool,
@@ -31,8 +34,7 @@ const {
   addCustomWordTool,
   removeCustomWordTool,
   listDictionaryTool,
-  copyDictionaryTool,
-} = createDictionaryTools(fsDictionaryStore, fsVoiceStore);
+} = createDictionaryTools(fsDictionaryStore);
 
 const { setStyleInstructionsTool, clearStyleInstructionsTool, getStyleInstructionsTool } =
   createInstructionsTools(fsInstructionsStore);
@@ -78,7 +80,7 @@ const server = new McpServer(
   {
     name: "etincel-nonfiction",
     title: "Étincel",
-    version: "0.1.1",
+    version: "0.1.2",
     description: "Gives Claude a trained writing voice, and audits drafts for AI writing tells.",
     websiteUrl: "https://etincel.ai",
     icons: ICONS,
@@ -105,18 +107,40 @@ function errorResult(err: unknown) {
   return { content: [{ type: "text" as const, text: `Error: ${message}` }], isError: true };
 }
 
+/** Every tool that targets one existing style takes it as `styleId`; a
+ * handful of older callers may still send the pre-unification name (`id`,
+ * or `presetId` for fork_style). Both are accepted here so an existing
+ * integration doesn't break, but `styleId` is the one every tool's schema
+ * and description actually documents. */
+function resolveStyleId(styleId: string | undefined, deprecatedAlias: string | undefined): string {
+  const resolved = styleId ?? deprecatedAlias;
+  if (!resolved) throw new Error("styleId is required.");
+  return resolved;
+}
+
 server.registerTool(
   "list_styles",
   {
     title: "List writing styles",
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
-      "List every available style: premade emotional-tone presets plus any voices the user has trained from their own samples. Call this before drafting or revising non-fiction prose if the caller hasn't been told which style to use, or if the user asks what styles exist.",
+      "List every available style: premade emotional-tone presets, any voices the user has trained from their own samples, and (if a .etincelrc in the current repo defines one) the shared team style, id 'team'. Call this before drafting or revising non-fiction prose if the caller hasn't been told which style to use, or if the user asks what styles exist.",
     inputSchema: {},
   },
   async () => {
     try {
-      return json(await listStylesTool());
+      const result = await listStylesTool();
+      const styles: { id: string; kind: string; name: string; summary: string }[] = [...result.styles];
+      const repoConfig = findRepoConfig(process.cwd());
+      if (repoConfig?.style) {
+        styles.push({
+          id: REPO_STYLE_ID,
+          kind: "repo-style",
+          name: repoConfig.style.name,
+          summary: `Defined in this repo's ${repoConfig.path.split("/").pop()}, shared with the whole team.`,
+        });
+      }
+      return json({ defaultStyleId: result.defaultStyleId, styles });
     } catch (err) {
       return errorResult(err);
     }
@@ -129,12 +153,40 @@ server.registerTool(
     title: "Get a style guide",
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
-      "Fetch the full drafting guide for one style (a preset id like 'direct-warm', or the id of a trained voice). Returns prose instructions to follow while drafting or revising: sentence rhythm, tone dials, and (for trained voices) the writer's own measured habits. Read this before drafting; it is context for you, the drafting model, not a tool that writes prose itself.",
-    inputSchema: { styleId: z.string().describe("Preset id or trained voice id, from list_styles.") },
+      "Fetch the full drafting guide for one style (a preset id like 'direct-warm', the id of a trained voice, or 'team' for the shared style a .etincelrc in the current repo defines, if any). Returns prose instructions to follow while drafting or revising: sentence rhythm, tone dials, and (for trained voices) the writer's own measured habits. If a .etincelrc in the current repo sets team-wide instructions, those are folded into every style's instructions, not just 'team''s. Read this before drafting; it is context for you, the drafting model, not a tool that writes prose itself.",
+    inputSchema: { styleId: z.string().describe("Preset id, trained voice id, or 'team', from list_styles.") },
   },
   async ({ styleId }) => {
     try {
-      return json(await getStyleGuideTool(styleId));
+      const repoConfig = findRepoConfig(process.cwd());
+
+      if (styleId === REPO_STYLE_ID) {
+        if (!repoConfig?.style) {
+          throw new Error(
+            `No team style is defined in this repo's .etincelrc. Call list_styles to see available options, or add a "style" block to .etincelrc to define one.`
+          );
+        }
+        const { formality, warmth, directness, entropy } = repoConfig.style.dials;
+        const guide = [personaGuideText({ formality, warmth, directness }), describeStats(dialsToStats(repoConfig.style.dials), 0)].join(
+          " "
+        );
+        const ownInstructions = await getStyleInstructionsTool(REPO_STYLE_ID);
+        const instructions = mergeInstructions(repoConfig.instructions ?? "", ownInstructions.effective ?? "");
+        return json({
+          id: REPO_STYLE_ID,
+          kind: "repo-style" as const,
+          name: repoConfig.style.name,
+          guide,
+          dials: { formality, warmth, directness, entropy },
+          instructions: instructions.length > 0 ? instructions : undefined,
+        });
+      }
+
+      const result = await getStyleGuideTool(styleId);
+      if (repoConfig?.instructions) {
+        return json({ ...result, instructions: mergeInstructions(repoConfig.instructions, result.instructions ?? "") });
+      }
+      return json(result);
     } catch (err) {
       return errorResult(err);
     }
@@ -154,17 +206,18 @@ server.registerTool(
         .array(z.string())
         .min(1)
         .describe("One or more raw text samples of the user's own writing, at least a few paragraphs each for a reliable read."),
-      id: z
+      styleId: z
         .string()
         .optional()
         .describe(
           "Id of an existing trained voice to train further, from list_styles. Use this to precisely target a voice you want to add more samples to, especially if it's been renamed. Omitted: falls back to matching an existing voice by name (case/whitespace-insensitive), or creating a new one if none matches."
         ),
+      id: z.string().optional().describe("Deprecated alias for styleId."),
     },
   },
-  async ({ name, samples, id }) => {
+  async ({ name, samples, styleId, id }) => {
     try {
-      return json(await trainStyleTool(name, samples, id));
+      return json(await trainStyleTool(name, samples, styleId ?? id));
     } catch (err) {
       return errorResult(err);
     }
@@ -202,16 +255,17 @@ server.registerTool(
     description:
       "Rename a trained voice or adjust its dials in place, keeping its id (and default-style pointer) stable. Persona dials (formality, warmth, directness) always apply; the mechanical dials only take effect if the voice has no writing samples (was built from dials, not trained). A sample-trained voice keeps its measured mechanical stats regardless of what's passed here.",
     inputSchema: {
-      id: z.string().describe("Id of the trained voice to edit, from list_styles."),
+      styleId: z.string().optional().describe("Id of the trained voice to edit, from list_styles."),
+      id: z.string().optional().describe("Deprecated alias for styleId."),
       name: z.string().describe("New (or unchanged) name for this voice."),
       dials: z
         .object(dialsSchema)
         .describe("The 11 dial values (3 persona + 8 mechanical) that define this style's voice."),
     },
   },
-  async ({ id, name, dials }) => {
+  async ({ styleId, id, name, dials }) => {
     try {
-      return json(await updateStyleTool(id, name, dials));
+      return json(await updateStyleTool(resolveStyleId(styleId, id), name, dials));
     } catch (err) {
       return errorResult(err);
     }
@@ -226,15 +280,17 @@ server.registerTool(
     description:
       "Copy a style into a new trained voice under the given name, seeded with its persona dials and drafting guide. Two kinds of source: a premade preset (e.g. 'pr-review', 'linkedin-post'), or another installer's style published publicly on the hosted gallery, addressed as \"handle/slug\" (e.g. \"jpleblanc/blunt-memo\", the same address shown on its public page at etincel.ai/v/handle/slug). A public-style fork makes one network call to etincel.ai to fetch it; a preset fork never leaves this install. The fork is then a normal trained voice: retrain it with train_style from real samples, or hand-tune it with update_style, without touching the original.",
     inputSchema: {
-      presetId: z
+      styleId: z
         .string()
+        .optional()
         .describe('Id of the preset to fork (from list_styles), or a published style\'s "handle/slug" address.'),
+      presetId: z.string().optional().describe("Deprecated alias for styleId."),
       name: z.string().describe("Name for the new trained voice."),
     },
   },
-  async ({ presetId, name }) => {
+  async ({ styleId, presetId, name }) => {
     try {
-      return json(await forkStyleTool(presetId, name));
+      return json(await forkStyleTool(resolveStyleId(styleId, presetId), name));
     } catch (err) {
       return errorResult(err);
     }
@@ -247,11 +303,14 @@ server.registerTool(
     title: "Delete a trained voice",
     annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
     description: "Permanently delete a trained voice profile by id. Does not affect premade presets.",
-    inputSchema: { id: z.string().describe("Id of the trained voice to delete, from list_styles.") },
+    inputSchema: {
+      styleId: z.string().optional().describe("Id of the trained voice to delete, from list_styles."),
+      id: z.string().optional().describe("Deprecated alias for styleId."),
+    },
   },
-  async ({ id }) => {
+  async ({ styleId, id }) => {
     try {
-      return json(await deleteStyleTool(id));
+      return json(await deleteStyleTool(resolveStyleId(styleId, id)));
     } catch (err) {
       return errorResult(err);
     }
@@ -266,12 +325,16 @@ server.registerTool(
     description:
       "Set which style (preset or trained voice) should be used by default for this user going forward, so it doesn't need to be re-specified every time.",
     inputSchema: {
-      id: z.string().describe("Id of the style (preset or trained voice) to set as default, from list_styles."),
+      styleId: z
+        .string()
+        .optional()
+        .describe("Id of the style (preset or trained voice) to set as default, from list_styles."),
+      id: z.string().optional().describe("Deprecated alias for styleId."),
     },
   },
-  async ({ id }) => {
+  async ({ styleId, id }) => {
     try {
-      return json(await setDefaultStyleTool(id));
+      return json(await setDefaultStyleTool(resolveStyleId(styleId, id)));
     } catch (err) {
       return errorResult(err);
     }
@@ -281,18 +344,22 @@ server.registerTool(
 server.registerTool(
   "check_voice_match",
   {
-    title: "Check a draft against a trained voice",
+    title: "Check a draft's rhythm against a trained voice",
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     description:
-      "Compare a piece of drafted text's measured sentence/paragraph rhythm against a trained or custom voice's baseline (sentence length, rhythm variance, paragraph variance, contraction rate, em-dash use, fragment use, question use, structural entropy). Use this after drafting in a voice to check whether the draft actually landed close to it, instead of just eyeballing it. Returns a verdict, a match score, and specific dials that drifted with a plain-language note for each. Only works against trained or custom voices (from train_style, create_style_from_dials, or fork_style), not bare presets, which have no measured baseline; fork_style a preset first if you want to check a draft against one.",
+      "Compare a piece of drafted text's measured sentence/paragraph rhythm and mechanics against a trained or custom voice's baseline (sentence length, rhythm variance, paragraph variance, contraction rate, em-dash use, fragment use, question use, structural entropy). Use this after drafting in a voice to check whether the draft's rhythm actually landed close to it, instead of just eyeballing it. Returns a verdict ('on rhythm' / 'some drift' / 'off rhythm'), a match score, specific dials that drifted with a plain-language note for each, and a caveat you should relay alongside the verdict: this is a rhythm/mechanics measurement, not an authorship or AI-detection check, so text merely shaped like the voice (by anyone, or any tool) can come back 'on rhythm', and a genuine off-voice draft by the target writer can still come back drifted. Confidence comes back \"low\" on short input, since a handful of sentences isn't enough to read rhythm reliably; treat a low-confidence verdict as provisional. Only works against trained or custom voices (from train_style, create_style_from_dials, or fork_style), not bare presets, which have no measured baseline; fork_style a preset first if you want to check a draft against one.",
     inputSchema: {
-      id: z.string().describe("Id of the trained or custom voice to compare against, from list_styles."),
+      styleId: z
+        .string()
+        .optional()
+        .describe("Id of the trained or custom voice to compare against, from list_styles."),
+      id: z.string().optional().describe("Deprecated alias for styleId."),
       text: z.string().describe("The drafted text to check."),
     },
   },
-  async ({ id, text }) => {
+  async ({ styleId, id, text }) => {
     try {
-      return json(await checkVoiceMatchTool(id, text));
+      return json(await checkVoiceMatchTool(resolveStyleId(styleId, id), text));
     } catch (err) {
       return errorResult(err);
     }
@@ -307,13 +374,14 @@ server.registerTool(
     description:
       "Compare a piece of drafted text against a trained voice's own recent training samples for two kinds of self-repetition: opening the same way (\"you've opened this way in 4 of your last 6 pieces\"), and reusing a characteristic phrase across several of them. This is about the writer's own recurring habits, not AI-writing tells; use audit_text for those. Only meaningful for a voice trained from real samples (train_style) with at least 3 recorded samples; dial-tuned or preset-forked voices, or ones with too little history yet, come back with an empty findings list rather than an error. Only the local install tracks sample history today, so a hosted/remote connection may always report zero history. A signal to weigh, same trust-mode spirit as audit_text: never rewrite the draft on the strength of this alone.",
     inputSchema: {
-      id: z.string().describe("Id of the trained voice to compare against, from list_styles."),
+      styleId: z.string().optional().describe("Id of the trained voice to compare against, from list_styles."),
+      id: z.string().optional().describe("Deprecated alias for styleId."),
       text: z.string().describe("The drafted text to check."),
     },
   },
-  async ({ id, text }) => {
+  async ({ styleId, id, text }) => {
     try {
-      return json(await checkSelfRepetitionTool(id, text));
+      return json(await checkSelfRepetitionTool(resolveStyleId(styleId, id), text));
     } catch (err) {
       return errorResult(err);
     }
@@ -464,32 +532,6 @@ server.registerTool(
   async ({ styleId }) => {
     try {
       return json(await listDictionaryTool(styleId));
-    } catch (err) {
-      return errorResult(err);
-    }
-  }
-);
-
-server.registerTool(
-  "copy_dictionary",
-  {
-    title: "Copy a dictionary to another style (or every style)",
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-    description:
-      "Copy one scope's banned/custom word lists onto another scope, overwriting the destination's lists outright. Pass toScope: 'all' to fan a dictionary out to every known style (every trained voice plus every preset id) in one call: the easy way to make one org dictionary apply everywhere. Omit fromStyleId to copy from the global list.",
-    inputSchema: {
-      toScope: z
-        .string()
-        .describe("Destination style id, or the literal string 'all' to copy onto every known style."),
-      fromStyleId: z
-        .string()
-        .optional()
-        .describe("Style id to copy from, from list_styles. Omit to copy from the global list."),
-    },
-  },
-  async ({ toScope, fromStyleId }) => {
-    try {
-      return json(await copyDictionaryTool(toScope, fromStyleId));
     } catch (err) {
       return errorResult(err);
     }

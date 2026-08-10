@@ -28,8 +28,8 @@ AI-drafted prose has a recognizable shape: uniform paragraphs, hedged authority,
 
 ## What's in here
 
-- **An MCP server** (`src/server.ts`) exposing twenty tools:
-  - `list_styles`: premade tone presets plus any voices you've trained
+- **An MCP server** (`src/server.ts`) exposing nineteen tools:
+  - `list_styles`: premade tone presets, any voices you've trained, and (if a repo-local `.etincelrc` defines one) a shared team style
   - `get_style_guide`: the drafting instructions for one style
   - `train_style`: learn a voice from your own writing samples (sentence rhythm, contraction rate, em-dash habits, paragraph variance, recurring phrasing: measured, not guessed)
   - `create_style_from_dials`: build a style from explicit formality/warmth/directness and mechanical dials instead of samples
@@ -37,13 +37,12 @@ AI-drafted prose has a recognizable shape: uniform paragraphs, hedged authority,
   - `fork_style`: copy a preset's dials and guide into a new trained voice you can retrain or hand-tune, or fork another installer's style once they've published it publicly on the hosted gallery (addressed as `handle/slug`, e.g. `jpleblanc/blunt-memo`, the same address shown on its public page at `etincel.ai/v/handle/slug`); a public-style fork makes one network call to `etincel.ai` to fetch it, a preset fork never leaves this install
   - `delete_style`: permanently remove a trained voice
   - `set_default_style`: remember which style to use without repeating yourself
-  - `check_voice_match`: compare a draft's measured rhythm against a trained voice's baseline
+  - `check_voice_match`: compare a draft's measured rhythm against a trained voice's baseline. A rhythm/mechanics check, not an authorship or AI-detection check, and low-confidence on short input
   - `check_self_repetition`: compare a draft against a voice's own recent training samples for habits, not AI tells: the same opener, or a phrase, recurring across several past pieces ("you've opened this way in 4 of your last 6 pieces"). Local install only for now
   - `audit_text`: a deterministic, rules-based scan for AI tells, returning a tier, specific findings with severity, and a strengths signal (specificity, concrete-vs-abstract ratio, sentence-rhythm variation) so fixes don't flatten the prose
   - `add_banned_word` / `remove_banned_word`: maintain your own banned-vocabulary list, checked by `audit_text` alongside the built-in corpus
   - `add_custom_word` / `remove_custom_word`: maintain a "never flag this" list: an org's own acronyms or house terms, the corporate-dictionary case
   - `list_dictionary`: see a scope's banned/custom words, and (for a style) what actually applies once merged with the global list
-  - `copy_dictionary`: copy one scope's word lists onto another style, or fan them out to every known style in one call
   - `set_style_instructions` / `clear_style_instructions` / `get_style_instructions`: save, remove, or read free-text drafting rules for a scope (required elements, forbidden topics, format constraints), merged into `get_style_guide` the same way dictionaries merge into `audit_text`
 - **A Claude Code / Claude Desktop skill** (`skills/etincel-nonfiction/`) that uses those tools when you're drafting or revising non-fiction prose of any meaningful length.
 
@@ -51,7 +50,7 @@ Trained voices, dictionaries, and your default style live locally in `~/.etincel
 
 ### Custom dictionaries
 
-Beyond the built-in AI-tell corpus, you can maintain your own banned and "always allowed" word lists: just tell Claude (or any MCP client) things like "add *[word]* to my banned words list" or "add *[word]* to my custom words list, it's one of ours." Each list lives at a *scope*: `global` (applies everywhere, the default when no style is named) or a specific style id, whose list is merged on top of `global` when you audit against that style. `list_dictionary` shows what's saved for a scope, plus the effective merged list for a style. `copy_dictionary` copies one scope's lists onto another: pass `toScope: "all"` to push a dictionary out to every trained voice and preset in one call, the easy way to keep an org's word list in sync across styles.
+Beyond the built-in AI-tell corpus, you can maintain your own banned and "always allowed" word lists: just tell Claude (or any MCP client) things like "add *[word]* to my banned words list" or "add *[word]* to my custom words list, it's one of ours." Each list lives at a *scope*: `global` (applies everywhere, the default when no style is named) or a specific style id, whose list is merged on top of `global` when you audit against that style. `list_dictionary` shows what's saved for a scope, plus the effective merged list for a style. Editing the global list is already the way to keep a word in sync across every style: it's merged in automatically, live, every time `audit_text` or `list_dictionary` runs.
 
 ## Install
 
@@ -150,20 +149,59 @@ workflows:
 
 It isn't published yet. Until then, copy the `commands.lint` and `jobs.lint` blocks from `orb.yml` into your own `.circleci/config.yml`.
 
-### Repo-local config
+### Repo-local config: dictionary, instructions, and a shared team style
 
-A team's banned/allowed words don't have to live only in an account setting. Drop a `.etincelrc` (or `.etincelrc.json` / `etincel.config.json`) at the repo root:
+A team's rules don't have to live only in each person's local `~/.etincel/`. Drop a `.etincelrc` (or `.etincelrc.json` / `etincel.config.json`) at the repo root and it's picked up automatically by the CLI and by the local (stdio) server, reviewable in code review and versioned instead of invisible and gone when someone leaves:
 
 ```json
 {
   "bannedWords": ["Acme Cloud Platform"],
   "allowedWords": ["leverage"],
   "register": "docs",
-  "threshold": "orange"
+  "threshold": "orange",
+  "instructions": "Always include a one-line CTA at the end.",
+  "style": {
+    "name": "House Voice",
+    "dials": {
+      "formality": 6,
+      "warmth": 4,
+      "directness": 7,
+      "sentenceLength": 40,
+      "sentenceRhythmVariance": 50,
+      "paragraphVariance": 30,
+      "contractionUse": 20,
+      "emDashUse": 0,
+      "fragmentTolerance": 10,
+      "questionUse": 5,
+      "entropy": 60
+    }
+  }
 }
 ```
 
-Reviewable and versioned instead of invisible and gone when someone leaves. It's picked up automatically by the CLI and by the local (stdio) `audit_text` tool, merged alongside whatever's in your account/style dictionary; `register`/`threshold` act as repo-wide defaults that an explicit `--register`/`--threshold` flag still overrides. The hosted server doesn't use this (it has no local repo to look in).
+- `bannedWords` / `allowedWords` merge alongside whatever's in your account/style dictionary; `register`/`threshold` act as repo-wide defaults that an explicit `--register`/`--threshold` flag still overrides.
+- `instructions` is free text, folded into `get_style_guide`'s `instructions` for *every* style, not just the team one, ahead of your own account-level global instructions: the team-wide equivalent of `set_style_instructions` with no `styleId`, but committed to the repo instead of living in one person's account.
+- `style` defines a shared "house voice" from dials, addressable everywhere as `styleId: "team"` (`get_style_guide`, and once forked into a real trained voice with `fork_style`, everywhere else too) so a team has one already-tuned starting voice from day one instead of everyone hand-training or hand-tuning their own from scratch. `list_styles` includes it automatically when a `.etincelrc` in the current repo defines one.
+
+The hosted server doesn't use any of this (it has no local repo to look in).
+
+### Sharing config across a team without committing it
+
+`.etincelrc` is the versioned, code-reviewable layer above; the layer beneath it is `ETINCEL_HOME`, an environment variable that points the local (stdio) server and CLI at a directory to use instead of the default `~/.etincel/`. Point every teammate's `ETINCEL_HOME` at the same shared, synced, or mounted directory (a repo-external path everyone's machine can read, e.g. something synced by your usual file-sharing setup) and trained voices, the default style, and account-level instructions/dictionaries are shared too, not just the `.etincelrc`-committed subset:
+
+```json
+{
+  "mcpServers": {
+    "etincel-nonfiction": {
+      "command": "node",
+      "args": ["/path/to/etincel/dist/server.js"],
+      "env": { "ETINCEL_HOME": "/path/to/shared/etincel-home" }
+    }
+  }
+}
+```
+
+Nothing else to export or import: pointing `ETINCEL_HOME` at the same directory *is* the sync, the same way it already is for a single person's `~/.etincel/`.
 
 ## Development
 
