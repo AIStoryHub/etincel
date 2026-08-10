@@ -80,7 +80,7 @@ const server = new McpServer(
   {
     name: "etincel-nonfiction",
     title: "Étincel",
-    version: "0.1.2",
+    version: "0.5.0",
     description: "Gives Claude a trained writing voice, and audits drafts for AI writing tells.",
     websiteUrl: "https://etincel.ai",
     icons: ICONS,

@@ -38,14 +38,14 @@ jobs:
       - checkout
       - install
       - run: npm run build
-      # Dogfoods this repo's own CLI against its own prose (README.md and
-      # docs/*.md), the same scope as .github/workflows/lint.yml. Non-blocking
-      # for the same reason that workflow uses continue-on-error: true, this
-      # exists to surface findings, not to gate merges on prose that hasn't
-      # been cleaned up against it yet.
+      # Dogfoods this repo's own CLI against its own prose (README.md, the
+      # same scope as .github/workflows/lint.yml). Non-blocking for the same
+      # reason that workflow uses continue-on-error: true, this exists to
+      # surface findings, not to gate merges on prose that hasn't been
+      # cleaned up against it yet.
       - run:
-          name: "Étincel self-lint (README + docs)"
-          command: node dist/cli.js lint README.md docs/*.md --threshold orange || true
+          name: "Étincel self-lint (README)"
+          command: node dist/cli.js lint README.md --threshold orange || true
 
   validate-orb:
     executor: node
