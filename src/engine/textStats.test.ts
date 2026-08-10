@@ -83,6 +83,17 @@ test("topWords ranks an uncommon recurring word above a common word repeated the
   assert.ok(genericRank === -1 || distinctiveRank < genericRank);
 });
 
+test("topWords filters out words that are usually capitalized mid-sentence (topic/proper nouns, not word choices)", () => {
+  const text = [
+    "We migrated the retry logic onto Kubernetes last quarter.",
+    "Running everything on Kubernetes cut our on-call load in half.",
+    "The team now trusts Kubernetes with every retry attempt.",
+  ].join(" ");
+  const stats = computeTextStats(text);
+  assert.ok(!stats.topWords.includes("kubernetes"), "a mostly-capitalized topic entity should not read as a distinctive word choice");
+  assert.ok(stats.topWords.includes("retry"), "an ordinary lowercase recurring word should still surface");
+});
+
 test("mergeStats with a single sample returns it unchanged", () => {
   const stats = computeTextStats("Some sample text here for testing purposes only.");
   const merged = mergeStats([stats]);
@@ -150,12 +161,13 @@ test("describeStats surfaces recurring phrasing when topBigrams is non-empty", (
   assert.match(description, /recurring phrasing/i);
 });
 
-test("describeStats surfaces distinctive word choices when topWords is non-empty", () => {
+test("describeStats surfaces distinctive word choices when topWords is non-empty and sampleCount clears the minimum", () => {
   const stats = computeTextStats(
     "Priya flagged the retry issue. The retry issue came back Friday. Priya was right about the retry issue."
   );
-  const description = describeStats(stats);
-  assert.match(description, /distinctive word choices/i);
+  assert.doesNotMatch(describeStats(stats), /distinctive word choices/i, "no sampleCount given defaults to gated off");
+  assert.doesNotMatch(describeStats(stats, 2), /distinctive word choices/i, "two samples is still below the minimum");
+  assert.match(describeStats(stats, 3), /distinctive word choices/i);
 });
 
 test("structuralEntropy rewards varied sentence openers and punctuation variety over repetitive uniform structure", () => {

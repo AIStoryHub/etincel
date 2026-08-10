@@ -75,14 +75,22 @@ test("whole-piece rhythm findings omit matches (no single span to locate)", () =
   assert.equal(rhythmFinding!.matches, undefined);
 });
 
-test("a soft-flag term is scored on a single occurrence (orange, not yellow)", () => {
-  const result = auditText(
+test("a soft-flag term is context-dependent: found but not scored on a single occurrence, scored once it recurs", () => {
+  const once = auditText(
     "On the other hand, the board's decision changed how we plan quarterly reviews."
   );
-  const softFinding = result.findings.find((f) => f.term === "on the other hand");
-  assert.ok(softFinding, "expected a finding for 'on the other hand'");
-  assert.equal(softFinding!.confidence, "orange");
-  assert.equal(softFinding!.scored, true);
+  const singleFinding = once.findings.find((f) => f.term === "on the other hand");
+  assert.ok(singleFinding, "expected a finding for 'on the other hand' even on a single occurrence");
+  assert.equal(singleFinding!.confidence, "orange");
+  assert.equal(singleFinding!.scored, false);
+
+  const twice = auditText(
+    "On the other hand, the board changed course. On the other hand, so did the budget."
+  );
+  const repeatedFinding = twice.findings.find((f) => f.term === "on the other hand");
+  assert.ok(repeatedFinding);
+  assert.equal(repeatedFinding!.count, 2);
+  assert.equal(repeatedFinding!.scored, true);
 });
 
 test("'to name a few' flags the verb-form list-closer idiom without touching 'name' as a noun", () => {
@@ -250,6 +258,39 @@ test("the 'docs' register suppresses markdown-structure detectors that are false
   );
 });
 
+test("fenced code blocks are blanked out before auditing, so code content never scores as prose", () => {
+  const text = [
+    "We should leverage the retry queue here.",
+    "",
+    "```js",
+    "// leverage this cache, it is robust and seamless",
+    "function harness() { return leverage(robust, seamless); }",
+    "```",
+  ].join("\n");
+  const result = auditText(text);
+  const leverage = result.findings.find((f) => f.term === "leverage");
+  assert.ok(leverage, "expected the prose 'leverage' outside the fence to still be flagged");
+  assert.equal(leverage!.count, 1, "the five occurrences inside the fenced block should not be counted");
+});
+
+test("inline code spans are blanked out before auditing", () => {
+  const text = "Run `leverage()` from the CLI; don't leverage untested config in production.";
+  const result = auditText(text);
+  const leverage = result.findings.find((f) => f.term === "leverage");
+  assert.ok(leverage);
+  assert.equal(leverage!.count, 1, "the inline-code occurrence should not be counted");
+});
+
+test("blanking code preserves character offsets so matches still locate correctly in the original text", () => {
+  const text = "`leverage()` aside, we still leverage our partnerships daily.";
+  const result = auditText(text);
+  const finding = result.findings.find((f) => f.term === "leverage");
+  assert.ok(finding);
+  assert.equal(finding!.matches?.length, 1);
+  const { start, end } = finding!.matches![0];
+  assert.equal(text.slice(start, end).toLowerCase(), "leverage");
+});
+
 test("register suppression only applies to the requested register, not others", () => {
   const text = "# Getting Started\n\nInstall the package, then run the setup script.";
   const emailRegister = auditText(text, { register: "email" });
@@ -275,6 +316,21 @@ test("extraBannedWords does not double-report a term already banned by the built
   assert.equal(matches[0].category, "verb");
 });
 
+test("extraBannedWords upgrades a softer built-in (orange) term to an always-scored hard ban instead of being dropped by it (regression: a user's explicit ban was silently downgraded to the corpus's cluster-only treatment)", () => {
+  const text = "Let's circle back on this next week.";
+  const withoutCustom = auditText(text);
+  const builtIn = withoutCustom.findings.find((f) => f.term === "circle back");
+  assert.ok(builtIn);
+  assert.equal(builtIn!.confidence, "orange");
+  assert.equal(builtIn!.scored, false, "a single occurrence of the built-in soft-flag term isn't scored on its own");
+
+  const withCustom = auditText(text, { extraBannedWords: ["circle back"] });
+  const matches = withCustom.findings.filter((f) => f.term === "circle back");
+  assert.equal(matches.length, 1, "expected exactly one finding, not one from the corpus and one from the custom entry");
+  assert.equal(matches[0].confidence, "red");
+  assert.equal(matches[0].scored, true, "an explicit user ban should always score, even on a single occurrence");
+});
+
 test("allowedWords wins over a conflicting extraBannedWords entry for the same term", () => {
   const text = "Our OKF export ran clean this morning.";
   const result = auditText(text, { extraBannedWords: ["OKF"], allowedWords: ["okf"] });
@@ -297,6 +353,71 @@ test("a single isolated finding no longer swings from orange/red to red purely b
   const threeHundredWords = auditText(pad(292));
   const thousandWords = auditText(pad(992));
   assert.equal(threeHundredWords.tier, thousandWords.tier);
+});
+
+test("a single-word corpus term capitalized mid-sentence is treated as a likely proper noun and excluded (regression: 'Neon' the Postgres provider false-positived against the 'neon' imagery-cliche term)", () => {
+  const clicheOnly = auditText("The alley glowed with neon signs and rain-slicked pavement.");
+  const cliche = clicheOnly.findings.find((f) => f.term === "neon");
+  assert.ok(cliche, "expected the lowercase imagery cliche to still be flagged");
+  assert.equal(cliche!.count, 1);
+
+  const properNounOnly = auditText("Dictionaries are scoped to their own account via Postgres (Neon, provisioned automatically).");
+  assert.ok(!properNounOnly.findings.some((f) => f.term === "neon"), "expected the capitalized product name to be excluded");
+
+  const mixed = auditText("Bathed in neon glow, the server talks to Neon, the Postgres provider, over TLS.");
+  const mixedFinding = mixed.findings.find((f) => f.term === "neon");
+  assert.ok(mixedFinding, "expected the lowercase occurrence to still count even alongside the excluded one");
+  assert.equal(mixedFinding!.count, 1);
+});
+
+test("corpus terms match their inflected forms, not just the exact listed word", () => {
+  const result = auditText("These frameworks are robustly tested against every edge case we found.");
+  assert.ok(result.findings.some((f) => f.term === "robust" && f.count === 1), "expected 'robustly' to match the 'robust' entry");
+  assert.ok(result.findings.some((f) => f.term === "framework" && f.count === 1), "expected 'frameworks' to match the 'framework' entry");
+});
+
+test("an inflected form already listed as its own corpus entry is not double-counted under the base term", () => {
+  const result = auditText("We dived right in, and the team dives into new data every sprint, still diving in deep.");
+  const dive = result.findings.find((f) => f.term === "dive");
+  const diving = result.findings.find((f) => f.term === "diving");
+  assert.ok(dive, "expected 'dived'/'dives' to match the 'dive' entry");
+  assert.equal(dive!.count, 2);
+  assert.ok(diving, "expected 'diving' to keep matching its own explicit entry");
+  assert.equal(diving!.count, 1);
+});
+
+test("strong specificity/groundedness caps the tier: soft tells alone can't push dense, named, concrete writing past yellow (regression: strengths were pure information, never fed back into the score)", () => {
+  const groundedButFlagged = [
+    "Q3 revenue grew 4.2% to $1.8 billion, driven by a 340-basis-point margin improvement at the Northeast hub.",
+    "Priya Malhotra's team cut fulfillment time from 6.3 days to 2.1 days between January and March 2026 by rerouting 60% of orders through the Newark facility, and however imperfect the model, it caught the March slowdown two weeks before Q2 closed.",
+    "However, the elasticity framework held up: fixed costs stayed at $412,000 monthly across all twelve regions, and the 8% churn drop in April tracked with the loyalty-program rollout on the 14th, itself built on the same framework Priya shipped last June.",
+  ].join("\n\n");
+  const result = auditText(groundedButFlagged);
+  assert.ok(result.findings.some((f) => f.scored), "expected this piece to still pick up scored findings");
+  assert.ok(result.strengths.specificityPer1000Words >= 15);
+  assert.ok(result.strengths.concreteAbstractRatio >= 2);
+  assert.notEqual(result.tier, "orange");
+  assert.notEqual(result.tier, "red");
+});
+
+test("the strengths cap never applies when a hard_evidence finding (an unambiguous assistant artifact) is present, no matter how specific the rest of the piece is", () => {
+  const specificButLeaked = [
+    "Q3 revenue grew 4.2% to $1.8 billion, driven by a 340-basis-point margin improvement at the Northeast hub.",
+    "Priya Malhotra's team cut fulfillment time from 6.3 days to 2.1 days between January and March 2026 by rerouting 60% of orders through the Newark facility.",
+    "As an AI language model, I don't have access to real-time data, but the April numbers should track close to this.",
+  ].join("\n\n");
+  const result = auditText(specificButLeaked);
+  assert.ok(result.strengths.specificityPer1000Words >= 15);
+  assert.ok(result.strengths.concreteAbstractRatio >= 2, "expected both strength signals to clear the cap's own bar");
+  assert.ok(
+    result.findings.some((f) => f.scored && f.term.includes("cutoff-date hedge")),
+    "expected the cutoff-date disclaimer to be a scored hard_evidence finding"
+  );
+  // Without the hard_evidence exemption, clearing both strength thresholds
+  // would cap this at "yellow" (see the test above); with an unambiguous
+  // assistant artifact present, the raw, uncapped tier applies instead.
+  assert.notEqual(result.tier, "yellow");
+  assert.notEqual(result.tier, "green");
 });
 
 test("repeated occurrences of a term increase score but with diminishing (capped) weight", () => {

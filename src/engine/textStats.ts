@@ -107,6 +107,34 @@ function topByLift(
     .map(({ token }) => token);
 }
 
+/** Fraction of a lowercase word's mid-sentence occurrences (excluding each
+ * sentence's own opener, whose capitalization says nothing about the word
+ * itself) that are capitalized. High values mean the word is usually a
+ * proper noun or topic entity ("React", "Kubernetes", a person's name), not
+ * a word choice the writer reached for: topWords filters those out below,
+ * see PROPER_NOUN_CAP_RATE_THRESHOLD. */
+const PROPER_NOUN_CAP_RATE_THRESHOLD = 0.6;
+
+function midSentenceCapitalizationRates(sentences: string[]): Map<string, number> {
+  const counts = new Map<string, { total: number; capitalized: number }>();
+  for (const sentence of sentences) {
+    const tokens = sentence.match(WORD_RE) ?? [];
+    tokens.forEach((raw, i) => {
+      if (i === 0) return;
+      const key = raw.toLowerCase();
+      const entry = counts.get(key) ?? { total: 0, capitalized: 0 };
+      entry.total++;
+      if (/^[A-Z]/.test(raw)) entry.capitalized++;
+      counts.set(key, entry);
+    });
+  }
+  const rates = new Map<string, number>();
+  for (const [key, { total, capitalized }] of counts) {
+    rates.set(key, capitalized / total);
+  }
+  return rates;
+}
+
 function splitSentences(text: string): string[] {
   const matches = text.match(SENTENCE_SPLIT_RE) ?? [];
   return matches.map((s) => s.trim()).filter((s) => s.length > 0);
@@ -201,11 +229,12 @@ function topBigrams(words: string[], wordCount: number, limit = 8): string[] {
   return topByLift(counts, wordCount, bigramReferenceWeight, limit);
 }
 
-function topWords(words: string[], wordCount: number, limit = 8): string[] {
+function topWords(words: string[], wordCount: number, properNounRates: Map<string, number>, limit = 8): string[] {
   const counts = new Map<string, number>();
   for (const raw of words) {
     const w = raw.toLowerCase();
     if (STOPWORDS.has(w) || w.length < 3) continue;
+    if ((properNounRates.get(w) ?? 0) >= PROPER_NOUN_CAP_RATE_THRESHOLD) continue;
     counts.set(w, (counts.get(w) ?? 0) + 1);
   }
   return topByLift(counts, wordCount, referenceWeightFor, limit);
@@ -248,7 +277,7 @@ export function computeTextStats(text: string): TextStats {
     ),
     relationalPronounRate: Number(((relationalPronouns.length / wordCount) * 1000).toFixed(2)),
     topBigrams: topBigrams(words, wordCount),
-    topWords: topWords(words, wordCount),
+    topWords: topWords(words, wordCount, midSentenceCapitalizationRates(sentences)),
   };
 }
 
@@ -293,7 +322,16 @@ export function mergeStats(perSample: TextStats[]): TextStats {
   };
 }
 
-export function describeStats(stats: TextStats): string {
+/** Below this many trained samples, topWords is really just "words this one
+ * (or two) document(s) used more than a generic baseline," i.e. the topic,
+ * not a habit that shows up regardless of subject. A word/bigram that keeps
+ * surfacing across three or more independent samples is much more likely to
+ * be an actual diction choice. Below the bar, describeStats omits the line
+ * entirely rather than asserting a "distinctive word choice" that's really
+ * just what the writer happened to be writing about that one time. */
+const MIN_SAMPLES_FOR_DISTINCTIVE_WORDS = 3;
+
+export function describeStats(stats: TextStats, sampleCount = 0): string {
   const lines: string[] = [];
   lines.push(
     stats.avgSentenceLength >= 20
@@ -333,7 +371,7 @@ export function describeStats(stats: TextStats): string {
   if (stats.topBigrams.length > 0) {
     lines.push(`Recurring phrasing across samples: ${stats.topBigrams.slice(0, 5).join(", ")}.`);
   }
-  if (stats.topWords.length > 0) {
+  if (stats.topWords.length > 0 && sampleCount >= MIN_SAMPLES_FOR_DISTINCTIVE_WORDS) {
     lines.push(`Distinctive word choices, reached for more than a generic baseline would predict: ${stats.topWords.slice(0, 5).join(", ")}.`);
   }
   lines.push(describeEntropy(stats.structuralEntropy));

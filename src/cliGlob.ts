@@ -7,7 +7,7 @@
  * dependency for a tool this small.
  */
 import { readdirSync, statSync } from "node:fs";
-import { join, relative, sep } from "node:path";
+import { isAbsolute, join, relative, sep } from "node:path";
 
 const DEFAULT_IGNORE_DIRS = new Set(["node_modules", ".git", "dist", ".next", ".turbo"]);
 
@@ -73,21 +73,37 @@ function toPosixRelative(cwd: string, fullPath: string): string {
 /** Resolves one glob pattern against cwd into relative (POSIX-style) file
  * paths. A pattern with no wildcard is treated as a literal path: returned
  * if it names an existing file, empty otherwise (so a typo'd literal path
- * fails the same way an unmatched glob does, not with an ENOENT crash). */
+ * fails the same way an unmatched glob does, not with an ENOENT crash).
+ *
+ * An absolute pattern (e.g. from `find /repo -name '*.md'` or a caller that
+ * already resolved its own paths) is used as-is rather than joined onto
+ * cwd: `path.join(cwd, pattern)` doesn't special-case an absolute second
+ * argument the way `path.resolve` does, so joining silently nested the
+ * absolute path under cwd (`/repo` + `/Users/x/README.md` became
+ * `/repo/Users/x/README.md`, which never exists). */
 export function resolveGlob(pattern: string, cwd: string): string[] {
   if (!/[*?]/.test(pattern)) {
+    const target = isAbsolute(pattern) ? pattern : join(cwd, pattern);
     try {
-      if (statSync(join(cwd, pattern)).isFile()) return [pattern.split(sep).join("/")];
+      if (statSync(target).isFile()) return [toPosixRelative(cwd, target)];
     } catch {
       // no match
     }
     return [];
   }
 
+  const root = staticRoot(pattern);
+  const walkRoot = isAbsolute(root) ? root : join(cwd, root);
   const files: string[] = [];
-  walk(join(cwd, staticRoot(pattern)), files);
+  walk(walkRoot, files);
   const regex = globToRegExp(pattern);
-  return files.map((f) => toPosixRelative(cwd, f)).filter((rel) => regex.test(rel));
+  // An absolute pattern's regex expects to match a full POSIX path (it was
+  // never made cwd-relative), so match against that instead of a
+  // cwd-relative path; a relative pattern matches as before.
+  const matchTarget = isAbsolute(pattern)
+    ? (f: string) => f.split(sep).join("/")
+    : (f: string) => toPosixRelative(cwd, f);
+  return files.filter((f) => regex.test(matchTarget(f))).map((f) => toPosixRelative(cwd, f));
 }
 
 /** Resolves multiple patterns, deduped and sorted. */

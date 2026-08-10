@@ -37,8 +37,9 @@ JP owns both the source skills and the source SaaS product.
 
 ## Scope decisions
 
-- **Curated subset, not the full corpus.** `banned-terms.json` (332 entries)
-  and `soft-flag-terms.json` (119 entries) total 451 entries, curated for
+- **Curated subset, not the full corpus.** `banned-terms.json` and
+  `soft-flag-terms.json` (341 + 126 = 467 entries as of 2026-08-09, plus
+  automatic inflection matching on top, see below) are curated for
   category breadth (verbs, adjectives, nouns, filler, imagery, transitions,
   phrase subcategories) rather than mechanically dumping all 758 corpus
   rows. The full corpus can be pulled in later (e.g. as an opt-in "extended
@@ -139,6 +140,42 @@ JP owns both the source skills and the source SaaS product.
   professional-writing tool, not a plagiarism-evasion tool, so the dial
   changes structural shape only, never correctness. `entropyGuideLine()` in
   `dials.ts` says so explicitly at every setting.
+- **2026-08-09: false-positive pass on real docs/CI usage.** Linting this
+  repo's own README (and other real-world non-fiction) surfaced two
+  systemic issues, not one-off misses. First, `however` and `robust` were
+  hard-ban despite being ordinary, entirely legitimate words in professional
+  writing; moved both from `banned-terms.json` to `soft-flag-terms.json`.
+  Second, and more broadly: soft-flag corpus entries (confidence `orange`)
+  were scored on a single occurrence, the same as hard-ban, even though this
+  file's own `$schema_note` says they should "surface as a challenge/
+  question, never auto-rewrite" and the code's own comments called them
+  "context-dependent." Fixed in `score.ts`: only `red` (hard-ban) scores on
+  a first hit; `orange` (soft-flag terms and most structural patterns) and
+  `yellow` now both require 2+ occurrences before they count toward the
+  score, matching the file's stated intent. Also added automatic inflection
+  matching in `score.ts` (single-word corpus terms now also match their
+  `-s/-es/-ed/-ing/-ly` forms, e.g. "framework" now also catches
+  "frameworks", "robust" also catches "robustly"), since the corpus had been
+  shipping inflected variants ad hoc and inconsistently (`dive`/`diving` but
+  not `harness`/`harnessing`). Generated forms that collide with an existing
+  explicit entry (like `diving`) are excluded to avoid double-counting.
+  Separately (engine-only, no data changes): `auditText` now blanks fenced/
+  inline Markdown code before scoring (code samples in a README shouldn't be
+  scanned as prose), and a piece with strong specificity/groundedness
+  signals now caps at `yellow` instead of climbing to orange/red on soft
+  tells alone, unless a `hard_evidence` finding (an unambiguous assistant
+  artifact) is present, in which case the cap never applies. Also (still
+  2026-08-09): dogfooding the above against this repo's own README turned up
+  two more real false positives. `neon` (an `imagery-cliche` hard-ban entry
+  for "neon-lit streets" phrasing) was matching "Neon" the Postgres
+  provider; `score.ts` now excludes a single-word term matched in Title Case
+  mid-sentence as a likely proper noun (a product name, a person's name),
+  since the actual imagery tell is almost always lowercase in real
+  AI-generated prose. Ordinary sentence-initial capitalization is left
+  alone. And `curate` was hard-ban despite being the precise, literal verb
+  for an actual editorial selection process ("a curated corpus," "a curated
+  subset," both true of this repo's own corpus); moved to soft-flag
+  alongside `however`/`robust` above.
 - **`score.ts` assigns flat strength values** (hard-ban = 80, soft-flag = 45)
   rather than porting each corpus entry's individual `strength_score`,
   since the curated JSON files don't carry that field. Structural patterns

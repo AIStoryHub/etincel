@@ -28,9 +28,12 @@ interface Config {
 const MAX_HISTORY = 20;
 
 /** A trained voice's guide is persona prose plus the measured mechanics,
- * not mechanics alone, see dials.ts's personaGuideText for why. */
-function composeGuide(persona: PersonaDials, stats: TextStats): string {
-  return [personaGuideText(persona), describeStats(stats)].join(" ");
+ * not mechanics alone, see dials.ts's personaGuideText for why. sampleCount
+ * gates describeStats' "distinctive word choices" line, see its own
+ * MIN_SAMPLES_FOR_DISTINCTIVE_WORDS: 0 for a dial-built voice with no real
+ * samples behind it. */
+function composeGuide(persona: PersonaDials, stats: TextStats, sampleCount = 0): string {
+  return [personaGuideText(persona), describeStats(stats, sampleCount)].join(" ");
 }
 
 /** Case/whitespace-insensitive comparison key for matching a voice by its
@@ -103,15 +106,16 @@ async function trainVoice(rawName: string, samples: string[], targetId?: string)
     topBigrams: perSample[i].topBigrams,
   }));
   const history = [...(existing?.history ?? []), ...newFingerprints].slice(-MAX_HISTORY);
+  const sampleCount = (existing?.sampleCount ?? 0) + perSample.length;
   const profile: VoiceProfile = {
     id,
     shortId,
     name,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
-    sampleCount: (existing?.sampleCount ?? 0) + perSample.length,
+    sampleCount,
     stats,
-    guide: composeGuide(persona, stats),
+    guide: composeGuide(persona, stats, sampleCount),
     formality: persona.formality,
     warmth: persona.warmth,
     directness: persona.directness,
@@ -212,7 +216,7 @@ async function updateVoice(id: string, rawName: string, dials: StyleDials): Prom
     name,
     updatedAt: new Date().toISOString(),
     stats,
-    guide: composeGuide(persona, stats),
+    guide: composeGuide(persona, stats, existing.sampleCount),
     formality: persona.formality,
     warmth: persona.warmth,
     directness: persona.directness,

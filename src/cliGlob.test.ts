@@ -2,7 +2,7 @@ import { test, after } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, relative, sep } from "node:path";
 import { globToRegExp, resolveGlob, resolveGlobs } from "./cliGlob.js";
 
 test("globToRegExp: '*' matches within a segment but not across '/'", () => {
@@ -67,4 +67,22 @@ test("resolveGlobs dedupes and sorts across overlapping patterns", () => {
 
 test("resolveGlob returns nothing for a pattern that matches no files", () => {
   assert.deepEqual(resolveGlob("docs/**/*.rst", root), []);
+});
+
+test("resolveGlob accepts an absolute literal path, even from a cwd it isn't nested under (regression: path.join mangled absolute patterns)", () => {
+  const otherCwd = mkdtempSync(join(tmpdir(), "etincel-glob-other-cwd-"));
+  const absolutePath = join(root, "README.md");
+  const expected = relative(otherCwd, absolutePath).split(sep).join("/");
+  assert.deepEqual(resolveGlob(absolutePath, otherCwd), [expected]);
+  rmSync(otherCwd, { recursive: true, force: true });
+});
+
+test("resolveGlob rejects an absolute path to a file that doesn't exist", () => {
+  const otherCwd = mkdtempSync(join(tmpdir(), "etincel-glob-other-cwd-"));
+  assert.deepEqual(resolveGlob(join(root, "does-not-exist.md"), otherCwd), []);
+  rmSync(otherCwd, { recursive: true, force: true });
+});
+
+test("resolveGlob supports an absolute path when cwd and the target happen to be the same directory", () => {
+  assert.deepEqual(resolveGlob(join(root, "README.md"), root), ["README.md"]);
 });
