@@ -15,6 +15,7 @@
 ```
 
 [![mcpscore audit](https://mcpscore.dev/api/v1/servers/badge.svg?url=https%3A%2F%2Fetincel.ai%2Fapi%2Fmcp)](https://mcpscore.dev/s?url=https%3A%2F%2Fetincel.ai%2Fapi%2Fmcp)
+[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/HWTiYiCZoft66WSoRKovSz/c4a8237e-0e19-4b67-8934-69c2386aa42d/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/HWTiYiCZoft66WSoRKovSz/c4a8237e-0e19-4b67-8934-69c2386aa42d/tree/main)
 
 <sub><em>This audits the hosted remote server (`etincel.ai/api/mcp`), not the local/stdio engine in this repo; the two expose the same tools but run as separate deployments.</em></sub>
 
