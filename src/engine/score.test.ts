@@ -322,6 +322,96 @@ test("the 'docs' register suppresses dictionary terms that fire more on human do
   );
 });
 
+test("the 'blog' register suppresses dictionary terms that fire more on human blog prose than AI prose (regression: assay efficacy run against a labeled blog corpus found inverted lift)", () => {
+  const text = "This project has a strong ecosystem. The ecosystem keeps growing every year.";
+
+  const withoutRegister = auditText(text);
+  assert.ok(
+    withoutRegister.findings.some((f) => f.term === "ecosystem"),
+    "expected 'ecosystem' to be flagged without a register"
+  );
+
+  const withBlogRegister = auditText(text, { register: "blog" });
+  assert.ok(
+    !withBlogRegister.findings.some((f) => f.term === "ecosystem"),
+    "the blog register should suppress 'ecosystem', an inverted-lift term for this genre"
+  );
+
+  const withDocsRegister = auditText(text, { register: "docs" });
+  assert.ok(
+    withDocsRegister.findings.some((f) => f.term === "ecosystem"),
+    "term suppression should only apply to the blog register, not others: 'ecosystem' is not suppressed for docs"
+  );
+});
+
+test("the 'memo' register suppresses dictionary terms that fire more on human memo prose than AI prose (regression: assay efficacy run against a labeled memo corpus found inverted lift)", () => {
+  const text = "The retry mechanism handles failures. This mechanism is used throughout the service.";
+
+  const withoutRegister = auditText(text);
+  assert.ok(
+    withoutRegister.findings.some((f) => f.term === "mechanism"),
+    "expected 'mechanism' to be flagged without a register"
+  );
+
+  const withMemoRegister = auditText(text, { register: "memo" });
+  assert.ok(
+    !withMemoRegister.findings.some((f) => f.term === "mechanism"),
+    "the memo register should suppress 'mechanism', an inverted-lift term for this genre"
+  );
+
+  const withBlogRegister = auditText(text, { register: "blog" });
+  assert.ok(
+    withBlogRegister.findings.some((f) => f.term === "mechanism"),
+    "term suppression should only apply to the memo register, not others: 'mechanism' is not suppressed for blog"
+  );
+});
+
+test("the 'essay' register suppresses dictionary terms that fire more on human essay prose than AI prose (regression: assay efficacy run against a labeled essay corpus found inverted lift)", () => {
+  const text = "This change would propagate to every caller. The error would propagate up the call stack unexpectedly.";
+
+  const withoutRegister = auditText(text);
+  assert.ok(
+    withoutRegister.findings.some((f) => f.term === "propagate"),
+    "expected 'propagate' to be flagged without a register"
+  );
+
+  const withEssayRegister = auditText(text, { register: "essay" });
+  assert.ok(
+    !withEssayRegister.findings.some((f) => f.term === "propagate"),
+    "the essay register should suppress 'propagate', an inverted-lift term for this genre"
+  );
+
+  const withMemoRegister = auditText(text, { register: "memo" });
+  assert.ok(
+    withMemoRegister.findings.some((f) => f.term === "propagate"),
+    "term suppression should only apply to the essay register, not others: 'propagate' is not suppressed for memo"
+  );
+});
+
+test("'email' has no dictionary-term suppressions: measured against a labeled email corpus, no term cleared this project's 4-document-hit trust floor in either direction (a real absence, not an oversight; see src/data/SOURCES.md's 2026-08-10 email entry), so auditText(text, {register: 'email'}) should behave identically to no register at all", () => {
+  const text = "This change would propagate to every caller. This project has a strong ecosystem. The retry mechanism handles failures well.";
+
+  const withoutRegister = auditText(text);
+  const withEmailRegister = auditText(text, { register: "email" });
+  assert.deepEqual(
+    withEmailRegister.findings.map((f) => f.term).sort(),
+    withoutRegister.findings.map((f) => f.term).sort(),
+    "email register suppresses nothing that unregistered text doesn't already flag"
+  );
+});
+
+test("'general' has no dictionary-term suppressions: a labeled mixed-genre corpus (6 docs each from the docs/blog/memo/essay human+AI corpora) showed apparently-inverted terms that turned out to be one specific sub-genre's already-known quirk bleeding through the mix (docs' own 'framework', essay's own 'evaluate', memo-specific 'benchmark'), not a genuine general-register signal, so none were suppressed (see src/data/SOURCES.md's 2026-08-10 general entry); auditText(text, {register: 'general'}) should behave identically to no register at all", () => {
+  const text = "This change would propagate to every caller. The retry mechanism handles failures well. We need to evaluate this framework as a benchmark.";
+
+  const withoutRegister = auditText(text);
+  const withGeneralRegister = auditText(text, { register: "general" });
+  assert.deepEqual(
+    withGeneralRegister.findings.map((f) => f.term).sort(),
+    withoutRegister.findings.map((f) => f.term).sort(),
+    "general register suppresses nothing that unregistered text doesn't already flag"
+  );
+});
+
 test("allowedWords suppresses a built-in hard-ban match", () => {
   const text = "We need to leverage our existing partnerships to grow.";
   const withoutAllow = auditText(text);
