@@ -203,4 +203,4 @@ npm run build   # compile to dist/
 
 ## Status
 
-Early. The audit corpus (`src/data/`) is a curated subset, not exhaustive: see `src/data/SOURCES.md` for provenance and what's not yet ported.
+Early. The audit corpus (`src/data/`) is a curated subset, not exhaustive: see `src/data/SOURCES.md` for provenance and what's not yet ported. The full, canonical corpus lives at [aistoryhub.co/corpus](https://aistoryhub.co/corpus).
