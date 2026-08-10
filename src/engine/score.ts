@@ -96,6 +96,21 @@ const REGISTER_DETECTOR_SUPPRESSIONS: Partial<Record<Register, string[]>> = {
   docs: ["markdown-heading-leak", "markdown-bold-in-prose", "bulleted-bold-term", "title-case-header"],
 }
 
+/** Dictionary terms that measurably fire *more* on real human writing than
+ * on AI writing in a given register, so scoring them there drags human text
+ * toward "flagged" and AI text toward "clean", the opposite of intent.
+ * Ordinary formal-register vocabulary in long-form reference documentation
+ * ("framework", "validate", "in order to"...), not an AI tell in that genre.
+ * Confirmed by an assay efficacy run (see ../assay) against a labeled
+ * pre-2021 human-docs corpus vs. two AI-effort tiers: each of these terms
+ * showed negativeRate > positiveRate (inverted lift) at register "docs".
+ * Suppressed rather than sign-flipped: the inversion is measured on a small
+ * corpus (29 negative / 50 positive docs), so trusting its direction is
+ * safer than trusting its magnitude. Revisit as the eval corpus grows. */
+const REGISTER_TERM_SUPPRESSIONS: Partial<Record<Register, string[]>> = {
+  docs: ["in order to", "when it comes to", "significant", "propagate", "domain", "expedite", "framework", "validate"],
+}
+
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
@@ -430,8 +445,14 @@ export function auditText(text: string, options: AuditOptions = {}): AuditResult
   const suppressedIds = new Set(
     options.register ? (REGISTER_DETECTOR_SUPPRESSIONS[options.register] ?? []) : []
   )
+  const suppressedTerms = new Set(
+    (options.register ? (REGISTER_TERM_SUPPRESSIONS[options.register] ?? []) : []).map(normalizeWord)
+  )
   const baseEntries = getCompiledEntries().filter(
-    (e) => !allowedSet.has(normalizeWord(e.term)) && !(e.id && suppressedIds.has(e.id))
+    (e) =>
+      !allowedSet.has(normalizeWord(e.term)) &&
+      !(e.id && suppressedIds.has(e.id)) &&
+      !suppressedTerms.has(normalizeWord(e.term))
   )
   // A user's explicit ban is always a hard ban (see compileCustomBannedEntries),
   // which only changes behavior over the built-in corpus entry for the same
@@ -489,10 +510,19 @@ export function auditText(text: string, options: AuditOptions = {}): AuditResult
   const density = weightedSum / ((wordCount + DENSITY_SMOOTHING_WORDS) / 1000)
   const score = weightedSum > 0 ? Math.round((100 * density) / (density + DENSITY_MIDPOINT)) : 0
 
-  const rhythmFindings = detectWholePieceRhythm(cleanedText)
-  // Whole-piece rhythm issues nudge the score up modestly (they're a real
-  // signal but shouldn't dominate the way a dozen banned words would).
-  const rhythmBonus = rhythmFindings.length * 6
+  const rhythmFindings = detectWholePieceRhythm(cleanedText, options.register)
+  // Whole-piece rhythm findings get real weight, not a token nudge: once
+  // register-calibrated (see REGISTER_MECHANICAL_BASELINES in
+  // structural-detectors.ts), they turned out to be the best-populated,
+  // best-separating signal this engine has for long-form registers: an
+  // assay efficacy run against a labeled docs corpus moved pooled AUC from
+  // 0.489 (chance) to 0.725 going from a per-finding weight of 6 to 14.
+  // Picked 14 over higher values that scored marginally better (up to 0.79
+  // at weight 18) because that gain came from a rising false-positive rate,
+  // not broader separation, a sign of tuning to this one small corpus
+  // rather than the underlying signal. Re-tune against a larger corpus
+  // before pushing this further.
+  const rhythmBonus = rhythmFindings.length * 14
   const finalScore = Math.min(100, score + rhythmBonus)
 
   for (const rf of rhythmFindings) {

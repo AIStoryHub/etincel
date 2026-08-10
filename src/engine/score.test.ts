@@ -174,7 +174,7 @@ test("scored findings sort before unscored findings", () => {
   }
 });
 
-test("rhythm findings add exactly 6 points per finding when vocabulary is otherwise clean", () => {
+test("rhythm findings add exactly 14 points per finding when vocabulary is otherwise clean", () => {
   const para = "Short sentence here now. Short sentence here too.";
   const text = [para, para, para, para].join("\n\n");
   const rhythmFindings = detectWholePieceRhythm(text);
@@ -187,7 +187,7 @@ test("rhythm findings add exactly 6 points per finding when vocabulary is otherw
     0,
     "expected no vocabulary/structural findings in this plain-word repeated text"
   );
-  assert.equal(result.score, rhythmFindings.length * 6);
+  assert.equal(result.score, rhythmFindings.length * 14);
 });
 
 test("assistant-chrome phrases are caught even when nothing else in the text is a tell", () => {
@@ -297,6 +297,28 @@ test("register suppression only applies to the requested register, not others", 
   assert.ok(
     emailRegister.findings.some((f) => f.term.includes("Markdown heading")),
     "markdown-heading-leak should still fire for a register that isn't docs"
+  );
+});
+
+test("the 'docs' register suppresses dictionary terms that fire more on human docs prose than AI prose (regression: assay efficacy run found inverted lift)", () => {
+  const text = "This framework handles retries. The framework also handles backoff automatically for every request.";
+
+  const withoutRegister = auditText(text);
+  assert.ok(
+    withoutRegister.findings.some((f) => f.term === "framework"),
+    "expected 'framework' to be flagged without a register"
+  );
+
+  const withDocsRegister = auditText(text, { register: "docs" });
+  assert.ok(
+    !withDocsRegister.findings.some((f) => f.term === "framework"),
+    "the docs register should suppress 'framework', an inverted-lift term for this genre"
+  );
+
+  const withEmailRegister = auditText(text, { register: "email" });
+  assert.ok(
+    withEmailRegister.findings.some((f) => f.term === "framework"),
+    "term suppression should only apply to the docs register, not others"
   );
 });
 

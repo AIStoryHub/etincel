@@ -8,6 +8,8 @@
  * dropped: this connector is non-fiction only.
  */
 
+import { computeTextStats } from "./textStats.js"
+
 export type Confidence = "red" | "orange" | "yellow"
 
 /** Tell lifecycle: is this pattern still a live signal on current-model output?
@@ -373,6 +375,61 @@ function coefficientOfVariation(values: number[]): number {
   return Math.sqrt(variance) / m
 }
 
+interface MechanicalBaseline {
+  mean: number
+  stdev: number
+}
+
+/** Per-register expected mean/stdev for four mechanical stats, so whole-piece
+ * rhythm detection compares a piece against what's normal for *this kind of
+ * writing* instead of one fixed number for every register. Without this, the
+ * generic 0.35 CV cutoff below almost never fires on long-form reference
+ * documentation: real docs prose (human or AI) typically runs CV 0.5-0.8, so
+ * a threshold tuned for punchier short-form copy sits under where either
+ * class lives and stays silent on both.
+ *
+ * "docs" is calibrated from 191 pre-2021 documentation pages pulled from six
+ * OSS projects (kubernetes/website, rust-lang/rust, postgres, curl, vuejs/docs,
+ * npm/cli) via a script mirroring assay's corpora/build-human-corpus.mjs,
+ * deliberately drawn from different repos than assay's own held-out human
+ * corpus (django/flask/express/rails/git/node/peps) so the baseline isn't
+ * fit to the same documents an AUC run later scores. structuralEntropy's
+ * direction here is the opposite of the "high entropy reads human" framing
+ * used for voice-matching a specific trained writer elsewhere in this file's
+ * comments (see textStats.ts's describeEntropy), a different task (match
+ * one person's rhythm) with a different empirical direction than this one
+ * (separate AI docs from human docs on average), not a contradiction.
+ * Other registers have no ground truth yet and fall back to the generic
+ * threshold; extend this map before trusting drift detection anywhere else. */
+const REGISTER_MECHANICAL_BASELINES: Record<string, {
+  sentenceLengthCV: MechanicalBaseline
+  paragraphLengthCV: MechanicalBaseline
+  fragmentRate: MechanicalBaseline
+  structuralEntropy: MechanicalBaseline
+}> = {
+  docs: {
+    sentenceLengthCV: { mean: 0.666, stdev: 0.189 },
+    paragraphLengthCV: { mean: 0.719, stdev: 0.329 },
+    fragmentRate: { mean: 0.069, stdev: 0.068 },
+    structuralEntropy: { mean: 0.583, stdev: 0.076 },
+  },
+}
+
+/** How many standard deviations off a register's baseline counts as drift.
+ * Chosen to sit clearly above where a held-out human sample landed (roughly
+ * 0.1-0.3 stdev off baseline) and at or below where two independent AI
+ * effort tiers landed (roughly 0.6-0.85 stdev off), measured against
+ * assay's labeled corpus. See src/data/SOURCES.md's 2026-08-10 entry. */
+const MECHANICAL_DRIFT_Z_THRESHOLD = 0.6
+
+/** Generic CV threshold used for any register without a calibrated baseline
+ * (everything except "docs" today). Unchanged from the original heuristic. */
+const GENERIC_UNIFORMITY_CV_THRESHOLD = 0.35
+
+function zScore(value: number, baseline: MechanicalBaseline): number {
+  return baseline.stdev > 0 ? (value - baseline.mean) / baseline.stdev : 0
+}
+
 /** Computes whole-piece rhythm metrics used by uniform-paragraph-length and
  * low-burstiness detection. Low coefficient-of-variation values (roughly
  * below 0.35-0.4) indicate suspiciously regular rhythm. */
@@ -400,13 +457,22 @@ export interface WholePieceFinding {
   detail: string
 }
 
-/** Flags whole-piece rhythm problems that no single regex can catch:
- * uniform paragraph length and flat sentence-length ("low burstiness"). */
-export function detectWholePieceRhythm(text: string): WholePieceFinding[] {
+/** Flags whole-piece rhythm problems that no single regex can catch: uniform
+ * paragraph length, flat sentence-length ("low burstiness"), and, for
+ * registers with a calibrated baseline (see REGISTER_MECHANICAL_BASELINES),
+ * fragment rate and structural entropy drifting from what's normal for
+ * that kind of writing. `register` is a plain string (not imported from
+ * score.ts's Register type) to avoid a circular import; any value without an
+ * entry in the baseline map just falls back to the generic threshold. */
+export function detectWholePieceRhythm(text: string, register?: string): WholePieceFinding[] {
   const metrics = computeWholePieceMetrics(text)
+  const baseline = register ? REGISTER_MECHANICAL_BASELINES[register] : undefined
   const findings: WholePieceFinding[] = []
 
-  if (metrics.paragraphCount >= 4 && metrics.paragraphLengthUniformity < 0.35) {
+  const paragraphThreshold = baseline
+    ? baseline.paragraphLengthCV.mean - MECHANICAL_DRIFT_Z_THRESHOLD * baseline.paragraphLengthCV.stdev
+    : GENERIC_UNIFORMITY_CV_THRESHOLD
+  if (metrics.paragraphCount >= 4 && metrics.paragraphLengthUniformity < paragraphThreshold) {
     findings.push({
       id: "uniform-paragraph-length",
       name: "Uniform paragraph length",
@@ -415,13 +481,34 @@ export function detectWholePieceRhythm(text: string): WholePieceFinding[] {
     })
   }
 
-  if (metrics.sentenceCount >= 8 && metrics.sentenceBurstiness < 0.35) {
+  const sentenceThreshold = baseline
+    ? baseline.sentenceLengthCV.mean - MECHANICAL_DRIFT_Z_THRESHOLD * baseline.sentenceLengthCV.stdev
+    : GENERIC_UNIFORMITY_CV_THRESHOLD
+  if (metrics.sentenceCount >= 8 && metrics.sentenceBurstiness < sentenceThreshold) {
     findings.push({
       id: "low-burstiness",
       name: "Low sentence-length burstiness",
       severity: "medium",
       detail: `${metrics.sentenceCount} sentences averaging ${metrics.avgSentenceLength.toFixed(0)} words, with little variation in length from one sentence to the next. Mix short sentences with long; allow fragments.`,
     })
+  }
+
+  if (baseline && metrics.sentenceCount >= 8) {
+    const stats = computeTextStats(text)
+    const fragmentZ = zScore(stats.fragmentRate, baseline.fragmentRate)
+    const entropyZ = zScore(stats.structuralEntropy, baseline.structuralEntropy)
+    // Directional: fewer fragments than this register's norm, or flatter
+    // sentence-opener/punctuation variety than its norm, each independently
+    // read as AI-typical smoothing in the calibration corpus (see the
+    // REGISTER_MECHANICAL_BASELINES comment for the corpora and numbers).
+    if (fragmentZ <= -MECHANICAL_DRIFT_Z_THRESHOLD || entropyZ >= MECHANICAL_DRIFT_Z_THRESHOLD) {
+      findings.push({
+        id: "mechanical-register-drift",
+        name: "Rhythm/mechanics off this register's baseline",
+        severity: "medium",
+        detail: `Fragment rate and structural variety (sentence openers, punctuation mix) sit off where ${register} prose typically lands. Allow more sentence fragments and vary openers/punctuation more.`,
+      })
+    }
   }
 
   return findings
