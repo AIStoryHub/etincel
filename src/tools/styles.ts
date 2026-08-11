@@ -3,6 +3,7 @@ import { statsToDials, DEFAULT_PERSONA_DIALS, type StyleDials } from "../engine/
 import { compareToVoice } from "../engine/matchVoice.js";
 import { detectSelfRepetition } from "../engine/selfRepetition.js";
 import { GLOBAL_INSTRUCTIONS_SCOPE, mergeInstructions, type InstructionsStore } from "../engine/instructionsStore.js";
+import type { DictionaryStore } from "../engine/dictionaryStore.js";
 import { parsePublicStyleRef, type PublicStyleSource } from "../engine/publicStyleSource.js";
 import type { VoiceStore } from "../engine/voiceStore.js";
 
@@ -10,7 +11,8 @@ export function createStylesTools(
   store: VoiceStore,
   presetSource: PresetSource = staticPresetSource,
   instructionsStore?: InstructionsStore,
-  publicStyleSource?: PublicStyleSource
+  publicStyleSource?: PublicStyleSource,
+  dictionaryStore?: DictionaryStore
 ) {
   /** Custom instructions layered on top of a style's voice: global notes
    * plus this style's own, same merge order as get_style_instructions. */
@@ -162,6 +164,20 @@ export function createStylesTools(
       const seed = ref && (await publicStyleSource.getPublicStyle(ref.handle, ref.slug));
       if (seed) {
         const profile = await store.forkFromGuide(seed, name);
+        // Carry over whatever the source installer set specifically for
+        // this style (never their global scope, see PublicStyleForFork),
+        // scoped to the new voice's own id in this installer's stores.
+        await Promise.all([
+          dictionaryStore && (seed.bannedWords.length > 0 || seed.customWords.length > 0)
+            ? dictionaryStore.setDictionary(profile.id, {
+                bannedWords: seed.bannedWords,
+                allowedWords: seed.customWords,
+              })
+            : undefined,
+          instructionsStore && seed.instructions.trim().length > 0
+            ? instructionsStore.setInstructions(profile.id, seed.instructions)
+            : undefined,
+        ]);
         return {
           id: profile.id,
           shortId: profile.shortId,

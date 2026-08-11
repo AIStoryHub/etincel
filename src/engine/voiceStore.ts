@@ -1,5 +1,5 @@
 import type { TextStats } from "./textStats.js";
-import type { StyleDials } from "./dials.js";
+import type { StyleDials, MechanicalDials } from "./dials.js";
 import type { Preset } from "./presets.js";
 
 /** One training sample's own fingerprint (not the merged/aggregate stats):
@@ -50,17 +50,19 @@ export interface VoiceProfile {
 }
 
 /** The minimum needed to seed a new trained voice from an existing style's
- * guide and persona: forkFromPreset and forkFromGuide both reset mechanics
- * to defaults (keeping only entropy for a preset) rather than trying to
- * preserve the source's exact measured rhythm, since a published public
- * style never exposes its exact mechanical dials in the first place, only
- * formality/warmth/directness (see the hosted web app's PublicStyle type
- * in web/lib/publishStore.neon.ts). */
+ * guide and persona. forkFromPreset always resets mechanics to defaults
+ * (keeping only entropy), since a preset never carries measured mechanics
+ * in the first place. forkFromGuide uses mechanicalDials when the seed has
+ * it (a published public style now exposes its 8 mechanical dials, see the
+ * hosted web app's PublicStyle type in web/lib/publishStore.neon.ts) and
+ * falls back to defaults when it doesn't (an older cached seed, or a
+ * public-style source that predates this field). */
 export interface StyleSeed {
   guide: string;
   formality: number;
   warmth: number;
   directness: number;
+  mechanicalDials?: MechanicalDials;
 }
 
 /**
@@ -97,9 +99,9 @@ export interface VoiceStore {
   forkFromPreset(preset: Preset, name: string): Promise<VoiceProfile>;
   /** Seeds a new trained voice from a published public style (see
    * publicStyleSource.ts): another installer's voice, or a preset,
-   * addressed by its public "handle/slug" rather than a local id. Same
-   * shape as forkFromPreset, guide folded in verbatim, mechanics reset to
-   * defaults, since that's all a public style ever exposes. */
+   * addressed by its public "handle/slug" rather than a local id. Guide
+   * folded in verbatim; mechanics come from seed.mechanicalDials when
+   * present, otherwise reset to defaults. */
   forkFromGuide(seed: StyleSeed, name: string): Promise<VoiceProfile>;
   loadVoice(id: string): Promise<VoiceProfile | undefined>;
   listVoices(): Promise<VoiceProfile[]>;
