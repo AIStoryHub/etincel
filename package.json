@@ -1,6 +1,6 @@
 {
   "name": "etincel",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Étincel: a non-fiction writing connector for Claude Code, Claude Desktop, and MCP-enabled tools. Trainable voice, premade emotional tones, and a transparent anti-AI-tells audit. Not an email client or editor replacement, a layer that keeps the writer in trust mode.",
   "type": "module",
   "bin": {
@@ -19,7 +19,7 @@
     "smoke": "node dist/smoke.js",
     "smoke:mcp": "node scripts/mcp-smoke.mjs",
     "test": "tsx --test src/*.test.ts src/**/*.test.ts",
-    "postinstall": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "engines": {
     "node": ">=18"
