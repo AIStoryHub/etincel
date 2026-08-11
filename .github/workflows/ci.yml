@@ -18,6 +18,12 @@ jobs:
       - run: npx tsc -p tsconfig.json --noEmit
       - run: npm test
       - run: npm run build
+      # End-to-end functional regression: exercises the built CLI/server
+      # tools directly (npm run smoke) and the built MCP server over the
+      # real stdio protocol (npm run smoke:mcp), catching breaks that unit
+      # tests against source, not the built dist/, wouldn't.
+      - run: npm run smoke
+      - run: npm run smoke:mcp
 
   efficacy-regression:
     runs-on: ubuntu-latest

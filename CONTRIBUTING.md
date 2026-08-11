@@ -19,7 +19,7 @@ npm run build   # compile to dist/
 - If you touched `README.md`'s tool list, confirm it still matches the `server.registerTool(...)` calls in `src/server.ts`. Nothing enforces that mechanically yet.
 - If you touched `orb.yml` (the CircleCI orb, mirrors `action.yml` for the GitHub Action), run it past `circleci orb validate orb.yml` ([install the CLI](https://circleci.com/docs/local-cli/) if you don't have it) before pushing.
 
-CI runs the same checks on every PR (`tsc`, `npm test`, `npm run build`, plus an `orb.yml` check); it needs to be green before merge. GitHub Actions and CircleCI both run the full suite, so a PR is only mergeable once both are green.
+CI runs the same checks on every PR (`tsc`, `npm test`, `npm run build`, `npm run smoke`, `npm run smoke:mcp`, plus an `orb.yml` check); it needs to be green before merge. GitHub Actions and CircleCI both run the full suite, so a PR is only mergeable once both are green.
 
 ## Reporting a security issue
 
