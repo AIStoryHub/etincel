@@ -4,7 +4,7 @@
   "description": "Étincel: a non-fiction writing connector for Claude Code, Claude Desktop, and MCP-enabled tools. Trainable voice, premade emotional tones, and a transparent anti-AI-tells audit. Not an email client or editor replacement, a layer that keeps the writer in trust mode.",
   "type": "module",
   "bin": {
-    "etincel": "./dist/cli.js"
+    "etincel": "dist/cli.js"
   },
   "main": "./dist/server.js",
   "files": [
@@ -28,7 +28,7 @@
   "author": "JP LeBlanc",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AIStoryHub/etincel"
+    "url": "git+https://github.com/AIStoryHub/etincel.git"
   },
   "homepage": "https://github.com/AIStoryHub/etincel#readme",
   "bugs": "https://github.com/AIStoryHub/etincel/issues",
