@@ -26,7 +26,7 @@ const {
   setDefaultStyleTool,
   checkVoiceMatchTool,
   checkSelfRepetitionTool,
-} = createStylesTools(fsVoiceStore, undefined, fsInstructionsStore, createHttpPublicStyleSource());
+} = createStylesTools(fsVoiceStore, undefined, fsInstructionsStore, createHttpPublicStyleSource(), fsDictionaryStore);
 
 const {
   addBannedWordTool,
@@ -80,7 +80,7 @@ const server = new McpServer(
   {
     name: "etincel-nonfiction",
     title: "Étincel",
-    version: "0.6.0",
+    version: "0.8.0",
     description: "Gives Claude a trained writing voice, and audits drafts for AI writing tells.",
     websiteUrl: "https://etincel.ai",
     icons: ICONS,
@@ -278,7 +278,7 @@ server.registerTool(
     title: "Fork a preset or published community style into a trained voice",
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
     description:
-      "Copy a style into a new trained voice under the given name, seeded with its persona dials and drafting guide. Two kinds of source: a premade preset (e.g. 'pr-review', 'linkedin-post'), or another installer's style published publicly on the hosted gallery, addressed as \"handle/slug\" (e.g. \"jpleblanc/blunt-memo\", the same address shown on its public page at etincel.ai/v/handle/slug). A public-style fork makes one network call to etincel.ai to fetch it; a preset fork never leaves this install. The fork is then a normal trained voice: retrain it with train_style from real samples, or hand-tune it with update_style, without touching the original.",
+      "Copy a style into a new trained voice under the given name, seeded with its persona dials and drafting guide. Two kinds of source: a premade preset (e.g. 'pr-review', 'linkedin-post'), or another installer's style published publicly on the hosted gallery, addressed as \"handle/slug\" (e.g. \"jpleblanc/blunt-memo\", the same address shown on its public page at etincel.ai/v/handle/slug). A public-style fork also carries over its 8 mechanical dials (rhythm, sentence length, em-dash use, etc.) and any banned words, custom words, or drafting instructions the source installer set specifically for that style, never their private account-wide dictionary or instructions; a preset fork only ever has persona dials and entropy to carry, since a preset has no measured mechanics. A public-style fork makes one network call to etincel.ai to fetch it; a preset fork never leaves this install. The fork is then a normal trained voice: retrain it with train_style from real samples, or hand-tune it with update_style, without touching the original.",
     inputSchema: {
       styleId: z
         .string()

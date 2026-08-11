@@ -188,7 +188,7 @@ async function forkFromPreset(preset: Preset, rawName: string): Promise<VoicePro
 async function forkFromGuide(seed: StyleSeed, rawName: string): Promise<VoiceProfile> {
   ensureDirs();
   const name = sanitizeFreeformText(rawName);
-  const stats = dialsToStats(DEFAULT_MECHANICAL_DIALS);
+  const stats = dialsToStats(seed.mechanicalDials ?? DEFAULT_MECHANICAL_DIALS);
   const existing = await findVoiceByName(name);
   const id = existing?.id ?? randomUUID();
   const shortId = existing?.shortId ?? (await uniqueShortId());

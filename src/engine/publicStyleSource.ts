@@ -1,5 +1,16 @@
 import type { StyleSeed } from "./voiceStore.js";
 
+/** A StyleSeed plus the style-scoped dictionary/instructions rows a fork
+ * should carry over: what the source installer set specifically for this
+ * voice (never their account-wide "global" scope, which stays private, see
+ * publishStore.neon.ts's getPublicStyle). Absent rows come back as empty,
+ * never undefined, so a caller can fork without a null check. */
+export interface PublicStyleForFork extends StyleSeed {
+  bannedWords: string[];
+  customWords: string[];
+  instructions: string;
+}
+
 /**
  * Looks up a style someone has published publicly (see the hosted web
  * app's /v/{handle}/{slug} pages): a preset, or another installer's
@@ -8,7 +19,7 @@ import type { StyleSeed } from "./voiceStore.js";
  * account-scoped presets, never another installer's voices.
  */
 export interface PublicStyleSource {
-  getPublicStyle(handle: string, slug: string): Promise<StyleSeed | undefined>;
+  getPublicStyle(handle: string, slug: string): Promise<PublicStyleForFork | undefined>;
 }
 
 const REF_PATTERN = /^([a-z][a-z0-9-]{2,31})\/([a-z0-9]+(?:-[a-z0-9]+)*)$/;

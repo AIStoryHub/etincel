@@ -12,6 +12,8 @@ after(() => {
 });
 
 const { fsVoiceStore } = await import("../engine/voiceStore.fs.js");
+const { fsDictionaryStore } = await import("../engine/dictionaryStore.fs.js");
+const { fsInstructionsStore } = await import("../engine/instructionsStore.fs.js");
 const { createStylesTools } = await import("./styles.js");
 
 const {
@@ -172,7 +174,15 @@ test("forkStyleTool rejects an unknown preset id with no publicStyleSource confi
 });
 
 test("forkStyleTool forks a published community style via its handle/slug address", async () => {
-  const seed = { guide: "Write like this. Short sentences.", formality: 3, warmth: 7, directness: 8 };
+  const seed = {
+    guide: "Write like this. Short sentences.",
+    formality: 3,
+    warmth: 7,
+    directness: 8,
+    bannedWords: [],
+    customWords: [],
+    instructions: "",
+  };
   const { forkStyleTool: forkWithPublicSource } = createStylesTools(fsVoiceStore, undefined, undefined, {
     async getPublicStyle(handle, slug) {
       return handle === "jpleblanc" && slug === "blunt-memo" ? seed : undefined;
@@ -216,6 +226,55 @@ test("forkStyleTool never treats a bare preset id as a public-style ref", async 
   });
   const forked = await forkWithPublicSource("linkedin-post", "My LinkedIn Voice");
   assert.equal(forked.forkedFrom, "linkedin-post");
+});
+
+test("forkStyleTool carries a public style's mechanical dials, dictionary, and instructions into the fork", async () => {
+  const seed = {
+    guide: "Write like this. Short sentences.",
+    formality: 3,
+    warmth: 7,
+    directness: 8,
+    mechanicalDials: {
+      sentenceLength: 80,
+      sentenceRhythmVariance: 20,
+      paragraphVariance: 20,
+      contractionUse: 10,
+      emDashUse: 0,
+      fragmentTolerance: 0,
+      questionUse: 0,
+      entropy: 20,
+    },
+    bannedWords: ["synergy"],
+    customWords: ["Étincel"],
+    instructions: "Always end with a call to action.",
+  };
+  const { forkStyleTool: forkWithPublicSource } = createStylesTools(
+    fsVoiceStore,
+    undefined,
+    fsInstructionsStore,
+    {
+      async getPublicStyle(handle, slug) {
+        return handle === "jpleblanc" && slug === "rich-fork" ? seed : undefined;
+      },
+    },
+    fsDictionaryStore
+  );
+
+  const forked = await forkWithPublicSource("jpleblanc/rich-fork", "My Rich Fork");
+
+  const guide = await getStyleGuideTool(forked.id);
+  assert.equal(guide.kind, "trained");
+  if (guide.kind === "trained") {
+    assert.equal(guide.dials.sentenceLength, seed.mechanicalDials.sentenceLength);
+    assert.equal(guide.dials.entropy, seed.mechanicalDials.entropy);
+  }
+
+  const dict = await fsDictionaryStore.getDictionary(forked.id);
+  assert.deepEqual(dict.bannedWords, seed.bannedWords);
+  assert.deepEqual(dict.allowedWords, seed.customWords);
+
+  const instructions = await fsInstructionsStore.getInstructions(forked.id);
+  assert.equal(instructions.instructions, seed.instructions);
 });
 
 let matchVoiceId: string;

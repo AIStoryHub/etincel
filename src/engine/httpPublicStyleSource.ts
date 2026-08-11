@@ -1,13 +1,22 @@
 import type { PublicStyleSource } from "./publicStyleSource.js";
+import type { MechanicalDials } from "./dials.js";
 
 const DEFAULT_BASE_URL = "https://etincel.ai";
 
 /** Shape of GET /api/styles/public/{handle}/{slug} (see
  * web/app/api/styles/public/[handle]/[slug]/route.ts): only the fields
- * this reads are declared here. */
+ * this reads are declared here. mechanicalDials/bannedWords/customWords/
+ * instructions are absent for a preset (mechanicalDials) or when nothing
+ * was set for a style specifically (the rest), never for a fetch failure:
+ * a real failure throws or returns 404 below, so `undefined` here always
+ * means "nothing to carry over," not "couldn't tell." */
 interface PublicStyleResponse {
   guide: string;
   dials: { formality: number; warmth: number; directness: number };
+  mechanicalDials?: MechanicalDials;
+  bannedWords?: string[];
+  customWords?: string[];
+  instructions?: string;
 }
 
 /**
@@ -44,6 +53,10 @@ export function createHttpPublicStyleSource(
         formality: data.dials.formality,
         warmth: data.dials.warmth,
         directness: data.dials.directness,
+        mechanicalDials: data.mechanicalDials,
+        bannedWords: data.bannedWords ?? [],
+        customWords: data.customWords ?? [],
+        instructions: data.instructions ?? "",
       };
     },
   };
