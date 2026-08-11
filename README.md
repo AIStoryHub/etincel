@@ -83,7 +83,7 @@ Point your MCP config at the built server:
 }
 ```
 
-Build first: `npm install && npm run build`.
+Build first: `npm install && npm run build`. Once published, `{"command": "npx", "args": ["etincel", "serve"]}` works in place of `node`/`dist/server.js`, no local clone needed.
 
 ### Remote (hosted, multi-tenant)
 

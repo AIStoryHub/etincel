@@ -17,7 +17,7 @@ export function tierRank(tier: Tier): number {
 }
 
 export const USAGE = [
-  "Usage: etincel-nonfiction lint <pattern...> [options]",
+  "Usage: etincel lint <pattern...> [options]",
   "",
   "Audits each matched file for AI writing tells (504 checks, no network or",
   "model call). Exits non-zero if any file's tier is at or above --threshold.",
@@ -37,8 +37,8 @@ export const USAGE = [
   "and versioned instead of living only in an account setting.",
   "",
   "Examples:",
-  "  npx etincel-nonfiction lint 'docs/**/*.md'",
-  "  npx etincel-nonfiction lint README.md --register docs --threshold yellow",
+  "  npx etincel lint 'docs/**/*.md'",
+  "  npx etincel lint README.md --register docs --threshold yellow",
 ].join("\n");
 
 export interface LintOptions {
