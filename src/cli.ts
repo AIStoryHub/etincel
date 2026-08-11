@@ -1,17 +1,31 @@
 #!/usr/bin/env node
 import { parseLintArgs, runLint, formatText, formatJson, USAGE } from "./cliLint.js";
 
-function main() {
+const TOP_USAGE = [
+  "Usage: etincel <command>",
+  "",
+  "Commands:",
+  "  lint <pattern...>   Audit files for AI writing tells (npx etincel lint --help)",
+  "  serve                Start the local MCP server over stdio, for Claude Desktop",
+  "                        or another MCP host's config (npx etincel serve)",
+].join("\n");
+
+async function main() {
   const [command, ...rest] = process.argv.slice(2);
 
   if (!command || command === "--help" || command === "-h") {
-    console.log(USAGE);
+    console.log(TOP_USAGE);
     process.exit(command ? 0 : 1);
+  }
+
+  if (command === "serve") {
+    await import("./server.js");
+    return;
   }
 
   if (command !== "lint") {
     console.error(`Unknown command "${command}".\n`);
-    console.error(USAGE);
+    console.error(TOP_USAGE);
     process.exit(2);
   }
 
@@ -44,4 +58,7 @@ function main() {
   process.exit(report.failing.length > 0 ? 1 : 0);
 }
 
-main();
+main().catch((err) => {
+  console.error(err instanceof Error ? err.message : String(err));
+  process.exit(1);
+});
