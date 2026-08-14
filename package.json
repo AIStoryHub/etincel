@@ -1,12 +1,18 @@
 {
   "name": "etincel",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "Étincel: a non-fiction writing connector for Claude Code, Claude Desktop, and MCP-enabled tools. Trainable voice, premade emotional tones, and a transparent anti-AI-tells audit. Not an email client or editor replacement, a layer that keeps the writer in trust mode.",
   "type": "module",
   "bin": {
     "etincel": "dist/cli.js"
   },
   "main": "./dist/server.js",
+  "exports": {
+    ".": "./dist/server.js",
+    "./tools/*": "./dist/tools/*.js",
+    "./engine/*": "./dist/engine/*.js",
+    "./data/*": "./dist/data/*"
+  },
   "files": [
     "dist",
     "skills",
@@ -45,7 +51,7 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
-    "zod": "^3.23.8"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
