@@ -84,3 +84,15 @@ test("auditTextTool suppresses a built-in flag via an allowed word merged from g
   const result = await auditTextTool(fsDictionaryStore, "We need to leverage our partnerships.");
   assert.ok(!result.findings.some((f) => f.term === "leverage"));
 });
+
+test("auditTextTool passes sourceFacts through to auditText, flagging elicited-material-unused when unused", async () => {
+  const result = await auditTextTool(
+    fsDictionaryStore,
+    "A perfectly generic draft with no named specifics in it.",
+    undefined,
+    undefined,
+    undefined,
+    ["The rink was cold most mornings.", "The coach's name was Dave."]
+  );
+  assert.ok(result.findings.some((f) => f.subcategory === "elicited-material-unused"));
+});

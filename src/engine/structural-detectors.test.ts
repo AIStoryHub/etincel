@@ -306,6 +306,100 @@ test("'general' deliberately has no REGISTER_MECHANICAL_BASELINES entry: docs/bl
   assert.deepEqual(detectWholePieceRhythm(text, "general"), detectWholePieceRhythm(text), "general register should behave identically to no register: no calibrated baseline exists for it");
 });
 
+// ---------------------------------------------------------------------------
+// D1 · self-describing-structure (etincel-human-signal-spec.md Part 2).
+// SCAFFOLDED_LETTER below is long enough (>250 words) to clear the piece
+// floor, and mirrors the spec's own worked example: a standalone paragraph
+// announcing "three parts" (family A), followed by three paragraphs each
+// opening on a bare "label, ordinal." fragment (family B).
+
+const SCAFFOLDED_LETTER = [
+  "I am writing to express my sincere interest in the VP of Foundation role at your organization, a position I have followed closely for some time and one I believe represents an excellent fit for my background and experience. Over the past decade I have built a proven track record of leading ambitious, high-impact fundraising campaigns across the nonprofit and cultural sectors, and I believe my professional background and demonstrated results align closely with what you are looking for in this critical leadership position at this pivotal moment for your foundation's next chapter of sustained growth and impact across the wider community.",
+  "Three parts of my track record speak directly to your requirements.",
+  "Major gifts, first. At my current organization I led a comprehensive campaign that raised $3.4M against a $2.5M target, a 53% increase over the prior fiscal cycle, working closely with board members and major donors including Ubisoft and several other corporate partners across the region and beyond, over a period of roughly eighteen months.",
+  "Partnerships and brand, second. I built the brand strategy that grew our corporate partnership program by 130% year over year, securing multi-year commitments from organizations across the region and establishing a repeatable, scalable playbook for sustained future growth across every channel we operate in today.",
+  "Building, last. I founded and scaled the development function from a single contractor to a five-person team, closing our first CFRE-certified staff hire within the first year and delivering consistent, measurable year-over-year growth across every program area and initiative we launched together.",
+].join("\n\n");
+
+const PLAIN_LETTER = [
+  "I want to tell you about my son before I tell you about my resume, because the second thing only makes sense in light of the first, and I promise I will get there eventually, once I have explained why.",
+  "He has been on skates since he was three, not because we were serious hockey people, not even close. The rink was cold most mornings and mostly empty, and the coach's name was Dave, and Dave believed in him before there was much evidence yet to believe in.",
+  "I have spent the years since then in development roles at three different organizations, and I would be lying if I said every campaign went the way I had planned it to go, because several of them plainly did not.",
+  "I am telling you this because building a campaign from almost nothing, the way I did at my last job, is honestly what I am best at, and I would like to bring that same instinct to your foundation if you will have me.",
+].join("\n\n");
+
+test("detectWholePieceRhythm flags self-describing-enumeration on a standalone paragraph announcing a count, at confidence red", () => {
+  const findings = detectWholePieceRhythm(SCAFFOLDED_LETTER, "general");
+  const finding = findings.find((f) => f.id === "self-describing-enumeration");
+  assert.ok(finding, "expected self-describing-enumeration to fire");
+  assert.equal(finding.confidence, "red");
+  assert.equal(finding.severity, "high");
+});
+
+test("detectWholePieceRhythm flags self-describing-ordinal-scaffold when 2+ paragraphs open on a label-fragment or bare ordinal, at confidence orange", () => {
+  const findings = detectWholePieceRhythm(SCAFFOLDED_LETTER, "general");
+  const finding = findings.find((f) => f.id === "self-describing-ordinal-scaffold");
+  assert.ok(finding, "expected self-describing-ordinal-scaffold to fire");
+  assert.equal(finding.confidence, "orange");
+  assert.equal(finding.severity, "medium");
+});
+
+test("detectWholePieceRhythm does not flag self-describing-structure on ordinary human-shaped prose of comparable length", () => {
+  const findings = detectWholePieceRhythm(PLAIN_LETTER, "general");
+  assert.ok(!findings.some((f) => f.id === "self-describing-enumeration"));
+  assert.ok(!findings.some((f) => f.id === "self-describing-ordinal-scaffold"));
+});
+
+test("self-describing-enumeration requires the ≥250-word piece floor: a lone short paragraph matching the shape doesn't fire on its own", () => {
+  const short = "I have a few things to do today, and none of them are especially urgent.";
+  assert.ok(!detectWholePieceRhythm(short, "general").some((f) => f.id === "self-describing-enumeration"));
+});
+
+test("self-describing-enumeration requires BOTH the enumeration phrase and a self/document reference in the same standalone paragraph", () => {
+  // Long enough to clear the word floor via padding paragraphs, but the
+  // enumeration paragraph itself has no self/document-reference token, so
+  // it should not fire: this is the exact false positive the spec's own
+  // testing caught ("I have a few things to do today" with no gate at all).
+  const padding = Array.from({ length: 4 }, () =>
+    "This paragraph exists only to push the piece above the two-hundred-fifty word floor so the test isolates the announced-enumeration check itself rather than the floor."
+  );
+  const text = [...padding, "There are two ways to read this situation, honestly."].join("\n\n");
+  assert.ok(!detectWholePieceRhythm(text, "general").some((f) => f.id === "self-describing-enumeration"));
+});
+
+test("self-describing-ordinal-scaffold requires at least 2 matching paragraphs: a single one is unremarkable prose", () => {
+  const padding = Array.from({ length: 4 }, () =>
+    "This paragraph exists only to push the piece above the two-hundred-fifty word floor so the test isolates the ordinal-scaffold check on its own terms."
+  );
+  const text = [...padding, "Major gifts, first. This is the only paragraph here shaped like a label fragment."].join(
+    "\n\n"
+  );
+  assert.ok(!detectWholePieceRhythm(text, "general").some((f) => f.id === "self-describing-ordinal-scaffold"));
+});
+
+test("self-describing-ordinal-scaffold is suppressed for docs, memo, essay, and blog (numbered structure is the correct form there; essay's and blog's suppressions were added after measuring real regressions on RFC/PEP and Rust release-note content, see the comment at the suppression's call site), but not general", () => {
+  assert.ok(!detectWholePieceRhythm(SCAFFOLDED_LETTER, "docs").some((f) => f.id === "self-describing-ordinal-scaffold"));
+  assert.ok(!detectWholePieceRhythm(SCAFFOLDED_LETTER, "memo").some((f) => f.id === "self-describing-ordinal-scaffold"));
+  assert.ok(!detectWholePieceRhythm(SCAFFOLDED_LETTER, "essay").some((f) => f.id === "self-describing-ordinal-scaffold"));
+  assert.ok(!detectWholePieceRhythm(SCAFFOLDED_LETTER, "blog").some((f) => f.id === "self-describing-ordinal-scaffold"));
+  assert.ok(detectWholePieceRhythm(SCAFFOLDED_LETTER, "general").some((f) => f.id === "self-describing-ordinal-scaffold"));
+});
+
+test("self-describing-enumeration is NOT suppressed for docs/memo: only family B (ordinal scaffold) is register-gated, per the spec", () => {
+  assert.ok(detectWholePieceRhythm(SCAFFOLDED_LETTER, "docs").some((f) => f.id === "self-describing-enumeration"));
+  assert.ok(detectWholePieceRhythm(SCAFFOLDED_LETTER, "memo").some((f) => f.id === "self-describing-enumeration"));
+});
+
+test("D1 family C (narrated intent) fires as a flat STRUCTURAL_PATTERNS entry, not a whole-piece finding", () => {
+  const withIntent = "Let me walk you through how this works before we get into the details of the plan.";
+  const detected = STRUCTURAL_PATTERNS.find((p) => p.id === "narrated-intent-scaffold");
+  assert.ok(detected);
+  detected.regex.lastIndex = 0;
+  assert.ok(detected.regex.test(withIntent));
+  detected.regex.lastIndex = 0;
+  assert.ok(!detected.regex.test("I walked to the store and back before dinner."));
+});
+
 test("computeStrengthSignals rates named, numbered detail as more specific and more grounded than generic abstraction", () => {
   const specific =
     "Priya shipped the fix on March 19, 2026. Q3 renewal came in at 94%, three points ahead of plan. The team closed 12 tickets in Boston before Friday.";

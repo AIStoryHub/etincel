@@ -15,7 +15,7 @@ import type { Register, Tier } from "./score.js";
 import { MECHANICAL_DIAL_KEYS, type StyleDials } from "./dials.js";
 
 const CONFIG_FILENAMES = [".etincelrc", ".etincelrc.json", "etincel.config.json"];
-const VALID_REGISTERS: Register[] = ["email", "blog", "memo", "essay", "social", "docs", "general"];
+const VALID_REGISTERS: Register[] = ["email", "blog", "memo", "essay", "social", "docs", "general", "personal"];
 const VALID_TIERS: Tier[] = ["green", "yellow", "orange", "red"];
 const PERSONA_DIAL_KEYS = ["formality", "warmth", "directness"] as const;
 

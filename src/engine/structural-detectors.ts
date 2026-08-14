@@ -317,6 +317,20 @@ export const STRUCTURAL_PATTERNS: StructuralPattern[] = [
       /\b(?:Most|Many)\s+[^.!?\n]{1,80}?\.\s+This\s+(?:one|tool|approach|product|version|library|model)\b[^.!?\n]{1,80}?\./gi,
   },
   {
+    // D1 pattern family C (narrated intent), see
+    // etincel-human-signal-spec.md Part 2. Families A and B need paragraph
+    // context (a standalone-paragraph gate, a paragraph-initial count), so
+    // they live in detectWholePieceRhythm below instead; this one is a
+    // plain phrase match like the rest of this list.
+    id: "narrated-intent-scaffold",
+    term: 'Narrated intent ("let me walk you through", "I\'ll break this down")',
+    category: "Rhetorical & structural moves",
+    subcategory: "Self-describing structure",
+    confidence: "orange",
+    strength: 55,
+    regex: /\b(?:let me|I(?:'ll| will))\s+(?:walk you through|break (?:this|it) down|cover|outline|unpack)\b/gi,
+  },
+  {
     id: "parenthetical-hedge",
     term: 'Parenthetical hedging aside ("(and increasingly, X)", "(though to be fair, Z)")',
     category: "Sentence patterns",
@@ -347,14 +361,14 @@ export interface WholePieceMetrics {
   avgSentenceLength: number
 }
 
-function splitParagraphs(text: string): string[] {
+export function splitParagraphs(text: string): string[] {
   return text
     .split(/\n\s*\n/)
     .map((p) => p.trim())
     .filter(Boolean)
 }
 
-function splitSentences(paragraph: string): string[] {
+export function splitSentences(paragraph: string): string[] {
   return paragraph
     .replace(/\s+/g, " ")
     .split(/(?<=[.!?])\s+(?=[A-Z0-9"'])/)
@@ -529,6 +543,67 @@ export interface WholePieceFinding {
   name: string
   severity: "high" | "medium" | "low"
   detail: string
+  /** Defaults to "orange" (score.ts's finding-construction loop applies
+   * that default) for the three original mechanical checks below, which
+   * predate this field. D1's family A is a near-definitive tell once its
+   * paragraph gate is on, so it's the first whole-piece check that needs
+   * to say "red" for itself instead of inheriting the old default. */
+  confidence?: Confidence
+}
+
+// ---------------------------------------------------------------------------
+// D1 · self-describing-structure (etincel-human-signal-spec.md Part 2).
+// Pattern families A and B need paragraph context (a standalone-paragraph
+// gate, a paragraph-initial count across the whole piece), so they live
+// here rather than the flat STRUCTURAL_PATTERNS list; family C is a plain
+// phrase match and lives there instead.
+
+// Family A: an enumeration announcement ("two things", "three reasons") is
+// only the tell when it's *also* self/document-referential (my, I, this
+// letter, below, that follow, here) AND is the entirety of a short,
+// standalone paragraph. Without that gate this fires on ordinary sentences
+// like "I have a few things to do today" — tested and confirmed false
+// positives during spec review, which is why the gate exists at all.
+const ANNOUNCED_ENUMERATION_RE =
+  /\b(?:two|three|four|five|several|a few)\s+(?:things|reasons|parts|areas|ways|points|themes|threads|examples|lessons|pieces)\b/i
+const SELF_OR_DOCUMENT_REFERENCE_RE = /\b(?:my|I|this letter|below|that follow|here)\b/i
+const ANNOUNCED_ENUMERATION_MAX_WORDS = 25
+
+function hasAnnouncedEnumerationParagraph(paragraphs: string[]): boolean {
+  return paragraphs.some((paragraph) => {
+    const sentences = splitSentences(paragraph)
+    if (sentences.length !== 1) return false
+    const [sentence] = sentences
+    if (sentence.split(/\s+/).filter(Boolean).length > ANNOUNCED_ENUMERATION_MAX_WORDS) return false
+    return ANNOUNCED_ENUMERATION_RE.test(sentence) && SELF_OR_DOCUMENT_REFERENCE_RE.test(sentence)
+  })
+}
+
+// Family B: a bare ordinal opener ("First, ...") or a label-fragment slot
+// ("Major gifts, first.") repeated across paragraphs is a scaffold showing
+// through, not content. One instance is unremarkable prose; two or more is
+// the tell, per the spec.
+const ORDINAL_OPENER_RE = /^(?:first|second|third|fourth|finally|lastly)\b[,.]/i
+const LABEL_FRAGMENT_RE = /^[A-Z][^.!?]{0,45},\s+(?:first|second|third|last|finally)\.$/
+const ORDINAL_SCAFFOLD_MIN_PARAGRAPHS = 2
+
+/** Both D1 families only run on pieces at or above this length, see the
+ * floor's own comment at the call site in detectWholePieceRhythm. */
+const SELF_DESCRIBING_STRUCTURE_MIN_WORDS = 250
+
+function countOrdinalScaffoldParagraphs(paragraphs: string[]): number {
+  // "Paragraph-initial" for the ordinal opener means testing the paragraph's
+  // start (no $ anchor on that regex, so it matches regardless of what
+  // follows). For the label-fragment form, whose regex is anchored at both
+  // ends, that means testing it against the paragraph's opening sentence in
+  // isolation, not the whole paragraph: "Major gifts, first." is D2's
+  // "fragment" opener class, the first of several sentences in a 44-60 word
+  // paragraph, not a one-sentence paragraph on its own.
+  return paragraphs.filter((p) => {
+    if (ORDINAL_OPENER_RE.test(p)) return true
+    const [firstSentence] = splitSentences(p)
+    return firstSentence ? LABEL_FRAGMENT_RE.test(firstSentence) : false
+  }).length
 }
 
 /** Flags whole-piece rhythm problems that no single regex can catch: uniform
@@ -583,6 +658,69 @@ export function detectWholePieceRhythm(text: string, register?: string): WholePi
         detail: `Fragment rate and structural variety (sentence openers, punctuation mix) sit off where ${register} prose typically lands. Allow more sentence fragments and vary openers/punctuation more.`,
       })
     }
+  }
+
+  const paragraphs = splitParagraphs(text)
+  // Floor for both D1 families below, per the spec's own residual-FPR note:
+  // a short, informal piece can contain a lone one-sentence paragraph that
+  // matches family A's shape (e.g. a text message that's just "I have a
+  // few things to do today") without it meaning anything. At piece length,
+  // that's noise the ≥250-word floor is meant to filter out; only a
+  // sustained piece earns the paragraph-shape scrutiny below.
+  const totalWords = metrics.sentenceLengthsWords.reduce((sum, n) => sum + n, 0)
+  const clearsSelfDescribingStructureFloor = totalWords >= SELF_DESCRIBING_STRUCTURE_MIN_WORDS
+
+  if (clearsSelfDescribingStructureFloor && hasAnnouncedEnumerationParagraph(paragraphs)) {
+    findings.push({
+      id: "self-describing-enumeration",
+      name: "Self-describing structure: announced enumeration",
+      severity: "high",
+      confidence: "red",
+      detail:
+        'A short, standalone paragraph announces how many things/reasons/parts are coming ("Three parts of my track record speak directly to...") instead of the organization just being clear from the writing. Cut the announcement.',
+    })
+  }
+
+  // Family B only, not family A: numbered/ordinal structure ("First, ...
+  // Second, ...") is the correct form for reference docs and meeting
+  // minutes, not a scaffold showing through, the same reasoning
+  // REGISTER_DETECTOR_SUPPRESSIONS uses for markdown-heading-leak in
+  // score.ts. Family A's announced-enumeration paragraph has no such
+  // legitimate-in-this-register reading, so it stays unsuppressed.
+  //
+  // "essay" and "blog" are suppressed too, beyond what the spec's Part 2
+  // named (docs and memo only) — added after measuring real regressions
+  // against assay's labeled corpora (github.com/AIStoryHub/assay), not by
+  // assumption:
+  //  - "essay": pooled AUC on its own corpus (24 pre-2021 Rust RFCs /
+  //    Python PEPs vs. two AI tiers) dropped 0.900 -> 0.884 with family B
+  //    unsuppressed, traced to a real PEP (pep-0563) using "First, this
+  //    only addresses... Second, this throws the baby out... Finally,
+  //    Guido van Rossum declared..." to enumerate rationale in ordinary
+  //    prose, the same legitimate structure docs/memo were already
+  //    suppressed for.
+  //  - "blog": pooled AUC on its own corpus (30 pre-2021 Rust/Electron blog
+  //    posts vs. two AI tiers) dropped 0.8195 -> 0.805, traced to two real
+  //    Rust release-note posts using "First, a meta note..." / "Finally, a
+  //    few documentation improvements..." as ordinary changelog transitions.
+  // Confirmed both fixes: re-measuring with each register added here
+  // restored its pre-D1 baseline (see the same PR's efficacy-baselines.json
+  // update).
+  const ordinalScaffoldSuppressed =
+    register === "docs" || register === "memo" || register === "essay" || register === "blog"
+  const ordinalScaffoldCount = countOrdinalScaffoldParagraphs(paragraphs)
+  if (
+    !ordinalScaffoldSuppressed &&
+    clearsSelfDescribingStructureFloor &&
+    ordinalScaffoldCount >= ORDINAL_SCAFFOLD_MIN_PARAGRAPHS
+  ) {
+    findings.push({
+      id: "self-describing-ordinal-scaffold",
+      name: "Self-describing structure: ordinal slot scaffold",
+      severity: "medium",
+      confidence: "orange",
+      detail: `${ordinalScaffoldCount} paragraphs open as a bare "first / second / third / finally" slot (e.g. "Major gifts, first.") instead of an idea in its own right. Let each paragraph argue on its own terms.`,
+    })
   }
 
   return findings

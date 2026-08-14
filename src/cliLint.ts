@@ -10,7 +10,7 @@ import { resolveGlobs } from "./cliGlob.js";
 import { findRepoConfig } from "./engine/repoConfig.js";
 
 const TIER_ORDER: Tier[] = ["green", "yellow", "orange", "red"];
-const VALID_REGISTERS: Register[] = ["email", "blog", "memo", "essay", "social", "docs", "general"];
+const VALID_REGISTERS: Register[] = ["email", "blog", "memo", "essay", "social", "docs", "general", "personal"];
 
 export function tierRank(tier: Tier): number {
   return TIER_ORDER.indexOf(tier);
@@ -25,7 +25,7 @@ export const USAGE = [
   "Options:",
   "  --threshold <tier>    green | yellow | orange | red (default: orange, or",
   "                        a repo-local config's own threshold if it sets one)",
-  "  --register <register> email | blog | memo | essay | social | docs | general",
+  "  --register <register> email | blog | memo | essay | social | docs | general | personal",
   "                        (default: 'docs' for .md/.mdx files, unset otherwise;",
   "                        a repo-local config's register applies in between)",
   "  --json                emit a single JSON report instead of text",
