@@ -511,6 +511,60 @@ JP owns both the source skills and the source SaaS product.
   signal without any one register's specific quirks distorting it.
   Confirmed by regression test that `register: "general"` behaves
   identically to no register at all, the same pattern used for `email`.
+- **2026-08-14: D1 `self-describing-structure` added (etincel-human-signal-spec.md
+  Part 2), rebaselined against all six tracked registers, one real regression
+  found and fixed, one accepted.** Three pattern families in
+  `structural-detectors.ts`'s `detectWholePieceRhythm`/`STRUCTURAL_PATTERNS`:
+  family A (a standalone, ≤25-word paragraph announcing a count, "Three
+  parts of my track record speak directly to..."), family B (2+ paragraphs
+  opening on a bare ordinal or label-fragment slot, "Major gifts, first."),
+  family C (narrated intent, "let me walk you through..."), all gated behind
+  a 250-word piece floor per the spec's own noted residual-FPR case.
+
+  Measured with `assay run` against a local working-tree build (not a
+  published ref), one register at a time, before vs. after:
+
+  | register | before | after | verdict |
+  |---|---|---|---|
+  | docs | 0.735 | 0.735 | unaffected |
+  | blog | 0.8195 | 0.805 -> 0.820 | regressed, fixed |
+  | memo | 0.909 | 0.909 | unaffected |
+  | essay | 0.900 | 0.884 -> 0.900 | regressed, fixed |
+  | email | 0.540 | 0.540 | unaffected |
+  | general | 0.757 | 0.748 | regressed, accepted (see below) |
+
+  Both regressions traced to the same root cause: family B firing on
+  legitimate ordinal-transition prose in technical/reference writing, the
+  exact failure mode the spec itself anticipated for `docs`/`memo` but
+  didn't extend further. `essay`'s regression (0.900 -> 0.884) traced to
+  one PEP (`pep-0563`) using "First, this only addresses... Second, this
+  throws the baby out... Finally, Guido van Rossum declared..." to
+  enumerate rationale in ordinary prose. `blog`'s regression (0.8195 ->
+  0.805) traced to two Rust release-note posts using "First, a meta
+  note..." / "Finally, a few documentation improvements..." as ordinary
+  changelog transitions. Both fixed the same way docs/memo already were,
+  by adding the register to family B's suppression list in
+  `detectWholePieceRhythm` (not `REGISTER_DETECTOR_SUPPRESSIONS`, which
+  only covers the flat `STRUCTURAL_PATTERNS` list, see the comment at the
+  suppression site for why family B's gate lives inline instead); each fix
+  confirmed by re-measuring and landing back on the pre-D1 number.
+
+  `general`'s regression (0.757 -> 0.748) was NOT fixed, on purpose: it
+  traces to the same PEP document (part of general's own 24-document mix,
+  6 of which are essay-sourced, see the entry above), but `general`
+  deliberately inherits no other register's suppressions, term or
+  detector, the whole point of the entry above being that any such
+  borrowing re-encodes one sub-genre's calibration under a misleading
+  "general" label. Suppressing family B for `general` specifically would
+  contradict that finding for a single document's sake. The 0.011-point
+  drop is accepted and this file's baseline updated to 0.748 to reflect
+  it, rather than left wrong or silently patched around; `general` remains
+  otherwise unfixed exactly as the entry above describes.
+
+  Family C (narrated intent) is a flat `STRUCTURAL_PATTERNS` entry
+  (`narrated-intent-scaffold`), scored the normal density-weighted way, not
+  swept separately here: it's a phrase match like any other entry in that
+  list, not a whole-piece check.
 - **`score.ts` assigns flat strength values** (hard-ban = 80, soft-flag = 45)
   rather than porting each corpus entry's individual `strength_score`,
   since the curated JSON files don't carry that field. Structural patterns

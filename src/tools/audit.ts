@@ -24,7 +24,10 @@ export async function auditTextTool(
    * in alongside the account/style dictionary. Only the local stdio server
    * passes this, since it's the only transport with a real repo/cwd to look
    * in; the hosted server never does. */
-  extra?: { bannedWords?: string[]; allowedWords?: string[] }
+  extra?: { bannedWords?: string[]; allowedWords?: string[] },
+  /** Elicited answers from SKILL.md's Step 0.5, see
+   * src/engine/elicitedMaterial.ts. Omit when Step 0.5 wasn't run. */
+  sourceFacts?: string[]
 ) {
   if (!text || text.trim().length === 0) {
     throw new Error("Nothing to audit: text was empty.");
@@ -32,7 +35,12 @@ export async function auditTextTool(
   const { bannedWords, allowedWords } = await effectiveDictionary(store, styleId);
   const mergedBannedWords = dedupeWords([...(extra?.bannedWords ?? []), ...bannedWords]);
   const mergedAllowedWords = dedupeWords([...(extra?.allowedWords ?? []), ...allowedWords]);
-  const result = auditText(text, { extraBannedWords: mergedBannedWords, allowedWords: mergedAllowedWords, register });
+  const result = auditText(text, {
+    extraBannedWords: mergedBannedWords,
+    allowedWords: mergedAllowedWords,
+    register,
+    sourceFacts,
+  });
   const scoredFindings = result.findings.filter((f) => f.scored);
   return {
     tier: result.tier,

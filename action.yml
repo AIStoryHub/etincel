@@ -15,7 +15,7 @@ inputs:
     required: false
     default: "orange"
   register:
-    description: "Register to calibrate strictness against: email, blog, memo, essay, social, docs, general. Leave unset to let .md/.mdx files default to 'docs' automatically."
+    description: "Register to calibrate strictness against: email, blog, memo, essay, social, docs, general, personal. Leave unset to let .md/.mdx files default to 'docs' automatically."
     required: false
     default: ""
 

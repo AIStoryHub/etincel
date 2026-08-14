@@ -412,6 +412,23 @@ test("'general' has no dictionary-term suppressions: a labeled mixed-genre corpu
   );
 });
 
+test("'personal' is scaffolded but not yet calibrated: no term suppressions, no detector suppressions, no rhythm weight of its own, so auditText(text, {register: 'personal'}) behaves identically to no register at all until a labeled corpus justifies otherwise", () => {
+  const text = "This change would propagate to every caller. The retry mechanism handles failures well. We need to evaluate this framework as a benchmark.";
+
+  const withoutRegister = auditText(text);
+  const withPersonalRegister = auditText(text, { register: "personal" });
+  assert.deepEqual(
+    withPersonalRegister.findings.map((f) => f.term).sort(),
+    withoutRegister.findings.map((f) => f.term).sort(),
+    "personal register suppresses nothing that unregistered text doesn't already flag"
+  );
+  assert.equal(
+    withPersonalRegister.score,
+    withoutRegister.score,
+    "personal register's rhythm weight falls through to DEFAULT_RHYTHM_WEIGHT, same as unregistered text"
+  );
+});
+
 test("allowedWords suppresses a built-in hard-ban match", () => {
   const text = "We need to leverage our existing partnerships to grow.";
   const withoutAllow = auditText(text);
@@ -536,4 +553,33 @@ test("repeated occurrences of a term increase score but with diminishing (capped
   const once = auditText("We should leverage this. " + "Padding word here to keep density comparable. ".repeat(20));
   const many = auditText("We should leverage leverage leverage leverage leverage leverage leverage this. " + "Padding word here to keep density comparable. ".repeat(20));
   assert.ok(many.score > once.score, "more repetitions should score at least as high");
+});
+
+test("auditText without sourceFacts never runs elicited-material-unused, even on a fact-light draft", () => {
+  const result = auditText("A perfectly generic draft with no named specifics at all in it whatsoever.");
+  assert.ok(!result.findings.some((f) => f.subcategory === "elicited-material-unused"));
+});
+
+test("auditText with sourceFacts flags elicited-material-unused as a scored finding when the quota isn't met", () => {
+  const draft = "I am a highly qualified candidate with a strong, proven track record of delivering results.";
+  const result = auditText(draft, {
+    sourceFacts: ["The rink was cold most mornings.", "The coach's name was Dave."],
+  });
+  const finding = result.findings.find((f) => f.subcategory === "elicited-material-unused");
+  assert.ok(finding, "expected elicited-material-unused to fire when neither fact was used");
+  assert.equal(finding.scored, true);
+});
+
+test("auditText with sourceFacts does not flag elicited-material-unused once the quota is met", () => {
+  const draft =
+    "The coach's name was Dave, and he believed in my son before there was much evidence to believe in yet. The rink was cold most mornings, and mostly empty too.";
+  const result = auditText(draft, {
+    sourceFacts: ["The coach's name was Dave.", "The rink was cold most mornings."],
+  });
+  assert.ok(!result.findings.some((f) => f.subcategory === "elicited-material-unused"));
+});
+
+test("auditText with an empty sourceFacts array behaves identically to no sourceFacts at all", () => {
+  const draft = "A perfectly generic draft with no named specifics at all in it whatsoever.";
+  assert.deepEqual(auditText(draft, { sourceFacts: [] }), auditText(draft));
 });

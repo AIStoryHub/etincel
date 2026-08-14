@@ -1,12 +1,12 @@
 {
   "$schema": "none, hand-maintained",
-  "description": "Last known-good pooled AUC per register, measured by assay (github.com/AIStoryHub/assay) against each register's labeled corpus. AUC is deterministic (same code + same corpus + same bootstrap seed always reproduce the same number), so any drop below these values on a PR means that PR measurably regressed detection for that register, not measurement noise. docs/blog/memo/essay are calibrated (term suppressions, mechanical baseline, and/or rhythm weight); email and general are deliberately left uncalibrated but are still checked here so an accidental regression in either doesn't go unnoticed just because no one tuned them on purpose. 'social' has no labeled corpus at all (see src/data/SOURCES.md's 2026-08-10 entry for why) so it isn't tracked here. See scripts/check-efficacy-regression.mjs and src/data/SOURCES.md's per-register 2026-08-10 entries for how each number was reached. Update this file in the same PR that intentionally changes a register's calibration or corpus.",
+  "description": "Last known-good pooled AUC per register, measured by assay (github.com/AIStoryHub/assay) against each register's labeled corpus. AUC is deterministic (same code + same corpus + same bootstrap seed always reproduce the same number), so any drop below these values on a PR means that PR measurably regressed detection for that register, not measurement noise. docs/blog/memo/essay are calibrated (term suppressions, mechanical baseline, and/or rhythm weight); email and general are deliberately left uncalibrated but are still checked here so an accidental regression in either doesn't go unnoticed just because no one tuned them on purpose. 'social' has no labeled corpus at all (see src/data/SOURCES.md's 2026-08-10 entry for why) so it isn't tracked here. See scripts/check-efficacy-regression.mjs and src/data/SOURCES.md's per-register 2026-08-10 entries (and the 2026-08-14 entry for 'general's most recent number, after D1 landed) for how each number was reached. Update this file in the same PR that intentionally changes a register's calibration or corpus.",
   "registers": {
     "docs": 0.7352,
     "blog": 0.8195,
     "memo": 0.9094,
     "essay": 0.9002,
     "email": 0.5398,
-    "general": 0.7569
+    "general": 0.7483
   }
 }

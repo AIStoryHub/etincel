@@ -37,8 +37,8 @@ commands:
         default: ""
         description: >
           Register to calibrate strictness against: email, blog, memo, essay,
-          social, docs, general. Leave unset to let .md/.mdx files default to
-          "docs" automatically.
+          social, docs, general, personal. Leave unset to let .md/.mdx files
+          default to "docs" automatically.
       ref:
         type: string
         default: "main"

@@ -33,7 +33,7 @@ AI-drafted prose has a recognizable shape: uniform paragraphs, hedged authority,
 
 ## What's in here
 
-- **An MCP server** (`src/server.ts`) exposing nineteen tools:
+- **An MCP server** (`src/server.ts`) exposing twenty tools:
   - `list_styles`: premade tone presets, any voices you've trained, and (if a repo-local `.etincelrc` defines one) a shared team style
   - `get_style_guide`: the drafting instructions for one style
   - `train_style`: learn a voice from your own writing samples (sentence rhythm, contraction rate, em-dash habits, paragraph variance, recurring phrasing: measured, not guessed)
@@ -44,7 +44,8 @@ AI-drafted prose has a recognizable shape: uniform paragraphs, hedged authority,
   - `set_default_style`: remember which style to use without repeating yourself
   - `check_voice_match`: compare a draft's measured rhythm against a trained voice's baseline. A rhythm/mechanics check, not an authorship or AI-detection check, and low-confidence on short input
   - `check_self_repetition`: compare a draft against a voice's own recent training samples for habits, not AI tells: the same opener, or a phrase, recurring across several past pieces ("you've opened this way in 4 of your last 6 pieces"). Local install only for now
-  - `audit_text`: a deterministic, rules-based scan for AI tells, returning a tier, specific findings with severity, and a strengths signal (specificity, concrete-vs-abstract ratio, sentence-rhythm variation) so fixes don't flatten the prose. Takes an optional `register` (`email` / `blog` / `memo` / `essay` / `social` / `docs` / `general`, default `general`) to calibrate strictness against the kind of text it is: `docs` suppresses Markdown-structure false positives (headings, bolded terms) and recalibrates rhythm/vocabulary detection against long-form reference prose instead of punchier short-form copy
+  - `audit_text`: a deterministic, rules-based scan for AI tells, returning a tier, specific findings with severity, and a strengths signal (specificity, concrete-vs-abstract ratio, sentence-rhythm variation) so fixes don't flatten the prose. Takes an optional `register` (`email` / `blog` / `memo` / `essay` / `social` / `docs` / `general` / `personal`, default `general`) to calibrate strictness against the kind of text it is: `docs` suppresses Markdown-structure false positives (headings, bolded terms) and recalibrates rhythm/vocabulary detection against long-form reference prose instead of punchier short-form copy. `personal` is scaffolded (accepted, suppresses nothing extra yet) but not yet calibrated: no term suppressions, rhythm weight, or labeled corpus of its own until one is measured. Also takes an optional `sourceFacts` (details elicited from the user, never generated): checks how many actually made it into the draft, flagging `elicited-material-unused` below a quota of two used and at least one in a sentence that isn't proving a qualification
+  - `second_read`: a single model call that reads a draft and reports what a careful human editor would notice, unscored and untiered, never a rewrite. Hosted only: this install always fails with a clear explanation, since a model call needs an account, a pinned model, and a billing surface this install doesn't have. `audit_text` remains fully available, no account needed
   - `add_banned_word` / `remove_banned_word`: maintain your own banned-vocabulary list, checked by `audit_text` alongside the built-in corpus
   - `add_custom_word` / `remove_custom_word`: maintain a "never flag this" list: an org's own acronyms or house terms, the corporate-dictionary case
   - `list_dictionary`: see a scope's banned/custom words, and (for a style) what actually applies once merged with the global list

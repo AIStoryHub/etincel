@@ -6,6 +6,8 @@ import { createStylesTools } from "./tools/styles.js";
 import { fsVoiceStore } from "./engine/voiceStore.fs.js";
 import { createHttpPublicStyleSource } from "./engine/httpPublicStyleSource.js";
 import { auditTextTool } from "./tools/audit.js";
+import { secondReadTool } from "./tools/secondRead.js";
+import { localSecondReadSource } from "./engine/secondReadSource.js";
 import { findRepoConfig, REPO_STYLE_ID } from "./engine/repoConfig.js";
 import { fsDictionaryStore } from "./engine/dictionaryStore.fs.js";
 import { createDictionaryTools } from "./tools/dictionary.js";
@@ -398,7 +400,7 @@ server.registerTool(
     inputSchema: {
       text: z.string().describe("The text to audit."),
       register: z
-        .enum(["email", "blog", "memo", "essay", "social", "docs", "general"])
+        .enum(["email", "blog", "memo", "essay", "social", "docs", "general", "personal"])
         .optional()
         .describe("Register to calibrate strictness against. Defaults to 'general'."),
       styleId: z
@@ -407,14 +409,40 @@ server.registerTool(
         .describe(
           "Style id (from list_styles) whose own banned/custom word list should merge with the installer's global list. Omit to use only the global list."
         ),
+      sourceFacts: z
+        .array(z.string())
+        .optional()
+        .describe(
+          "Elicited answers from the skill's Step 0.5 (details only the user could supply, never generated): specific spans the draft was supposed to draw on. When given, checks how many actually made it into the draft (elicited-material-unused fires below the quota: at least two used, at least one in a sentence that isn't proving a qualification). Omit when Step 0.5 wasn't run."
+        ),
     },
   },
-  async ({ text, register, styleId }) => {
+  async ({ text, register, styleId, sourceFacts }) => {
     try {
       const repoConfig = findRepoConfig(process.cwd());
       const effectiveRegister = register ?? repoConfig?.register;
       const extra = repoConfig && { bannedWords: repoConfig.bannedWords, allowedWords: repoConfig.allowedWords };
-      return json(await auditTextTool(fsDictionaryStore, text, effectiveRegister, styleId, extra));
+      return json(await auditTextTool(fsDictionaryStore, text, effectiveRegister, styleId, extra, sourceFacts));
+    } catch (err) {
+      return errorResult(err);
+    }
+  }
+);
+
+server.registerTool(
+  "second_read",
+  {
+    title: "Get a second read on a draft (hosted only)",
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    description:
+      "A single model call that reads a draft and reports what a careful human editor would notice: unscored, untiered, and never a rewrite. Distinct from audit_text, which is deterministic and reproducible; this is neither, so weigh it as one more opinion, not a verdict, and never gate a decision on it alone. Requires the hosted server (https://etincel.ai/api/mcp): the local (stdio) install has no account to bill a model call against, so this always fails there with a clear explanation. audit_text remains fully available locally, no account needed.",
+    inputSchema: {
+      text: z.string().describe("The text to read."),
+    },
+  },
+  async ({ text }) => {
+    try {
+      return json(await secondReadTool(localSecondReadSource, text));
     } catch (err) {
       return errorResult(err);
     }

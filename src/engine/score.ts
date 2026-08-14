@@ -22,6 +22,7 @@ import {
   type Lifecycle,
   type StrengthSignals,
 } from "./structural-detectors.js"
+import { checkElicitedMaterial } from "./elicitedMaterial.js"
 
 export type Tier = "green" | "yellow" | "orange" | "red"
 
@@ -70,6 +71,12 @@ export interface AuditOptions {
   /** Calibrates strictness against the kind of text this is, see
    * REGISTER_DETECTOR_SUPPRESSIONS. Defaults to no suppression ("general"). */
   register?: Register
+  /** Elicited answers from SKILL.md's Step 0.5 (details only the user
+   * could supply, never generated), so elicited-material-unused can check
+   * how many actually made it into the draft. See elicitedMaterial.ts.
+   * Omit or pass an empty array when Step 0.5 wasn't run: the check only
+   * fires when sourceFacts was actually supplied. */
+  sourceFacts?: string[]
 }
 
 interface CompiledEntry {
@@ -86,7 +93,7 @@ interface CompiledEntry {
 }
 
 /** Registers the "audit_text" tool accepts, matching server.ts's input schema. */
-export type Register = "email" | "blog" | "memo" | "essay" | "social" | "docs" | "general"
+export type Register = "email" | "blog" | "memo" | "essay" | "social" | "docs" | "general" | "personal"
 
 /** Structural detectors that fire on markup that's correct, not an AI tell,
  * in a given register: a README's headings and bolded terms are valid
@@ -175,6 +182,15 @@ const REGISTER_TERM_SUPPRESSIONS: Partial<Record<Register, string[]>> = {
  * entry here earned it via its own weight sweep against its own labeled
  * corpus, same stopping rule: more separation, not just a higher number. */
 const DEFAULT_RHYTHM_WEIGHT = 14
+
+/** Flat score bonus when elicited-material-unused fires (see
+ * elicitedMaterial.ts). Same order of magnitude as DEFAULT_RHYTHM_WEIGHT on
+ * purpose, not swept: this check's correctness is definitional (did the
+ * draft use facts the user supplied), not a statistical claim about prose
+ * shape, so a corpus sweep can't justify a "right" number the way it does
+ * for the rhythm weights above. Revisit if it turns out to move score too
+ * much or too little in practice. */
+const ELICITED_MATERIAL_UNUSED_BONUS = 14
 const REGISTER_RHYTHM_WEIGHT: Partial<Record<Register, number>> = {
   // Swept 8/10/14/16/18/22 against the labeled blog corpus. FPR and recall
   // held completely flat (0.276 / 0.7) across 14-18, with AUC creeping up
@@ -614,18 +630,51 @@ export function auditText(text: string, options: AuditOptions = {}): AuditResult
   const rhythmFindings = detectWholePieceRhythm(cleanedText, options.register)
   const rhythmWeight = (options.register && REGISTER_RHYTHM_WEIGHT[options.register]) ?? DEFAULT_RHYTHM_WEIGHT
   const rhythmBonus = rhythmFindings.length * rhythmWeight
-  const finalScore = Math.min(100, score + rhythmBonus)
+
+  // elicited-material-unused (etincel-human-signal-spec.md Part 4): a flat
+  // bonus like rhythmBonus, but independent of it and NOT register-weighted
+  // by REGISTER_RHYTHM_WEIGHT, since its firing condition (did the draft
+  // use the facts the user explicitly supplied) has no register-specific
+  // basis to vary by the way rhythm's does. ELICITED_MATERIAL_UNUSED_BONUS
+  // is a first-pass number, not swept against a corpus: unlike the rhythm
+  // weights, this check's correctness is definitional (did text X appear),
+  // not statistical, so it doesn't need one to justify running, but the
+  // exact point value is still a judgment call worth revisiting.
+  const elicitedMaterialUsage = options.sourceFacts?.length
+    ? checkElicitedMaterial(options.sourceFacts, cleanedText)
+    : undefined
+  const elicitedMaterialBonus =
+    elicitedMaterialUsage && !elicitedMaterialUsage.meetsQuota ? ELICITED_MATERIAL_UNUSED_BONUS : 0
+
+  const finalScore = Math.min(100, score + rhythmBonus + elicitedMaterialBonus)
 
   for (const rf of rhythmFindings) {
     findings.push({
       term: rf.name,
       category: "Whole-piece rhythm",
       subcategory: rf.id,
-      confidence: "orange",
+      confidence: rf.confidence ?? "orange",
       severity: rf.severity,
       count: 1,
       scored: true,
       note: rf.detail,
+    })
+  }
+
+  if (elicitedMaterialUsage && !elicitedMaterialUsage.meetsQuota) {
+    findings.push({
+      term: "Elicited material unused",
+      category: "Elicited material",
+      subcategory: "elicited-material-unused",
+      confidence: "orange",
+      severity: "medium",
+      count: 1,
+      scored: true,
+      note: `${elicitedMaterialUsage.usedFacts.length} of ${elicitedMaterialUsage.totalFacts} elicited detail(s) used${
+        elicitedMaterialUsage.usedFacts.length > 0 && !elicitedMaterialUsage.usedInNonEvidentiarySentence
+          ? ", all only inside sentences that are already proving a qualification"
+          : ""
+      }. The bar: at least two used, and at least one in a sentence that isn't proving anything. Without new material this reads as a rearrangement, not a richer draft.`,
     })
   }
 
