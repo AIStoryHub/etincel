@@ -67,6 +67,8 @@ Those answer "was a machine involved?" with a probability, over a whole document
 
 ## Install
 
+Also listed on the [official MCP registry](https://registry.modelcontextprotocol.io/?search=ai.etincel) as `ai.etincel/etincel-nonfiction`, so MCP-aware clients that auto-discover servers from there (VS Code's `@mcp` gallery, for one) find it without any of the config below.
+
 ### Claude Code
 
 ```
@@ -235,6 +237,7 @@ npm run build   # compile to dist/
 ```
 
 [![mcpscore audit](https://mcpscore.dev/api/v1/servers/badge.svg?url=https%3A%2F%2Fetincel.ai%2Fapi%2Fmcp)](https://mcpscore.dev/s?url=https%3A%2F%2Fetincel.ai%2Fapi%2Fmcp)
+[![MCP Registry](https://img.shields.io/badge/MCP%20Registry-listed-blue)](https://registry.modelcontextprotocol.io/?search=ai.etincel)
 [![CircleCI](https://dl.circleci.com/status-badge/img/circleci/HWTiYiCZoft66WSoRKovSz/c4a8237e-0e19-4b67-8934-69c2386aa42d/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/HWTiYiCZoft66WSoRKovSz/c4a8237e-0e19-4b67-8934-69c2386aa42d/tree/main)
 [![CI](https://github.com/AIStoryHub/etincel/actions/workflows/ci.yml/badge.svg)](https://github.com/AIStoryHub/etincel/actions/workflows/ci.yml)
 [![Étincel lint](https://github.com/AIStoryHub/etincel/actions/workflows/lint.yml/badge.svg)](https://github.com/AIStoryHub/etincel/actions/workflows/lint.yml)
