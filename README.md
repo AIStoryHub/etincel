@@ -24,10 +24,25 @@ No install, no account, no model call, no network.
 
 ```
 $ npx etincel lint drafts/announcement.md --register blog
-✗ drafts/announcement.md  RED 82/100  (9 findings)
-    - leverage
-    - streamline
-    - comprehensive
+✗ drafts/announcement.md  RED 86/100  (6 findings, 71 words, register: blog)
+  Heavy AI styling. Multiple strong tells stacking up, worth a structural
+  rewrite, not a word-swap pass.
+
+  Whole-piece rhythm
+    medium  uniform-paragraph-length
+            4 paragraphs, most running about the same length with little
+            variation between them. Vary paragraph length more.
+
+  Vocabulary and phrasing
+    high    leverage  L3:C99  → use
+    high    streamline  L3:C70  → simplify, speed up
+    high    comprehensive  L3:C30  → thorough, complete
+    high    cutting-edge  L3:C109  → newest, latest
+    high    seamless  L3:C150  → smooth, easy
+
+  strengths  specificity 27.0/1k · concrete:abstract 0.67 · burstiness 0.36
+             Specific: names, numbers, and concrete detail carry real weight
+             here.
 
 1 file audited, 1 at or above orange.
 ```
