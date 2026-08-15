@@ -1,6 +1,6 @@
 {
   "name": "etincel-nonfiction",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Non-fiction writing connector: trainable voice, premade emotional tones, and a transparent anti-AI-tells audit for Claude Code, Claude Desktop, and any MCP-enabled tool. Layers onto whatever you already write in, does not replace your email client, editor, or CMS.",
   "author": {
     "name": "Jean-Philippe LeBlanc"
