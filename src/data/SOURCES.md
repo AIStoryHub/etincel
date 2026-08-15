@@ -565,6 +565,62 @@ JP owns both the source skills and the source SaaS product.
   (`narrated-intent-scaffold`), scored the normal density-weighted way, not
   swept separately here: it's a phrase match like any other entry in that
   list, not a whole-piece check.
+- **2026-08-14: gap-fill pass against `hardikpandya/stop-slop`, a third-party
+  Claude Skill (MIT, 15k+ stars) covering the same problem with a much
+  smaller catalogue.** Comparing its taxonomy against this project's found
+  two real conceptual gaps and several missing business-idiom/signature-verb
+  terms; both repos (`etincel` and `etincelNFAI`) got the same fix.
+  - **`false-agency`** (new `ai-tells.json` entry): giving an inanimate/
+    abstract noun a human verb so the sentence never names the actor ("the
+    decision emerges," "the market rewards efficiency"). Distinct from
+    passive voice (an active verb, wrong subject). Added as 6 soft-flag
+    phrase entries (`lives or dies`, `decision emerges`, `culture shifts`,
+    `conversation moves toward`, `data tells us`, `market rewards`), not a
+    broad regex: the general shape (abstract-noun-subject + human verb) is
+    too broad to catch mechanically without flagging ordinary sentences
+    ("water becomes ice"), so only stop-slop's own named idioms are covered,
+    same reasoning `vague-authority-attribution` and other conceptual
+    entries in this file already use for judgment-dependent tells.
+  - **`negative-listing`** (new `STRUCTURAL_PATTERNS` entry in
+    `structural-detectors.ts`, mirrors `no-triple`'s red/75
+    confidence/strength): "Not a X. Not a Y. A Z." and its past-tense
+    "It wasn't X. It wasn't Y. It was Z." variant, a rhetorical striptease
+    distinct from `elevation-echo`'s two-sentence contrast. Well-defined
+    enough for a regex, unlike false-agency.
+  - **Business-idiom/signature-verb gaps**: `game-changer` (hyphenated form;
+    the unhyphenated "game changer" was already covered), `lean into`,
+    `double down`, `take a step back`, `moving forward`, `on the same page`
+    added to `banned-terms.json`, matching stop-slop's jargon swap-table
+    entries.
+  - **Lesson from measuring, not assuming**: bare `unpack`/`unpacking` was
+    tried first as a signature-verb hard-ban (stop-slop lists "unpack
+    (analysis)" in its jargon table) and immediately regressed `essay`
+    (0.9002 → 0.8715) and `general` (0.7569 → 0.732ish) pooled AUC, confirmed
+    via `assay` against a local working-tree build (see
+    `reference-assay-local-measurement` in project memory for the method).
+    Root cause: a real Python PEP (`pep-0448`, "Additional Unpacking
+    Generalizations") is entirely about `*`/`**` iterable-unpacking syntax
+    and uses the word 20+ times, clearing the occurrence floor at every
+    tier. Downgrading to soft-flag wasn't enough either (soft-flag still
+    scores past 2+ occurrences, and the term recurs dozens of times in that
+    one document) — essay only fully recovered once `unpack`/`unpacking`
+    were dropped entirely, keeping just the pre-existing `let's unpack`
+    phrase-level ban, which is unambiguous and was never the problem. Same
+    remedy this file's own 2026-08-10 entry already reached for `however`/
+    `generally`/`sure`/`furthermore`: some collisions aren't fixable by
+    softening the tier, only by not banning the bare word at all.
+    Re-measured after the fix, directly against this repo's own local build
+    (not copied from etincelNFAI's numbers, since this repo lacks
+    etincelNFAI's uncommitted D1 `self-describing-structure` feature and so
+    has different baselines): `docs` 0.7352, `blog` 0.8195, `memo` 0.9094,
+    `essay` 0.9002 — all exactly unchanged from `efficacy-baselines.json`;
+    `general` 0.7587, slightly above its 0.7569 baseline. `email` wasn't
+    remeasured (a pre-existing scratch-config/corpus-path issue unrelated to
+    this change returned no score; email is already documented above as
+    falling through to the generic, uncalibrated path, so a dictionary-only
+    addition like this one has no register-specific mechanism to regress).
+    Corpus now 348 + 129 = 477 entries (was 340 + 123 = 463); `ai-tells.json`
+    now 43 entries (was 41).
 - **`score.ts` assigns flat strength values** (hard-ban = 80, soft-flag = 45)
   rather than porting each corpus entry's individual `strength_score`,
   since the curated JSON files don't carry that field. Structural patterns

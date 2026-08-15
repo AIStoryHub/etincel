@@ -26,6 +26,11 @@ const cases: Array<{ id: string; positive: string; negative: string }> = [
     negative: "All the reports were filed on time. That's normal here.",
   },
   {
+    id: "negative-listing",
+    positive: "Not a hobby. Not a phase. A calling.",
+    negative: "Not a bad idea, honestly, but we should wait and see.",
+  },
+  {
     id: "elevation-echo",
     positive: "It's not just a tool, it's a movement.",
     negative: "It's not a tool. It's broken.",
@@ -160,6 +165,16 @@ for (const { id, positive, negative } of cases) {
     assert.equal(countMatches(id, negative), 0, `expected no match in: ${negative}`);
   });
 }
+
+test('negative-listing also matches the past-tense "It wasn\'t X. It wasn\'t Y. It was Z." variant', () => {
+  const text = "It wasn't luck. It wasn't timing. It was preparation.";
+  assert.ok(countMatches("negative-listing", text) >= 1);
+});
+
+test("negative-listing leaves a single negation unmatched (regression)", () => {
+  const text = "Not a bad idea, honestly, but we should wait and see.";
+  assert.equal(countMatches("negative-listing", text), 0);
+});
 
 test('elevation-echo also matches the "None of this is X. It\'s Y." structural variant', () => {
   const text = "None of this is about cutting corners. It's about cutting the waiting.";

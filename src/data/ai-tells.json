@@ -1,7 +1,7 @@
 {
   "$schema_note": "Structural/rhetorical AI tells, whole-piece and sentence-level. 'critical' severity items are near-definitive fingerprints \u2014 a single hit is enough to flag regardless of the rest of the piece.",
   "source": "Condensed from JP LeBlanc's etincel-prose skill (references/ai-tells.md, items 1-26) and avoid-ai-writing's channel-and-chatbot-tells.md.",
-  "count": 41,
+  "count": 43,
   "entries": [
     {
       "id": "uniform-paragraph-length",
@@ -47,6 +47,22 @@
       "severity": "high",
       "example_bad": "The report serves as a reminder of the risk.",
       "example_good": "The report shows the risk."
+    },
+    {
+      "id": "false-agency",
+      "name": "False agency",
+      "description": "Giving an inanimate or abstract noun a human verb, so the sentence never has to name who actually did the thing (\"the complaint becomes a fix,\" \"the decision emerges,\" \"the market rewards efficiency\"). Distinct from passive voice: the sentence has an active verb, it's just attached to the wrong subject. Name the person; if none fits, use \"you.\"",
+      "severity": "high",
+      "example_bad": "The decision emerges after the team reviews the data.",
+      "example_good": "Priya decides after the team reviews the data."
+    },
+    {
+      "id": "negative-listing",
+      "name": "Negative listing",
+      "description": "Listing what something is not, twice, before revealing what it is (\"Not a hobby. Not a phase. A calling.\") — a rhetorical striptease. State the third term directly; the reader doesn't need the runway.",
+      "severity": "medium",
+      "example_bad": "It wasn't luck. It wasn't timing. It was preparation.",
+      "example_good": "It was preparation."
     },
     {
       "id": "significance-inflation",

@@ -47,6 +47,21 @@ export const STRUCTURAL_PATTERNS: StructuralPattern[] = [
     regex: /\bAll the\s+[^.!?\n]{1,30}?\.\s+None of the\s+[^.!?\n]{1,30}?\./gi,
   },
   {
+    id: "negative-listing",
+    term: "Not a X... Not a Y... A Z.",
+    category: "Sentence patterns",
+    subcategory: "Negative listing",
+    confidence: "red",
+    strength: 75,
+    // A rhetorical striptease: listing what something is *not*, twice, before
+    // revealing what it *is*. Present-tense ("Not a X... Not a Y... A Z.")
+    // and past-tense ("It wasn't X. It wasn't Y. It was Z.") are the same
+    // template; matched as two branches rather than trying to unify the verb
+    // forms into one pattern.
+    regex:
+      /\bNot\s+(?:a|an)\s+[^.!?\n,]{1,30}\.\s+Not\s+(?:a|an)\s+[^.!?\n,]{1,30}\.\s+(?:A|An)\s+[^.!?\n,]{1,30}\.|\bIt\s+wasn'?t\s+[^.!?\n,]{1,30}\.\s+It\s+wasn'?t\s+[^.!?\n,]{1,30}\.\s+It\s+was\s+[^.!?\n,]{1,30}\./gi,
+  },
+  {
     id: "elevation-echo",
     term: "It's not just X, it's Y",
     category: "Sentence patterns",
