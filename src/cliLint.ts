@@ -9,6 +9,7 @@ import { auditText, type AuditResult, type Finding, type FindingMatch, type Tier
 import { resolveGlobs } from "./cliGlob.js";
 import { findRepoConfig } from "./engine/repoConfig.js";
 import { buildLineStarts, offsetToLineCol } from "./engine/offsets.js";
+import { guardStrengthsNotes, hasReliableStrengths } from "./engine/strengthsConfidence.js";
 
 const TIER_ORDER: Tier[] = ["green", "yellow", "orange", "red"];
 const VALID_REGISTERS: Register[] = ["email", "blog", "memo", "essay", "social", "docs", "general", "personal"];
@@ -112,6 +113,48 @@ export interface LintFinding extends Omit<Finding, "matches"> {
   matches?: LintFindingMatch[];
 }
 
+const SEVERITY_ORDER: Record<Finding["severity"], number> = { critical: 0, high: 1, medium: 2, low: 3 };
+
+/** Two corpus entries occasionally share a term ("it is worth noting" is
+ * both a "didactic-hedge" and an "editorializing-marker") and so both match
+ * the exact same span, which would otherwise render as the same line
+ * twice and inflate findingCount for what a reader counts as one problem.
+ * Findings are merged only when their term AND their full match-position
+ * set are identical — i.e. they describe the literal same occurrences,
+ * not just the same word elsewhere in the file — and the merged entry's
+ * subcategory lists every distinct subcategory that fired, so nothing is
+ * lost, just deduplicated. Findings without matches (whole-piece rhythm,
+ * elicited material) are never candidates: each is already unique. */
+function mergeDuplicateSpanFindings(findings: LintFinding[]): LintFinding[] {
+  const groups = new Map<string, LintFinding[]>();
+  const order: string[] = [];
+  for (const finding of findings) {
+    const key =
+      finding.matches && finding.matches.length > 0
+        ? `${finding.term.toLowerCase()}|${finding.matches.map((m) => `${m.start}-${m.end}`).join(",")}`
+        : `__unique__${order.length}`;
+    const bucket = groups.get(key);
+    if (bucket) bucket.push(finding);
+    else {
+      groups.set(key, [finding]);
+      order.push(key);
+    }
+  }
+  return order.map((key) => {
+    const group = groups.get(key)!;
+    if (group.length === 1) return group[0];
+    const bySeverity = [...group].sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]);
+    const primary = bySeverity[0];
+    const subcategories = Array.from(new Set(group.map((f) => f.subcategory))).join(", ");
+    return {
+      ...primary,
+      subcategory: subcategories,
+      note: primary.note ?? group.find((f) => f.note)?.note,
+      replacementHint: primary.replacementHint ?? group.find((f) => f.replacementHint)?.replacementHint,
+    };
+  });
+}
+
 export interface FileLintResult {
   file: string;
   score: number;
@@ -158,12 +201,13 @@ export function runLint(options: LintOptions, cwd: string): LintReport {
       allowedWords,
     });
     const lineStarts = buildLineStarts(text);
-    const findings: LintFinding[] = result.findings
+    const rawFindings: LintFinding[] = result.findings
       .filter((f) => f.scored)
       .map((f) => ({
         ...f,
         matches: f.matches?.map((m) => ({ ...m, ...offsetToLineCol(lineStarts, m.start) })),
       }));
+    const findings = mergeDuplicateSpanFindings(rawFindings);
     return {
       file,
       score: result.score,
@@ -174,7 +218,7 @@ export function runLint(options: LintOptions, cwd: string): LintReport {
       findings,
       categoryBreakdown: result.categoryBreakdown,
       summary: result.summary,
-      strengths: result.strengths,
+      strengths: guardStrengthsNotes(result.strengths, result.wordCount),
     };
   });
   const failing = files.filter((f) => tierRank(f.tier) >= tierRank(threshold));
@@ -182,8 +226,6 @@ export function runLint(options: LintOptions, cwd: string): LintReport {
 }
 
 const TIER_LABEL: Record<Tier, string> = { green: "GREEN", yellow: "YELLOW", orange: "ORANGE", red: "RED" };
-
-const SEVERITY_ORDER: Record<Finding["severity"], number> = { critical: 0, high: 1, medium: 2, low: 3 };
 
 // Finding.category values sourced from the vocabulary corpora (banned-terms /
 // soft-flag-terms) plus a repo config's custom bans: single lowercase words,
@@ -230,15 +272,34 @@ function wrap(text: string, indent: string, width: number = WRAP_WIDTH): string[
   return lines;
 }
 
-function formatFinding(finding: LintFinding, lexical: boolean): string[] {
+/** Two or more corpus subcategories merged onto one line (see
+ * mergeDuplicateSpanFindings) get every subcategory named in the label
+ * itself, since a lexical finding otherwise only ever shows `term`. A
+ * finding with a single subcategory looks exactly as before. */
+function lexicalLabel(finding: LintFinding): string {
+  const base = finding.subcategory.includes(",") ? `${finding.term} (${finding.subcategory})` : finding.term;
+  return finding.count > 1 ? `${base} ×${finding.count}` : base;
+}
+
+function lexicalPosition(finding: LintFinding): string {
+  const match = finding.matches?.[0];
+  return match ? `L${match.line}:C${match.col}` : "";
+}
+
+function formatFinding(finding: LintFinding, lexical: boolean, labelWidth = 0, positionWidth = 0): string[] {
   const lines: string[] = [];
   const severity = finding.severity.padEnd(8);
-  const label = lexical ? finding.term : finding.subcategory;
-  const countSuffix = finding.count > 1 ? ` ×${finding.count}` : "";
-  const match = finding.matches?.[0];
-  const position = lexical && match ? `  L${match.line}:C${match.col}` : "";
-  const hint = finding.replacementHint ? `  → ${finding.replacementHint}` : "";
-  lines.push(`    ${severity}${label}${countSuffix}${position}${hint}`);
+  let line: string;
+  if (lexical) {
+    const label = lexicalLabel(finding).padEnd(labelWidth);
+    const position = lexicalPosition(finding).padEnd(positionWidth);
+    line = `    ${severity}${label}  ${position}`;
+    if (finding.replacementHint) line += `  → ${finding.replacementHint}`;
+  } else {
+    const countSuffix = finding.count > 1 ? ` ×${finding.count}` : "";
+    line = `    ${severity}${finding.subcategory}${countSuffix}`;
+  }
+  lines.push(line.trimEnd());
   if (finding.note) {
     lines.push(...wrap(finding.note, "            "));
   }
@@ -266,6 +327,13 @@ function formatFindingGroups(findings: LintFinding[]): string[] {
   for (const label of orderedLabels) {
     const lexical = label === LEXICAL_GROUP_LABEL;
     const groupFindings = [...groups.get(label)!].sort((a, b) => {
+      if (lexical) {
+        // Ranking by severity here would mostly just be "hard ban before
+        // soft flag," which reads as arbitrary once several findings share
+        // a severity; count is the signal a reader actually wants ranked.
+        if (b.count !== a.count) return b.count - a.count;
+        return a.term.toLowerCase().localeCompare(b.term.toLowerCase());
+      }
       const severityDiff = SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity];
       return severityDiff !== 0 ? severityDiff : b.count - a.count;
     });
@@ -274,10 +342,12 @@ function formatFindingGroups(findings: LintFinding[]): string[] {
     // slop-heavy file can otherwise surface dozens of individual word hits.
     const shown = lexical ? groupFindings.slice(0, LEXICAL_FINDINGS_CAP) : groupFindings;
     const omitted = groupFindings.length - shown.length;
+    const labelWidth = lexical ? Math.max(...shown.map((f) => lexicalLabel(f).length)) : 0;
+    const positionWidth = lexical ? Math.max(...shown.map((f) => lexicalPosition(f).length)) : 0;
 
     lines.push(`  ${label}`);
     for (const finding of shown) {
-      lines.push(...formatFinding(finding, lexical));
+      lines.push(...formatFinding(finding, lexical, labelWidth, positionWidth));
     }
     if (omitted > 0) {
       lines.push(`    …and ${omitted} more (use --json for the full list)`);
@@ -300,16 +370,32 @@ export function formatText(report: LintReport): string {
       `${flag} ${f.file}  ${TIER_LABEL[f.tier]} ${f.score}/100  (${f.findingCount} finding${f.findingCount === 1 ? "" : "s"}, ${f.wordCount} word${f.wordCount === 1 ? "" : "s"}${registerNote})`
     );
     lines.push(...wrap(f.summary, "  "));
-    lines.push("");
+
+    const bodyLines: string[] = [];
     if (f.findings.length > 0) {
-      lines.push(...formatFindingGroups(f.findings));
+      bodyLines.push(...formatFindingGroups(f.findings));
     }
-    const s = f.strengths;
-    lines.push(
-      `  strengths  specificity ${s.specificityPer1000Words.toFixed(1)}/1k · concrete:abstract ${s.concreteAbstractRatio.toFixed(2)} · burstiness ${s.sentenceBurstiness.toFixed(2)}`
-    );
-    for (const note of s.notes) {
-      lines.push(...wrap(note, "             "));
+    // Below the reliable-read floor, specificity/burstiness are division
+    // artifacts (a 2-word file can read "1000/1k specificity"), and empty
+    // input has nothing to measure at all: neither is worth a strengths
+    // block, only a plain word count on the short-input line, none at all
+    // on empty. See engine/strengthsConfidence.ts.
+    if (f.wordCount === 0) {
+      // No strengths block: "Empty input." already says everything there is to say.
+    } else if (hasReliableStrengths(f.wordCount)) {
+      const s = f.strengths;
+      bodyLines.push(
+        `  strengths  specificity ${s.specificityPer1000Words.toFixed(1)}/1k · concrete:abstract ${s.concreteAbstractRatio.toFixed(2)} · burstiness ${s.sentenceBurstiness.toFixed(2)}`
+      );
+      for (const note of s.notes) {
+        bodyLines.push(...wrap(note, "             "));
+      }
+    } else {
+      bodyLines.push(`  strengths  not enough text to measure (${f.wordCount} word${f.wordCount === 1 ? "" : "s"})`);
+    }
+    if (bodyLines.length > 0) {
+      lines.push("");
+      lines.push(...bodyLines);
     }
     lines.push("");
   }

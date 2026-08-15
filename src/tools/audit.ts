@@ -1,5 +1,6 @@
 import { auditText, type Register } from "../engine/score.js";
 import { dedupeWords, GLOBAL_DICTIONARY_SCOPE, type DictionaryStore } from "../engine/dictionaryStore.js";
+import { guardStrengthsNotes } from "../engine/strengthsConfidence.js";
 
 /** Merges the global dictionary with a style-scoped one (if given and
  * distinct from global) into the flat word lists auditText() takes. */
@@ -52,6 +53,6 @@ export async function auditTextTool(
     findings: scoredFindings,
     categoryBreakdown: result.categoryBreakdown,
     summary: result.summary,
-    strengths: result.strengths,
+    strengths: guardStrengthsNotes(result.strengths, result.wordCount),
   };
 }

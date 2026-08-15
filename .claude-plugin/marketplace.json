@@ -8,7 +8,7 @@
     {
       "name": "etincel-nonfiction",
       "description": "Non-fiction writing connector: trainable voice, premade emotional tones, and a transparent anti-AI-tells audit. Layers onto whatever you already write in.",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "source": "./",
       "author": {
         "name": "Jean-Philippe LeBlanc"
