@@ -5,9 +5,10 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { auditText, type Tier, type Register } from "./engine/score.js";
+import { auditText, type AuditResult, type Finding, type FindingMatch, type Tier, type Register } from "./engine/score.js";
 import { resolveGlobs } from "./cliGlob.js";
 import { findRepoConfig } from "./engine/repoConfig.js";
+import { buildLineStarts, offsetToLineCol } from "./engine/offsets.js";
 
 const TIER_ORDER: Tier[] = ["green", "yellow", "orange", "red"];
 const VALID_REGISTERS: Register[] = ["email", "blog", "memo", "essay", "social", "docs", "general", "personal"];
@@ -99,13 +100,32 @@ function registerFor(filePath: string, override: Register | undefined): Register
   return /\.mdx?$/i.test(filePath) ? "docs" : undefined;
 }
 
+/** A Finding with its character-offset matches (see engine/score.ts) resolved
+ * to 1-indexed line/column, so text and --json output can point at a spot
+ * in the file. Whole-piece findings (Whole-piece rhythm, Elicited material)
+ * carry no matches upstream, so `matches` stays undefined for those. */
+export interface LintFindingMatch extends FindingMatch {
+  line: number;
+  col: number;
+}
+export interface LintFinding extends Omit<Finding, "matches"> {
+  matches?: LintFindingMatch[];
+}
+
 export interface FileLintResult {
   file: string;
   score: number;
   tier: Tier;
   wordCount: number;
+  /** The register actually applied to this file (an explicit --register, a
+   * repo config's, or the .md/.mdx default), if any. */
+  register?: Register;
   findingCount: number;
-  topFindings: { term: string; count: number }[];
+  /** Every scored finding the engine returned, not a slice. */
+  findings: LintFinding[];
+  categoryBreakdown: { category: string; count: number }[];
+  summary: string;
+  strengths: AuditResult["strengths"];
 }
 
 export interface LintReport {
@@ -131,19 +151,30 @@ export function runLint(options: LintOptions, cwd: string): LintReport {
   const matched = resolveGlobs(options.patterns, cwd);
   const files: FileLintResult[] = matched.map((file) => {
     const text = readFileSync(join(cwd, file), "utf8");
+    const register = registerFor(file, registerOverride);
     const result = auditText(text, {
-      register: registerFor(file, registerOverride),
+      register,
       extraBannedWords,
       allowedWords,
     });
-    const scored = result.findings.filter((f) => f.scored);
+    const lineStarts = buildLineStarts(text);
+    const findings: LintFinding[] = result.findings
+      .filter((f) => f.scored)
+      .map((f) => ({
+        ...f,
+        matches: f.matches?.map((m) => ({ ...m, ...offsetToLineCol(lineStarts, m.start) })),
+      }));
     return {
       file,
       score: result.score,
       tier: result.tier,
       wordCount: result.wordCount,
-      findingCount: scored.length,
-      topFindings: scored.slice(0, 3).map((f) => ({ term: f.term, count: f.count })),
+      register,
+      findingCount: findings.length,
+      findings,
+      categoryBreakdown: result.categoryBreakdown,
+      summary: result.summary,
+      strengths: result.strengths,
     };
   });
   const failing = files.filter((f) => tierRank(f.tier) >= tierRank(threshold));
@@ -151,6 +182,110 @@ export function runLint(options: LintOptions, cwd: string): LintReport {
 }
 
 const TIER_LABEL: Record<Tier, string> = { green: "GREEN", yellow: "YELLOW", orange: "ORANGE", red: "RED" };
+
+const SEVERITY_ORDER: Record<Finding["severity"], number> = { critical: 0, high: 1, medium: 2, low: 3 };
+
+// Finding.category values sourced from the vocabulary corpora (banned-terms /
+// soft-flag-terms) plus a repo config's custom bans: single lowercase words,
+// one per match, always carrying a `term`. Every other category comes from a
+// structural detector (whole-piece rhythm, sentence-pattern regexes, etc.)
+// whose `term` is a template shape, not a word, so `subcategory` is the
+// readable label there instead. See engine/score.ts and
+// engine/structural-detectors.ts.
+const LEXICAL_CATEGORIES = new Set(["verb", "adjective", "noun", "filler", "imagery", "transition", "phrase", "custom"]);
+const LEXICAL_GROUP_LABEL = "Vocabulary and phrasing";
+const LEXICAL_FINDINGS_CAP = 20;
+const WRAP_WIDTH = 76;
+
+function isLexicalCategory(category: string): boolean {
+  return LEXICAL_CATEGORIES.has(category);
+}
+
+function groupLabel(category: string): string {
+  return isLexicalCategory(category) ? LEXICAL_GROUP_LABEL : category;
+}
+
+/** Whole-piece rhythm is the tool's core differentiator (prose *shape*, not
+ * just word choice) and must never sort below vocabulary hits or get lost
+ * off the bottom of the terminal. */
+function isPriorityGroup(label: string): boolean {
+  return /rhythm|structural/i.test(label);
+}
+
+function wrap(text: string, indent: string, width: number = WRAP_WIDTH): string[] {
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return [];
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (current && indent.length + next.length > width) {
+      lines.push(indent + current);
+      current = word;
+    } else {
+      current = next;
+    }
+  }
+  if (current) lines.push(indent + current);
+  return lines;
+}
+
+function formatFinding(finding: LintFinding, lexical: boolean): string[] {
+  const lines: string[] = [];
+  const severity = finding.severity.padEnd(8);
+  const label = lexical ? finding.term : finding.subcategory;
+  const countSuffix = finding.count > 1 ? ` ×${finding.count}` : "";
+  const match = finding.matches?.[0];
+  const position = lexical && match ? `  L${match.line}:C${match.col}` : "";
+  const hint = finding.replacementHint ? `  → ${finding.replacementHint}` : "";
+  lines.push(`    ${severity}${label}${countSuffix}${position}${hint}`);
+  if (finding.note) {
+    lines.push(...wrap(finding.note, "            "));
+  }
+  return lines;
+}
+
+function formatFindingGroups(findings: LintFinding[]): string[] {
+  const groups = new Map<string, LintFinding[]>();
+  for (const finding of findings) {
+    const label = groupLabel(finding.category);
+    const bucket = groups.get(label);
+    if (bucket) bucket.push(finding);
+    else groups.set(label, [finding]);
+  }
+
+  const groupTotal = (label: string) => groups.get(label)!.reduce((sum, f) => sum + f.count, 0);
+  const orderedLabels = Array.from(groups.keys()).sort((a, b) => {
+    const aPriority = isPriorityGroup(a);
+    const bPriority = isPriorityGroup(b);
+    if (aPriority !== bPriority) return aPriority ? -1 : 1;
+    return groupTotal(b) - groupTotal(a);
+  });
+
+  const lines: string[] = [];
+  for (const label of orderedLabels) {
+    const lexical = label === LEXICAL_GROUP_LABEL;
+    const groupFindings = [...groups.get(label)!].sort((a, b) => {
+      const severityDiff = SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity];
+      return severityDiff !== 0 ? severityDiff : b.count - a.count;
+    });
+    // Structural findings (rhythm, sentence patterns, formatting tells, ...)
+    // always show in full; only the vocabulary bucket is capped, since a
+    // slop-heavy file can otherwise surface dozens of individual word hits.
+    const shown = lexical ? groupFindings.slice(0, LEXICAL_FINDINGS_CAP) : groupFindings;
+    const omitted = groupFindings.length - shown.length;
+
+    lines.push(`  ${label}`);
+    for (const finding of shown) {
+      lines.push(...formatFinding(finding, lexical));
+    }
+    if (omitted > 0) {
+      lines.push(`    …and ${omitted} more (use --json for the full list)`);
+    }
+    lines.push("");
+  }
+  return lines;
+}
 
 export function formatText(report: LintReport): string {
   const lines: string[] = [];
@@ -160,12 +295,24 @@ export function formatText(report: LintReport): string {
   }
   for (const f of report.files) {
     const flag = tierRank(f.tier) >= tierRank(report.threshold) ? "✗" : "✓";
-    lines.push(`${flag} ${f.file}  ${TIER_LABEL[f.tier]} ${f.score}/100  (${f.findingCount} finding${f.findingCount === 1 ? "" : "s"})`);
-    for (const finding of f.topFindings) {
-      lines.push(`    - ${finding.term}${finding.count > 1 ? ` ×${finding.count}` : ""}`);
+    const registerNote = f.register ? `, register: ${f.register}` : "";
+    lines.push(
+      `${flag} ${f.file}  ${TIER_LABEL[f.tier]} ${f.score}/100  (${f.findingCount} finding${f.findingCount === 1 ? "" : "s"}, ${f.wordCount} word${f.wordCount === 1 ? "" : "s"}${registerNote})`
+    );
+    lines.push(...wrap(f.summary, "  "));
+    lines.push("");
+    if (f.findings.length > 0) {
+      lines.push(...formatFindingGroups(f.findings));
     }
+    const s = f.strengths;
+    lines.push(
+      `  strengths  specificity ${s.specificityPer1000Words.toFixed(1)}/1k · concrete:abstract ${s.concreteAbstractRatio.toFixed(2)} · burstiness ${s.sentenceBurstiness.toFixed(2)}`
+    );
+    for (const note of s.notes) {
+      lines.push(...wrap(note, "             "));
+    }
+    lines.push("");
   }
-  lines.push("");
   lines.push(`${report.files.length} file${report.files.length === 1 ? "" : "s"} audited, ${report.failing.length} at or above ${report.threshold}.`);
   return lines.join("\n");
 }

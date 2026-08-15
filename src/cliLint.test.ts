@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseLintArgs, runLint, formatText, formatJson, tierRank } from "./cliLint.js";
+import { offsetToLineCol, buildLineStarts } from "./engine/offsets.js";
 
 test("parseLintArgs collects bare arguments as patterns, leaving threshold unset so runLint can fall back to a repo config or 'orange'", () => {
   const parsed = parseLintArgs(["docs/**/*.md"]);
@@ -95,7 +96,7 @@ test("runLint defaults .md files to the 'docs' register, suppressing markdown-st
   const readme = withoutOverride.files.find((f) => f.file === "docs/readme-with-markdown.md");
   assert.ok(readme);
   assert.ok(
-    !readme!.topFindings.some((f) => f.term.includes("Markdown heading")),
+    !readme!.findings.some((f) => f.term.includes("Markdown heading")),
     "expected the default docs register to suppress the markdown-heading-leak finding"
   );
 });
@@ -108,7 +109,7 @@ test("runLint's --register override wins over the .md default", () => {
   const readme = forced.files.find((f) => f.file === "docs/readme-with-markdown.md");
   assert.ok(readme);
   assert.ok(
-    readme!.topFindings.some((f) => f.term.includes("Markdown heading")),
+    readme!.findings.some((f) => f.term.includes("Markdown heading")),
     "expected an explicit --register override to bypass the docs default"
   );
 });
@@ -135,10 +136,117 @@ test("formatJson is valid JSON carrying the threshold, failing count, and per-fi
   assert.equal(parsed.files.length, 2);
 });
 
+test("formatJson round-trips findings, summary, strengths, and categoryBreakdown for each file", () => {
+  const report = runLint({ patterns: ["slop.md"], threshold: "orange", format: "json" }, root);
+  const parsed = JSON.parse(formatJson(report));
+  const file = parsed.files[0];
+  assert.ok(Array.isArray(file.findings) && file.findings.length > 0);
+  assert.ok(file.findings.every((f: any) => typeof f.category === "string" && typeof f.severity === "string"));
+  assert.equal(typeof file.summary, "string");
+  assert.ok(file.summary.length > 0);
+  assert.ok(Array.isArray(file.categoryBreakdown) && file.categoryBreakdown.length > 0);
+  assert.equal(typeof file.strengths.specificityPer1000Words, "number");
+  assert.equal(typeof file.strengths.concreteAbstractRatio, "number");
+  assert.equal(typeof file.strengths.sentenceBurstiness, "number");
+});
+
+test("formatText prints a green/zero-finding file cleanly: summary present, no empty group headings", () => {
+  const report = runLint({ patterns: ["clean.md"], threshold: "orange", format: "text" }, root);
+  const text = formatText(report);
+  assert.match(text, /✓ clean\.md/);
+  // The summary line for a clean file (see TIER_SUMMARY in engine/score.ts).
+  assert.match(text, /No tells from this pass/);
+  assert.ok(report.files[0].findings.length === 0);
+  assert.ok(!text.includes("Vocabulary and phrasing"), "expected no group heading when there are no findings");
+  assert.ok(!text.includes("Whole-piece rhythm"), "expected no group heading when there are no findings");
+});
+
+const rhythmParagraph = "Short sentence here now. Short sentence here too.";
+
+test("formatText shows every Whole-piece rhythm finding with its note, and sorts the structural group above the lexical one", () => {
+  const mixedRoot = mkdtempSync(join(tmpdir(), "etincel-lint-mixed-test-"));
+  mkdirSync(join(mixedRoot, ".git"));
+  const mixedText = [
+    "We should leverage synergy to drive our rollout forward.",
+    rhythmParagraph,
+    rhythmParagraph,
+    rhythmParagraph,
+    rhythmParagraph,
+  ].join("\n\n");
+  writeFileSync(join(mixedRoot, "mixed.md"), mixedText);
+
+  const report = runLint({ patterns: ["mixed.md"], threshold: "orange", register: "general", format: "text" }, mixedRoot);
+  const file = report.files[0];
+  const rhythmFindings = file.findings.filter((f) => f.category === "Whole-piece rhythm");
+  assert.ok(rhythmFindings.length >= 2, "expected both rhythm checks to fire on this text");
+  assert.ok(rhythmFindings.every((f) => typeof f.note === "string" && f.note!.length > 0));
+
+  const text = formatText(report);
+  const normalized = text.replace(/\s+/g, " ");
+  for (const f of rhythmFindings) {
+    assert.ok(
+      normalized.includes(f.note!.replace(/\s+/g, " ")),
+      `expected the note for ${f.subcategory} to appear in the rendered output`
+    );
+  }
+  const rhythmHeadingIndex = text.indexOf("Whole-piece rhythm");
+  const vocabHeadingIndex = text.indexOf("Vocabulary and phrasing");
+  assert.ok(rhythmHeadingIndex >= 0 && vocabHeadingIndex >= 0, "expected both group headings to appear");
+  assert.ok(rhythmHeadingIndex < vocabHeadingIndex, "expected the structural group to sort above the lexical one");
+
+  rmSync(mixedRoot, { recursive: true, force: true });
+});
+
+test("formatText orders findings within a group by severity (high before medium)", () => {
+  const severityRoot = mkdtempSync(join(tmpdir(), "etincel-lint-severity-test-"));
+  mkdirSync(join(severityRoot, ".git"));
+  writeFileSync(
+    join(severityRoot, "severity.md"),
+    // "on the other hand" is a soft-flag term (severity medium); "leverage"
+    // is a hard-ban term (severity high). Both land in the same "Vocabulary
+    // and phrasing" display group, so this exercises the within-group sort.
+    "On the other hand, the board changed course. On the other hand, so did the budget. We should leverage synergy here."
+  );
+  const report = runLint({ patterns: ["severity.md"], threshold: "orange", format: "text" }, severityRoot);
+  const text = formatText(report);
+  const groupSection = text.slice(text.indexOf("Vocabulary and phrasing"));
+  const highIndex = groupSection.indexOf("leverage");
+  const mediumIndex = groupSection.indexOf("on the other hand");
+  assert.ok(highIndex >= 0 && mediumIndex >= 0);
+  assert.ok(highIndex < mediumIndex, "expected the high-severity finding to sort above the medium-severity one");
+
+  rmSync(severityRoot, { recursive: true, force: true });
+});
+
+test("runLint caps lexical findings at 20 per file and formatText notes the omitted count, while never truncating structural findings", () => {
+  const capRoot = mkdtempSync(join(tmpdir(), "etincel-lint-cap-test-"));
+  mkdirSync(join(capRoot, ".git"));
+  const bannedWords = Array.from({ length: 25 }, (_, i) => `zzzcustomterm${i}`);
+  writeFileSync(join(capRoot, ".etincelrc"), JSON.stringify({ bannedWords }));
+  const bannedSentence = bannedWords.map((w) => `We saw ${w} today.`).join(" ");
+  const text = [bannedSentence, rhythmParagraph, rhythmParagraph, rhythmParagraph, rhythmParagraph].join("\n\n");
+  writeFileSync(join(capRoot, "cap.md"), text);
+
+  const report = runLint({ patterns: ["cap.md"], threshold: "orange", register: "general", format: "text" }, capRoot);
+  const file = report.files[0];
+  const lexicalFindings = file.findings.filter((f) => f.category === "custom");
+  assert.equal(lexicalFindings.length, 25, "expected all 25 distinct custom-banned terms to be found by the engine");
+  const rhythmFindings = file.findings.filter((f) => f.category === "Whole-piece rhythm");
+  assert.ok(rhythmFindings.length >= 1);
+
+  const rendered = formatText(report);
+  assert.match(rendered, /…and 5 more \(use --json for the full list\)/);
+  for (const f of rhythmFindings) {
+    assert.ok(rendered.includes(f.subcategory), "expected every structural finding to render, uncapped");
+  }
+
+  rmSync(capRoot, { recursive: true, force: true });
+});
+
 test("runLint has no configPath and no config-driven findings when no .etincelrc is present", () => {
   const report = runLint({ patterns: ["draft.md"], format: "text" }, configRoot);
   assert.equal(report.configPath, undefined);
-  const terms = report.files[0].topFindings.map((f) => f.term);
+  const terms = report.files[0].findings.map((f) => f.term);
   assert.ok(terms.includes("leverage"), "expected the built-in corpus hit to still fire");
   assert.ok(terms.includes("synergy"), "expected the built-in corpus hit to still fire");
   assert.ok(!terms.includes("rollout"), "rollout isn't a built-in term, shouldn't be flagged without a config");
@@ -149,7 +257,7 @@ test("runLint applies bannedWords and allowedWords from a repo-local .etincelrc"
   writeFileSync(configPath, JSON.stringify({ bannedWords: ["rollout"], allowedWords: ["leverage"] }));
 
   const report = runLint({ patterns: ["draft.md"], format: "text" }, configRoot);
-  const terms = report.files[0].topFindings.map((f) => f.term);
+  const terms = report.files[0].findings.map((f) => f.term);
   assert.ok(terms.includes("rollout"), "expected the repo config's bannedWords to add a finding");
   assert.ok(terms.includes("synergy"), "expected the untouched built-in corpus hit to still fire");
   assert.ok(!terms.includes("leverage"), "expected the repo config's allowedWords to suppress the built-in finding");
