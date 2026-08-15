@@ -14,6 +14,8 @@
      \/__/                                   \/__/         \/__/         \/__/         \/__/
 ```
 
+[![smithery badge](https://smithery.ai/badge/jp-leblanc/etincel)](https://smithery.ai/servers/jp-leblanc/etincel)
+
 Find the AI tells in your prose. Deterministically, locally, in CI.
 
 ```
