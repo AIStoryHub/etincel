@@ -1,0 +1,13 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # No configuration required: the audit path is local and deterministic,
+    # with no API keys or network calls.
+    type: object
+    required: []
+    properties: {}
+  commandFunction:
+    |-
+    (config) => ({ command: 'npx', args: ['etincel', 'serve'] })
