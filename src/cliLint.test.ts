@@ -197,25 +197,92 @@ test("formatText shows every Whole-piece rhythm finding with its note, and sorts
   rmSync(mixedRoot, { recursive: true, force: true });
 });
 
-test("formatText orders findings within a group by severity (high before medium)", () => {
-  const severityRoot = mkdtempSync(join(tmpdir(), "etincel-lint-severity-test-"));
-  mkdirSync(join(severityRoot, ".git"));
+test("formatText sorts the lexical group by descending count, then alphabetically", () => {
+  const sortRoot = mkdtempSync(join(tmpdir(), "etincel-lint-sort-test-"));
+  mkdirSync(join(sortRoot, ".git"));
   writeFileSync(
-    join(severityRoot, "severity.md"),
-    // "on the other hand" is a soft-flag term (severity medium); "leverage"
-    // is a hard-ban term (severity high). Both land in the same "Vocabulary
-    // and phrasing" display group, so this exercises the within-group sort.
-    "On the other hand, the board changed course. On the other hand, so did the budget. We should leverage synergy here."
+    join(sortRoot, "sort.md"),
+    // "leverage" occurs 3x (higher count should sort first, ranking above
+    // severity: "streamline" is a single-occurrence hard-ban term but
+    // still sorts below "leverage"). "comprehensive" and "streamline" both
+    // occur once, so they fall back to alphabetical order.
+    "We should leverage this. Let's leverage that. Time to leverage everything. This is a streamline and comprehensive plan."
   );
-  const report = runLint({ patterns: ["severity.md"], threshold: "orange", format: "text" }, severityRoot);
+  const report = runLint({ patterns: ["sort.md"], threshold: "orange", format: "text" }, sortRoot);
   const text = formatText(report);
   const groupSection = text.slice(text.indexOf("Vocabulary and phrasing"));
-  const highIndex = groupSection.indexOf("leverage");
-  const mediumIndex = groupSection.indexOf("on the other hand");
-  assert.ok(highIndex >= 0 && mediumIndex >= 0);
-  assert.ok(highIndex < mediumIndex, "expected the high-severity finding to sort above the medium-severity one");
+  const leverageIndex = groupSection.indexOf("leverage");
+  const comprehensiveIndex = groupSection.indexOf("comprehensive");
+  const streamlineIndex = groupSection.indexOf("streamline");
+  assert.ok(leverageIndex >= 0 && comprehensiveIndex >= 0 && streamlineIndex >= 0);
+  assert.ok(leverageIndex < comprehensiveIndex, "expected the higher-count finding to sort first regardless of severity");
+  assert.ok(comprehensiveIndex < streamlineIndex, "expected equal-count findings to fall back to alphabetical order");
 
-  rmSync(severityRoot, { recursive: true, force: true });
+  rmSync(sortRoot, { recursive: true, force: true });
+});
+
+test("formatText pads lexical labels and positions so the L:C and hint columns line up within a group", () => {
+  const padRoot = mkdtempSync(join(tmpdir(), "etincel-lint-pad-test-"));
+  mkdirSync(join(padRoot, ".git"));
+  writeFileSync(padRoot + "/pad.md", "We should leverage this comprehensive plan to streamline delivery.");
+  const report = runLint({ patterns: ["pad.md"], threshold: "orange", format: "text" }, padRoot);
+  const text = formatText(report);
+  const groupLines = text
+    .slice(text.indexOf("Vocabulary and phrasing"))
+    .split("\n")
+    .filter((line) => /^\s{4}(critical|high|medium|low)\s/.test(line));
+  assert.ok(groupLines.length >= 2, "expected at least two lexical finding lines to compare column alignment");
+  const positionColumn = (line: string) => line.search(/L\d+:C\d+/);
+  const columns = groupLines.map(positionColumn);
+  assert.ok(
+    columns.every((c) => c === columns[0]),
+    `expected every L:C position to start at the same column, got ${JSON.stringify(columns)}`
+  );
+
+  rmSync(padRoot, { recursive: true, force: true });
+});
+
+test("formatText merges findings sharing a term and an identical match span into one line, and findingCount reflects the merge", () => {
+  const dupRoot = mkdtempSync(join(tmpdir(), "etincel-lint-dup-test-"));
+  mkdirSync(join(dupRoot, ".git"));
+  // "it is worth noting" fires two corpus entries (didactic-hedge and
+  // editorializing-marker) at the exact same span; a reader counting
+  // distinct problems should see one line, not two, and findingCount
+  // should agree with what's printed.
+  writeFileSync(join(dupRoot, "dup.md"), "It is worth noting that this matters.");
+  const report = runLint({ patterns: ["dup.md"], threshold: "orange", format: "text" }, dupRoot);
+  const file = report.files[0];
+  assert.equal(file.findings.filter((f) => f.term === "it is worth noting").length, 1);
+  assert.equal(file.findingCount, file.findings.length);
+  const merged = file.findings.find((f) => f.term === "it is worth noting")!;
+  assert.ok(merged.subcategory.includes("didactic-hedge"));
+  assert.ok(merged.subcategory.includes("editorializing-marker"));
+
+  const text = formatText(report);
+  const occurrences = text.split("it is worth noting").length - 1;
+  assert.equal(occurrences, 1, "expected the duplicate-span finding to render exactly once");
+  assert.match(text, /it is worth noting \(didactic-hedge, editorializing-marker\)/);
+
+  rmSync(dupRoot, { recursive: true, force: true });
+});
+
+test("formatText suppresses the strengths block below the reliable-read word count, and drops it entirely on empty input", () => {
+  const shortRoot = mkdtempSync(join(tmpdir(), "etincel-lint-short-test-"));
+  mkdirSync(join(shortRoot, ".git"));
+  writeFileSync(join(shortRoot, "tiny.md"), "# Hi");
+  writeFileSync(join(shortRoot, "empty.md"), "");
+
+  const tinyReport = runLint({ patterns: ["tiny.md"], threshold: "orange", format: "text" }, shortRoot);
+  const tinyText = formatText(tinyReport);
+  assert.match(tinyText, /strengths\s+not enough text to measure \(2 words\)/);
+  assert.ok(!tinyText.includes("specificity"), "expected no raw specificity/burstiness numbers below the word-count floor");
+
+  const emptyReport = runLint({ patterns: ["empty.md"], threshold: "orange", format: "text" }, shortRoot);
+  const emptyText = formatText(emptyReport);
+  assert.ok(!emptyText.includes("strengths"), "expected no strengths block at all on empty input");
+  assert.match(emptyText, /Empty input\./);
+
+  rmSync(shortRoot, { recursive: true, force: true });
 });
 
 test("runLint caps lexical findings at 20 per file and formatText notes the omitted count, while never truncating structural findings", () => {

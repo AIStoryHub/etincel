@@ -6,13 +6,13 @@
     "url": "https://github.com/AIStoryHub/etincel",
     "source": "github"
   },
-  "version": "0.10.0",
+  "version": "0.10.1",
   "websiteUrl": "https://etincel.ai/connect",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "etincel",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"

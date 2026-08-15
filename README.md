@@ -24,25 +24,31 @@ No install, no account, no model call, no network.
 
 ```
 $ npx etincel lint drafts/announcement.md --register blog
-✗ drafts/announcement.md  RED 86/100  (6 findings, 71 words, register: blog)
+✗ drafts/announcement.md  RED 100/100  (8 findings, 169 words, register: blog)
   Heavy AI styling. Multiple strong tells stacking up, worth a structural
   rewrite, not a word-swap pass.
 
   Whole-piece rhythm
     medium  uniform-paragraph-length
-            4 paragraphs, most running about the same length with little
+            6 paragraphs, most running about the same length with little
             variation between them. Vary paragraph length more.
+    medium  low-burstiness
+            13 sentences averaging 13 words, with little variation in length
+            from one sentence to the next. Mix short sentences with long;
+            allow fragments.
+    medium  mechanical-register-drift
+            Fragment rate and structural variety (sentence openers,
+            punctuation mix) sit off where blog prose typically lands. Allow
+            more sentence fragments and vary openers/punctuation more.
 
   Vocabulary and phrasing
-    high    leverage  L3:C99  → use
-    high    streamline  L3:C70  → simplify, speed up
-    high    comprehensive  L3:C30  → thorough, complete
-    high    cutting-edge  L3:C109  → newest, latest
-    high    seamless  L3:C150  → smooth, easy
+    high    comprehensive  L3:C30   → thorough, complete
+    high    cutting-edge   L3:C109  → newest, latest
+    high    leverage       L3:C99   → use
+    high    seamless       L3:C150  → smooth, easy
+    high    streamline     L3:C70   → simplify, speed up
 
-  strengths  specificity 27.0/1k · concrete:abstract 0.67 · burstiness 0.36
-             Specific: names, numbers, and concrete detail carry real weight
-             here.
+  strengths  specificity 11.4/1k · concrete:abstract 0.40 · burstiness 0.32
 
 1 file audited, 1 at or above orange.
 ```
